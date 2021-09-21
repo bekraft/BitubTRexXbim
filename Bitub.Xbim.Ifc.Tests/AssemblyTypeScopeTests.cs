@@ -4,11 +4,9 @@ using System.Linq;
 
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
+using Xbim.Ifc4.SharedBldgElements;
 
 using Xbim.IO;
-
-using Xbim.Common;
-using Xbim.Common.Metadata;
 using Xbim.Common.Step21;
 
 using Bitub.Dto;
@@ -26,7 +24,7 @@ namespace Bitub.Xbim.Ifc.Tests
             using (var store = IfcStore.Create(XbimSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
             using (var tx = store.BeginTransaction())
             {
-                var wall = store.Instances.New<Xbim.Ifc4.SharedBldgElements.IfcWall>();
+                var wall = store.Instances.New<IfcWall>();
                 var assertedName = new[] { "Ifc4", "IfcWall" }.ToQualifier();
                 Assert.AreEqual(assertedName, wall.ToQualifiedName());
                 tx.Commit();

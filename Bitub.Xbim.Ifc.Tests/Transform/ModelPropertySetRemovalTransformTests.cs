@@ -16,6 +16,8 @@ using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validation;
 
+using Xbim.IO;
+
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
     [TestClass]
@@ -41,7 +43,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     ExludePropertySetByName = new string[] { "AllplanAttributes" },
                     IsNameMatchingCaseSensitive = false,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -94,7 +96,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     IsNameMatchingCaseSensitive = false,
                     FilterRuleStrategy = FilterRuleStrategyType.ExcludeBeforeInclude,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -148,7 +150,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     IsNameMatchingCaseSensitive = false,
                     FilterRuleStrategy = FilterRuleStrategyType.ExcludeBeforeInclude,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 

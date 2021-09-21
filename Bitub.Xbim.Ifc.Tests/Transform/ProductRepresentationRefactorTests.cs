@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Xbim.Ifc;
+using Xbim.IO;
 using Xbim.Ifc4.Interfaces;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -61,7 +62,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 {
                     ContextIdentifiers = new[] { "Body" },
                     Strategy = ProductRefactorStrategy.DecomposeMultiItemRepresentations,
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -96,7 +97,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     Strategy = ProductRefactorStrategy.DecomposeMultiItemRepresentations 
                         | ProductRefactorStrategy.DecomposeMappedRepresentations 
                         | ProductRefactorStrategy.DecomposeWithEntityElementAssembly,
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -129,7 +130,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 {
                     ContextIdentifiers = new[] { "Body" },
                     Strategy = ProductRefactorStrategy.DecomposeMultiItemRepresentations,
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -162,7 +163,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 {
                     ContextIdentifiers = new[] { "Body" },
                     Strategy = ProductRefactorStrategy.DecomposeWithEntityElementAssembly | ProductRefactorStrategy.DecomposeMultiItemRepresentations,
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 

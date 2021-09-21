@@ -3,11 +3,10 @@
 using System.Linq;
 
 using Xbim.Ifc;
-using Bitub.Dto.Spatial;
+using Xbim.Common;
+using Xbim.Common.Enumerations;
+
 using Bitub.Xbim.Ifc.Validation;
-using System.IO;
-using Bitub.Dto;
-using Microsoft.Extensions.Logging;
 
 namespace Bitub.Xbim.Ifc.Tests
 {
@@ -22,7 +21,7 @@ namespace Bitub.Xbim.Ifc.Tests
             using (var source = IfcStore.Open(@"Resources\Ifc2x3-Slab-BooleanResult.ifc"))
             {
                 var validationStamp = SchemaValidator.OfModel(source,
-                    Xbim.Common.Enumerations.ValidationFlags.Properties | Xbim.Common.Enumerations.ValidationFlags.Inverses);
+                    ValidationFlags.Properties | ValidationFlags.Inverses);
 
                 var lookUp = validationStamp.InstanceResults;
                 
@@ -31,7 +30,7 @@ namespace Bitub.Xbim.Ifc.Tests
                 Assert.IsTrue(validationStamp.IsConstraintToSchema);
                 Assert.IsFalse(validationStamp.IsCompliantToSchema);
 
-                var results = lookUp[new Xbim.Common.XbimInstanceHandle(source.Instances[176464])];
+                var results = lookUp[new XbimInstanceHandle(source.Instances[176464])];
                 Assert.AreEqual(1, results.Count());
 
                 Assert.IsFalse(SchemaValidator.Diff(validationStamp.Results, validationStamp.Results).Any());
@@ -47,7 +46,7 @@ namespace Bitub.Xbim.Ifc.Tests
             using (var source = IfcStore.Open(@"Resources\Ifc2x3-Slab-BooleanResult.ifc"))
             {
                 var validationStamp = SchemaValidator.OfModel(source,
-                    Xbim.Common.Enumerations.ValidationFlags.TypeWhereClauses | Xbim.Common.Enumerations.ValidationFlags.EntityWhereClauses);
+                    ValidationFlags.TypeWhereClauses | ValidationFlags.EntityWhereClauses);
 
                 var lookUp = validationStamp.InstanceResults;
 
@@ -56,7 +55,7 @@ namespace Bitub.Xbim.Ifc.Tests
                 Assert.IsFalse(validationStamp.IsConstraintToSchema);
                 Assert.IsTrue(validationStamp.IsCompliantToSchema);
 
-                var results = lookUp[new Xbim.Common.XbimInstanceHandle(source.Model.Instances[25])];
+                var results = lookUp[new XbimInstanceHandle(source.Model.Instances[25])];
                 Assert.AreEqual(1, results.Count());
 
                 Assert.IsFalse(SchemaValidator.Diff(validationStamp.Results, validationStamp.Results).Any());

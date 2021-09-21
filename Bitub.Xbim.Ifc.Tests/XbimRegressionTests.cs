@@ -4,7 +4,9 @@ using System;
 using System.Linq;
 
 using Xbim.Common;
+using Xbim.IO;
 using Xbim.Common.Geometry;
+
 using Xbim.Ifc;
 
 namespace Bitub.Xbim.Ifc.Tests
@@ -18,7 +20,7 @@ namespace Bitub.Xbim.Ifc.Tests
         {
             using (var store = IfcStore.Open(@"Resources\Ifc4-Storey-With-4Walls.ifc"))
             {
-                var testStore = IfcStore.Create(store.SchemaVersion, Xbim.IO.XbimStoreType.InMemoryModel);
+                var testStore = IfcStore.Create(store.SchemaVersion, XbimStoreType.InMemoryModel);
                 var map = new XbimInstanceHandleMap(store, testStore);
 
                 using (var tx = testStore.BeginTransaction("Test"))

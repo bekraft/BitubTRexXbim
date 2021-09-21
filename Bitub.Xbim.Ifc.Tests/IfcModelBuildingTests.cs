@@ -1,13 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System.Collections.Generic;
 using System.Linq;
 
-using Bitub.Xbim.Ifc;
-
 using Xbim.Common.Step21;
-using Xbim.Ifc;
-using Xbim.IO;
+using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 
 
@@ -24,7 +20,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.IsNotNull(builder.NewBuilding("Some building"));
             Assert.IsNotNull(builder.NewStorey("Some building"));
 
-            var globalPlacement = builder.NewLocalPlacement(new Xbim.Common.Geometry.XbimVector3D());
+            var globalPlacement = builder.NewLocalPlacement(new XbimVector3D());
             Assert.IsNotNull(builder.NewProduct<IIfcWallStandardCase>(globalPlacement));
 
             Assert.AreEqual(4, builder.model.Instances.OfType<IIfcProduct>().Count());
@@ -41,7 +37,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.IsNotNull(builder.NewBuilding("Some building"));
             Assert.IsNotNull(builder.NewStorey("Some building"));
 
-            var globalPlacement = builder.NewLocalPlacement(new Xbim.Common.Geometry.XbimVector3D());
+            var globalPlacement = builder.NewLocalPlacement(new XbimVector3D());
             Assert.IsNotNull(builder.NewProduct<IIfcWallStandardCase>(globalPlacement));
 
             Assert.AreEqual(4, builder.model.Instances.OfType<IIfcProduct>().Count());
@@ -58,7 +54,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.IsNotNull(builder.NewBuilding("Some building"));
             Assert.IsNotNull(builder.NewStorey("Some building"));
 
-            var globalPlacement = builder.NewLocalPlacement(new Xbim.Common.Geometry.XbimVector3D());
+            var globalPlacement = builder.NewLocalPlacement(new XbimVector3D());
             var fixture1 = builder.NewProduct<IIfcWallStandardCase>(globalPlacement);
             Assert.IsNotNull(fixture1);
 

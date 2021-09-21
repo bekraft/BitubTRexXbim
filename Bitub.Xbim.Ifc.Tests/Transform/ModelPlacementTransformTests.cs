@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
+using Xbim.IO;
 
 using Bitub.Dto;
 
@@ -62,7 +63,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     AxisAlignment = testConfig,
                     PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -107,7 +108,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     AxisAlignment = testConfig,
                     PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
@@ -156,7 +157,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     AxisAlignment = testConfig,
                     PlacementStrategy = ModelPlacementStrategy.NewRootPlacement,
                     // Common config
-                    TargetStoreType = Xbim.IO.XbimStoreType.InMemoryModel,
+                    TargetStoreType = XbimStoreType.InMemoryModel,
                     EditorCredentials = EditorCredentials
                 };
 
