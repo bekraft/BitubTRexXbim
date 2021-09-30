@@ -97,13 +97,13 @@ namespace Bitub.Xbim.Ifc.Transform
             switch (removalStrategy)
             {
                 case FilterRuleStrategyType.IncludeBeforeExclude:
-                    if (IncludeExclusivelyName.Count > 0)
-                        return IncludeExclusivelyName.Contains(pset.Name.ToString());
+                    if (IncludeExclusivelyName.Contains(pset.Name.ToString()))
+                        return true;
                     else
                         return PassesExclusionFilter(pset);
                 case FilterRuleStrategyType.ExcludeBeforeInclude:
-                    if (ExcludeName.Count > 0)
-                        return !ExcludeName.Contains(pset.Name.ToString());
+                    if (ExcludeName.Contains(pset.Name.ToString()))
+                        return false;
                     else
                         return PassesInclusionFilter(pset);                    
                 default:
@@ -297,10 +297,10 @@ namespace Bitub.Xbim.Ifc.Transform
             LogFilter.ForEach(f => package.LogFilter.Add(f));
 
             ExludePropertySetByName?
-                .Where(n => null != n)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ForEach(n => package.ExcludeName.Add(n));
             IncludePropertySetByName?
-                .Where(n => null != n)
+                .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ForEach(n => package.IncludeExclusivelyName.Add(n));            
             return package;
         }        
