@@ -55,7 +55,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
                 var transform = new ProductRepresentationRefactorTransform(LoggerFactory, defaultLogResultTypes)
@@ -74,7 +74,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 Assert.AreEqual(0, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, false, "Body")));
                 Assert.AreEqual(17, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
-                var stampAfter = SchemaValidator.OfModel(result.Target);
+                var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
                 result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-1.ifc", FileMode.Create));
@@ -88,7 +88,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\mapped-shape-with-transformation.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
                 var transform = new ProductRepresentationRefactorTransform(LoggerFactory)
@@ -109,7 +109,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 Assert.AreEqual(0, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, true, "Body")));
                 Assert.AreEqual(2, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
-                var stampAfter = SchemaValidator.OfModel(result.Target);
+                var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
                 result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-1.ifc", FileMode.Create));
@@ -123,7 +123,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\mapped-shape-with-transformation.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
                 var transform = new ProductRepresentationRefactorTransform(LoggerFactory)
@@ -142,7 +142,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 Assert.AreEqual(1, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, true, "Body")));
                 Assert.AreEqual(1, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
-                var stampAfter = SchemaValidator.OfModel(result.Target);
+                var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
                 result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-2.ifc", FileMode.Create));
@@ -156,7 +156,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
                 var transform = new ProductRepresentationRefactorTransform(LoggerFactory)
@@ -177,7 +177,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 Assert.AreEqual(1, result.Target.Instances.OfType<IIfcElementAssembly>().Count());
                 Assert.AreEqual(14, result.Target.Instances.OfType<IIfcElementAssembly>().First().IsDecomposedBy.SelectMany(r => r.RelatedObjects).Count());
 
-                var stampAfter = SchemaValidator.OfModel(result.Target);
+                var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
                 result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-2.ifc", FileMode.Create));

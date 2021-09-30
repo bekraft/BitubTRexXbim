@@ -51,7 +51,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\Ifc4-Rotated-1st-floor.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
 
                 var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis1.xml");
                 Assert.IsNotNull(testConfig);
@@ -79,7 +79,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                         //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                         // TODO Specific tests
 
-                        var stampAfter = SchemaValidator.OfModel(result.Target);
+                        var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
 
                         result.Target.SaveAsIfc(new FileStream("Ifc4-Rotated-1st-floor-Transformed.ifc", FileMode.Create));
@@ -96,7 +96,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\Ifc4-SampleHouse.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
 
                 var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis2.xml");
                 Assert.IsNotNull(testConfig);
@@ -128,7 +128,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                         //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                         // TODO Specific tests
 
-                        var stampAfter = SchemaValidator.OfModel(result.Target);
+                        var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
 
                         result.Target.SaveAsIfc(new FileStream("Ifc4-SampleHouse-Transformed.ifc", FileMode.Create));
@@ -145,7 +145,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
             IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = IfcStore.Open(@"Resources\Ifc4-SampleHouse.ifc"))
             {
-                var stampBefore = SchemaValidator.OfModel(source);
+                var stampBefore = source.ToSchemeValidator();
 
                 var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis2.xml");
                 Assert.IsNotNull(testConfig);
@@ -177,7 +177,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                         //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                         // TODO Specific tests
 
-                        var stampAfter = SchemaValidator.OfModel(result.Target);
+                        var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
 
                         result.Target.SaveAsIfc(new FileStream("Ifc4-SampleHouse-Transformed.ifc", FileMode.Create));
