@@ -6,6 +6,7 @@
 
     <TargetFramework>net48</TargetFramework>
     <IsPackable>false</IsPackable>
+    <Configurations>Debug;Release;Beta</Configurations>
     <!--<RunSettingsFilePath>$(SolutionDir)BitubTRexXbim.runsettings</RunSettingsFilePath>    -->
   </PropertyGroup>
   

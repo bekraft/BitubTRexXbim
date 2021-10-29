@@ -13,7 +13,7 @@
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <BuildQualifier>-Alpha</BuildQualifier>
+    <BuildQualifier>-Debug</BuildQualifier>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
@@ -34,6 +34,6 @@
     <Company>Bitub</Company>
     <Copyright>Bernold Kraft</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://www.github.com/bekraft/BitubTRex</PackageProjectUrl>
+    <PackageProjectUrl>https://www.github.com/bekraft/BitubTRexXbim</PackageProjectUrl>
   </PropertyGroup>
 </Project>
