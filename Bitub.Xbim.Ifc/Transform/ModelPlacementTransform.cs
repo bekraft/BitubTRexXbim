@@ -45,7 +45,7 @@ namespace Bitub.Xbim.Ifc.Transform
         public IfcAxisAlignment AppliedAxisAlignment { get; private set; }
         public int[] SourceRootPlacementsLabels { get; private set; }
 
-        private IIfcLocalPlacement _newRootPlacement;
+        private IIfcLocalPlacement newRootPlacement;
 
 
         public ModelPlacementTransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor,
@@ -112,13 +112,13 @@ namespace Bitub.Xbim.Ifc.Transform
             switch(AppliedPlacementStrategy)
             {
                 case ModelPlacementStrategy.NewRootPlacement:
-                    if (null == _newRootPlacement)
+                    if (null == newRootPlacement)
                     {
-                        _newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
-                        LogAction(new XbimInstanceHandle(_newRootPlacement), TransformActionResult.Added);
+                        newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
+                        LogAction(new XbimInstanceHandle(newRootPlacement), TransformActionResult.Added);
                     }
                     LogAction(new XbimInstanceHandle(sourcePlacement), TransformActionResult.Modified);
-                    targetPlacement.PlacementRelTo = _newRootPlacement;
+                    targetPlacement.PlacementRelTo = newRootPlacement;
                     break;
 
                 case ModelPlacementStrategy.ChangeRootPlacements:
