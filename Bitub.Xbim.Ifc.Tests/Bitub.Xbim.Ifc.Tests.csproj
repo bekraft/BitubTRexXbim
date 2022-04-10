@@ -50,28 +50,28 @@
       <Version>2.1.2</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Common">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Geometry.Engine.Interop">
-      <Version>5.1.403</Version>
+      <Version>5.1.434</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Ifc">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Ifc2x3">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.Ifc4">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.IO.Esent">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.IO.MemoryModel">
-      <Version>5.1.323</Version>
+      <Version>5.1.329</Version>
     </PackageReference>
     <PackageReference Include="Xbim.ModelGeometry.Scene">
-      <Version>5.1.403</Version>
+      <Version>5.1.434</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
