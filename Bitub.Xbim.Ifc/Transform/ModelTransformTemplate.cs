@@ -121,10 +121,10 @@ namespace Bitub.Xbim.Ifc.Transform
             return TransformResult.Code.Finished;
         }
 
-        protected IEnumerable<E> EmptyToNull<E>(IEnumerable<E> elements)
-        {
+        protected ExpressEnumerableWrapper<E> EmptyToNull<E>(IEnumerable<E> elements)
+        {           
             if (elements.Any())
-                return elements.ToArray();
+                return new ExpressEnumerableWrapper<E>(elements.ToArray());
             else
                 return null;
         }
