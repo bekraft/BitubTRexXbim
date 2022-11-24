@@ -1,0 +1,49 @@
+trigger:
+  branches:
+   include:
+     - dev
+     - master
+     - feature/*
+  paths:
+    exclude:
+      - .gitignore
+      - README.md
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln' 
+  buildPlatform: 'Any CPU'
+  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+    buildConfiguration: 'Release'
+  ${{ if eq(variables['Build.SourceBranchName'], 'dev') }}: 
+    buildConfiguration: 'Beta'
+  ${{ if startsWith(variables['Build.SourceBranchName'], 'feature') }}: 
+    buildConfiguration: 'Debug'
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild@1
+  inputs:
+    solution: '$(solution)'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: NuGetCommand@2
+  condition: and(succeeded(), in(variables['buildConfiguration'], 'Release', 'Beta'))
+  inputs:
+    command: push
+    packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
+    nuGetFeedType: 'external'
+    publishFeedCredentials: 'nuget.org'
