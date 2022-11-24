@@ -14,7 +14,6 @@ pool:
 
 variables:
   solution: '**/*.sln' 
-  skipTests: false
   buildPlatform: 'Any CPU'
   ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
@@ -37,13 +36,13 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: VSTest@2
-  condition: and(succeeded(), eq(variables['skipTests'], 'false'))
+  condition: and(succeeded(), eq($(skipTests), 'false'))
   inputs:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables['buildConfiguration'], 'Release', 'Beta'))
+  condition: and(succeeded(), in($(buildConfiguration), 'Release', 'Beta'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
