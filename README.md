@@ -1,6 +1,6 @@
 # Bitub TRex Xbim
 
-![Dev status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev)
+Dev Build ![Dev status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev) | Release Build ![Dev status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=master)
 
 ## Goal
 
