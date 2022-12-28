@@ -122,9 +122,6 @@ namespace Bitub.Xbim.Ifc.Transform
 
         public void Dispose()
         {
-            if (null == Map)
-                throw new ObjectDisposedException(ToString());
-
             logEntry.Clear();
             Map = null;
         }

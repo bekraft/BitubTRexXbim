@@ -124,7 +124,7 @@ namespace Bitub.Xbim.Ifc.Transform
         protected IEnumerable<E> EmptyToNull<E>(IEnumerable<E> elements)
         {            
             if (elements.Any())
-                return elements.ToArray();
+                return new ExpressEnumerableDelegate<E>(elements);
             else
                 return null;
         }
