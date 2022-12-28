@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 
 using System.Linq;
 
@@ -15,10 +15,10 @@ using Bitub.Xbim.Ifc.Concept;
 
 namespace Bitub.Xbim.Ifc.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class AssemblyTypeScopeTests : TestBase<AssemblyTypeScopeTests>
     {
-        [TestMethod]
+        [Test]
         public void Ifc4IfcWallTest()
         {
             using (var store = IfcStore.Create(XbimSchemaVersion.Ifc4, XbimStoreType.InMemoryModel))
@@ -31,7 +31,7 @@ namespace Bitub.Xbim.Ifc.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Ifc2x3AssemblyTest()
         {
             var ifc2x3 = IfcAssemblyScope.Ifc2x3;

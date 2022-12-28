@@ -1,21 +1,22 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Extensions.Logging;
+﻿using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using Xbim.Ifc;
 
-using System.IO;
 using Google.Protobuf;
-
-using System.Threading.Tasks;
 
 using Bitub.Dto;
 
 using Bitub.Xbim.Ifc.Tests;
 
+using NUnit.Framework;
+
 namespace Bitub.Xbim.Ifc.Export.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ComponentModelExportTests : TestBase<ComponentModelExportTests>
     {
         private ExportPreferences testPreferences = new ExportPreferences
@@ -23,10 +24,10 @@ namespace Bitub.Xbim.Ifc.Export.Tests
             BodyExportType = SceneBodyExportType.FaceBody
         };
 
-        private async Task InternallyRunExport(string fileName, ExportPreferences settings)
+        private async Task InternallyRunExport(string resourceName, ExportPreferences settings)
         {
             Dto.Scene.ComponentScene result;
-            using (var store = IfcStore.Open(fileName))
+            using (var store = ReadIfc4Model(resourceName))
             {
                 var exporter = new ComponentModelExporter(new XbimTesselationContext(LoggerFactory), LoggerFactory);
                 exporter.Preferences = settings;
@@ -44,7 +45,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
             // Show default values too
             var formatter = new JsonFormatter(JsonFormatter.Settings.Default.WithFormatDefaultValues(true));
 
-            using (var jsonStream = File.CreateText($"{Path.GetFileNameWithoutExtension(fileName)}.json"))
+            using (var jsonStream = File.CreateText($"{Path.GetFileNameWithoutExtension(resourceName)}.json"))
             {
                 var json = formatter.Format(result);
                 jsonStream.WriteLine(json);
@@ -52,7 +53,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 logger.LogInformation($"JSON example has been written.");
             }
 
-            using (var binStream = File.Create($"{Path.GetFileNameWithoutExtension(fileName)}.scene"))
+            using (var binStream = File.Create($"{Path.GetFileNameWithoutExtension(resourceName)}.scene"))
             {
                 var binScene = result.ToByteArray();
                 binStream.Write(binScene, 0, binScene.Length);
@@ -60,8 +61,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc2x3-Slab-BooleanResult.ifc")]
+        [Test]
         public async Task BooleanResultCorrectionQuaternion()
         {
             await InternallyRunExport(
@@ -72,8 +72,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-SampleHouse.ifc")]
+        [Test]
         public async Task SampleHouseUserCorrectionQuaternion()
         {
             var filter = new Dto.Concept.CanonicalFilter(Dto.Concept.FilterMatchingType.SubOrEquiv, System.StringComparison.OrdinalIgnoreCase);
@@ -89,8 +88,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Storey-With-4Walls.ifc")]
+        [Test]
         public async Task StoreyWithWallsNoCorrectionQuaternion()
         {
             await InternallyRunExport(
@@ -101,8 +99,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Rotated-IfcSite-1st-floor.ifc")]
+        [Test]
         public async Task SlabIfcSiteRotatedMostExtendedRegionCorrectionQuaternion()
         {
             await InternallyRunExport(
@@ -114,8 +111,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Base-Groundfloor.ifc")]
+        [Test]
         public async Task WallsMostExtendedRegionCorrectionQuaternion()
         {
             await InternallyRunExport(
@@ -127,8 +123,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Rotated-1st-floor.ifc")]
+        [Test]
         public async Task SlabMeanTranslationCorrectionMatrix()
         {
             await InternallyRunExport(
@@ -140,8 +135,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Multi-Body-House.ifc")]
+        [Test]
         public async Task MultiBodyHouseTranslationCorrectionQuaternion()
         {
             await InternallyRunExport(
@@ -153,8 +147,7 @@ namespace Bitub.Xbim.Ifc.Export.Tests
                 });
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\mapped-shape-with-transformation.ifc")]
+        [Test]
         public async Task MappedRepresentationItem()
         {
             await InternallyRunExport(

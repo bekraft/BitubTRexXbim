@@ -2,12 +2,15 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 
 using Xbim.Common;
 using Xbim.Common.Metadata;
 
 using Bitub.Dto;
-using System.Reflection;
+using Bitub.Xbim.Ifc;
+
+using Xbim.Ifc4.Interfaces;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -50,21 +53,33 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// Combined flag of all relationship flags.
         /// </summary>
-        WithAllIfcRelations = 0x0f,
+        WithAllIfcRelations = 0x0f
     }
 
+    /// <summary>
+    /// Runtime transform package. Keeps the transient knowledge of model filltering transformation. 
+    /// </summary>
     public class ModelFilterTransformPackage : TransformPackage
     {
         public int[] ExclusiveEntityLabels { get; private set; } = new int[] { };
+
         public int[] InclusiveEntityLabels { get; private set; } = new int[] { };
 
         public short[] ExclusiveTypeIds { get; private set; } = new short[] { };
+
         public short[] InclusiveTypeIds { get; private set; } = new short[] { };
+        
 
         public ModelFilterStrategy RelationalStrategy { get; private set; }
 
+        private enum InstanceStateType
+        {
+            Unknown, Including, Excluding
+        }
 
-        public ModelFilterTransformPackage(IModel source, IModel target, CancelableProgressing progressMonitor,
+        private IDictionary<XbimInstanceHandle, InstanceStateType> instanceState;
+
+        internal ModelFilterTransformPackage(IModel source, IModel target, CancelableProgressing progressMonitor,
             ModelFilterStrategy rules = 0) : base(source, target, progressMonitor)
         {
             Array.Sort(ExclusiveEntityLabels);
@@ -122,7 +137,26 @@ namespace Bitub.Xbim.Ifc.Transform
 
         internal bool IsFollowReleation(PropertyInfo propertyInfo)
         {
-            return false;
+            bool isFollowing = true;
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRepresentation))
+            {
+                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcProductRepresentation>();
+            }
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRelDefinesByType))
+            {
+                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcRelDefinesByType>();
+            }
+            return isFollowing;
+        }
+
+        internal bool IsPassingEntity(IPersistEntity entity)
+        {
+            bool isPassing = true;
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRepresentation))
+            {
+                isPassing &= !typeof(IIfcProductRepresentation).IsAssignableFrom(entity.GetType());
+            }
+            return isPassing;
         }
     }
 
@@ -137,9 +171,11 @@ namespace Bitub.Xbim.Ifc.Transform
         public override ILogger Log { get; protected set; }
 
         public int[] ExclusiveEntityLabels { get; set; } = new int[] { };
+
         public int[] InclusiveEntityLabels { get; set; } = new int[] { };
 
         public ExpressType[] ExclusiveExpressTypes { get; set; } = new ExpressType[] { };
+
         public ExpressType[] InclusiveExpressTypes { get; set; } = new ExpressType[] { };
 
         public ModelFilterStrategy RelationalStrategy { get; set; } = ModelFilterStrategy.PureCopy;

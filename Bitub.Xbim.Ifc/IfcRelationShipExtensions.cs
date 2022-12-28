@@ -184,6 +184,14 @@ namespace Bitub.Xbim.Ifc
             return target;
         }
 
+        /// <summary>
+        /// Finds a relation typed by lower constraint <c>TParam</c> which implements <see cref="IItemSet"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of lower base property type.</typeparam>
+        /// <typeparam name="TParam">The relation type</typeparam>
+        /// <param name="t">The host type</param>
+        /// <param name="relationName">The relation name</param>
+        /// <returns>Reflected property info.</returns>
         public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<T,TParam>(this Type t, string propertyName)
         {
             return t.GetInterfaces()
@@ -205,15 +213,18 @@ namespace Bitub.Xbim.Ifc
         }
 
         /// <summary>
-        /// Determines whether the given property is a super generic type of given <c>TParam</c>
+        /// Determines whether the given property is a sub (generic) type of given <c>TParam</c>.
+        /// If the property redirects to a simple relation <c>TParam</c> denotes the expected base type.
+        /// If the property redirects to a n-ary relation <c>TParam</c> denotes the expected generic parameter base type.
         /// </summary>
         /// <typeparam name="TParam">The generic argument of relation</typeparam>
         /// <param name="propertyInfo">The property</param>
         /// <returns>True, if relation is a super generic type of given type</returns>
         public static bool IsLowerConstraintRelationType<TParam>(this PropertyInfo propertyInfo)
         {
-            return typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType)
-                && propertyInfo.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam)));
+            return typeof(TParam).IsAssignableFrom(propertyInfo.PropertyType) 
+                || (typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType)
+                    && propertyInfo.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam))));
         }
 
         /// <summary>

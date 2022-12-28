@@ -4,10 +4,9 @@
     <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Tests</AssemblyName>
 
-    <TargetFramework>net48</TargetFramework>
+    <TargetFrameworks>net48;net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;Beta</Configurations>
-    <!--<RunSettingsFilePath>$(SolutionDir)BitubTRexXbim.runsettings</RunSettingsFilePath>    -->
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -34,83 +33,44 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging">
-      <Version>3.1.9</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console">
-      <Version>3.1.9</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>2.1.2</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Common">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Geometry.Engine.Interop">
-      <Version>5.1.434</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Ifc">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Ifc2x3">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.Ifc4">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.IO.Esent">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.IO.MemoryModel">
-      <Version>5.1.329</Version>
-    </PackageReference>
-    <PackageReference Include="Xbim.ModelGeometry.Scene">
-      <Version>5.1.434</Version>
-    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.9" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+
+    <PackageReference Include="Bitub.Dto" Version="1.0.21363-Beta.42538" />
+    <PackageReference Include="Serilog" Version="2.9.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
+    <PackageReference Include="Xbim.Common" Version="5.1.329" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.434" />
+    <PackageReference Include="Xbim.Ifc" Version="5.1.329" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="5.1.329" />
+    <PackageReference Include="Xbim.Ifc4" Version="5.1.329" />
+    <PackageReference Include="Xbim.IO.Esent" Version="5.1.329" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.1.329" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.434" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="Resources\Ifc4-Storey-With-4Walls.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Ifc4-Storey-With-Slab.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Ifc4-Base-Groundfloor.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Ifc4-Rotated-1st-floor.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\Ifc4-Rotated-IfcSite-1st-floor.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <ProjectReference Include="..\Bitub.Xbim.Ifc\Bitub.Xbim.Ifc.csproj" />
-    <None Update="Resources\Ifc2x3-Slab-BooleanResult.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Ifc4-Multi-Body-House.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Ifc4-MultipleBodiesPerProduct.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\Ifc4-SampleHouse.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\IfcAlignmentTestAxis1.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\IfcAlignmentTestAxis2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\mapped-shape-with-transformation.ifc">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>    
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Ifc4-Storey-With-4Walls.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-Storey-With-Slab.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-Base-Groundfloor.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-Rotated-1st-floor.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-Rotated-IfcSite-1st-floor.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc2x3-Slab-BooleanResult.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-Multi-Body-House.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-MultipleBodiesPerProduct.ifc"/>
+    <EmbeddedResource Include="Resources\Ifc4-SampleHouse.ifc"/>
+    <EmbeddedResource Include="Resources\IfcAlignmentTestAxis1.xml"/>
+    <EmbeddedResource Include="Resources\IfcAlignmentTestAxis2.xml"/>
+    <EmbeddedResource Include="Resources\mapped-shape-with-transformation.ifc"/>
   </ItemGroup>
 </Project>

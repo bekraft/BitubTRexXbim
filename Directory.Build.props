@@ -10,6 +10,24 @@
     <DayOfMonth>$([MSBuild]::Multiply($([MSBuild]::Multiply($([System.DateTime]::Now.Day), 24)), 60))</DayOfMonth>
     <HourOfDay>$([MSBuild]::Multiply($([System.DateTime]::Now.Hour), 60))</HourOfDay>
     <Build>$([MSBuild]::Add($([MSBuild]::Add($([System.DateTime]::Now.Minute),$(HourOfDay))), $(DayOfMonth)))</Build>
+
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <UserHome>$(UserProfile)</UserHome>
+    <DefineConstants>$(DefineConstants);Is_WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
+    <UserHome>$(HOME)</UserHome>
+    <DefineConstants>$(DefineConstants);Is_OSX_or_LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'x64'">
+    <DefineConstants>$(DefineConstants);Is_x64</DefineConstants>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
