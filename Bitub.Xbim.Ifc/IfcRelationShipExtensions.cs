@@ -162,11 +162,13 @@ namespace Bitub.Xbim.Ifc
         /// <returns>The modified target instance</returns>
         public static T2 CreateSameRelationshipsLike<T1, T2>(this T2 target, T1 template) where T1 : IPersistEntity where T2 : T1
         {
-            // Scan trough hosted indirect relations of template type T
+            // Scan through hosted indirect relations of template type T
             foreach (var relationProperty in typeof(T1)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
-                .Where(property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod.ReturnType.GenericTypeArguments[0])))
+                .Where(
+                    property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
+                .Where(
+                    property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod.ReturnType.GenericTypeArguments[0])))
             {   
                 // Scan through relation objects of type IEnumerable<? extends IIfcRelationship>
                 foreach (var relation in (relationProperty.GetValue(template) as IEnumerable))

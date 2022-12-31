@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
-using Xbim.ModelGeometry.Scene;
 
 using Bitub.Dto;
 using Microsoft.Extensions.Logging;
 
+using Xbim.ModelGeometry.Scene;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -59,6 +60,9 @@ namespace Bitub.Xbim.Ifc.Transform
 
         internal void Prepare(CancelableProgressing cancelableProgress)
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new NotSupportedException($"${nameof(ModelPlacementTransformPackage)}) requires WinOS platform.");
+
             PlacementTree = new XbimPlacementTree(Source, false);
             SourceRootPlacementsLabels = Source.Instances
                 .OfType<IIfcLocalPlacement>()

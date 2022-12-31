@@ -4,7 +4,6 @@
     <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Tests</AssemblyName>
 
-    <TargetFrameworks>net48;net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <Configurations>Debug;Release;Beta</Configurations>
   </PropertyGroup>
@@ -28,7 +27,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -48,9 +47,6 @@
     <PackageReference Include="Xbim.Common">
       <Version>5.1.341</Version>
     </PackageReference>
-    <PackageReference Include="Xbim.Geometry.Engine.Interop">
-      <Version>5.1.437</Version>
-    </PackageReference>
     <PackageReference Include="Xbim.Ifc">
       <Version>5.1.341</Version>
     </PackageReference>
@@ -60,15 +56,12 @@
     <PackageReference Include="Xbim.Ifc4">
       <Version>5.1.341</Version>
     </PackageReference>
-    <PackageReference Include="Xbim.IO.Esent">
-      <Version>5.1.341</Version>
-    </PackageReference>
     <PackageReference Include="Xbim.IO.MemoryModel">
       <Version>5.1.341</Version>
     </PackageReference>
-    <PackageReference Include="Xbim.ModelGeometry.Scene">
-      <Version>5.1.437</Version>
-    </PackageReference>
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
+    <PackageReference Include="Xbim.IO.Esent" Version="5.1.341" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.437" />
   </ItemGroup>
 
   <ItemGroup>

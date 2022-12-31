@@ -187,8 +187,10 @@ namespace Bitub.Xbim.Ifc.Transform
                 model = s.Model;
             if (model is global::Xbim.IO.Memory.MemoryModel)
                 return XbimStoreType.InMemoryModel;
-            else if (model is global::Xbim.IO.Esent.EsentModel)
+            #if Is_WINDOWS
+            else if (model is global::Xbim.IO.Esent.EsentModel)            
                 return XbimStoreType.EsentDatabase;
+            #endif
             else
                 throw new NotSupportedException($"Unsupported / unknown type {model.GetType()}");
         }

@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Since OpenCascade native wrapper is CLR/CLI Windows only
+#if Is_WINDOWS
+
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -160,3 +163,5 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         }
     }
 }
+
+#endif
