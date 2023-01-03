@@ -240,7 +240,7 @@ namespace Bitub.Xbim.Ifc.Transform
                     {
                         if (propDefinition.Count() > 1)
                             // Only IFC4+, if more than one use a set
-                            return new IfcPropertySetDefinitionSet(propDefinition.Cast<IfcPropertySetDefinition>().ToList());
+                            return new IfcPropertySetDefinitionSet(propDefinition.ToList());
                         else
                             // Otherwise, return first
                             return propDefinition.First();
@@ -275,7 +275,7 @@ namespace Bitub.Xbim.Ifc.Transform
                     // Filter for valid property sets
                     var whiteList = setOfSet.PropertySetDefinitions
                         .Where(package.PassesNameFilter)
-                        .OfType<IfcPropertySetDefinition>()
+                        .OfType<IIfcPropertySetDefinition>()
                         .ToList();
                     var newRel = package.Target.NewIfcRelDefinesByProperties(new IfcPropertySetDefinitionSet(whiteList));
 

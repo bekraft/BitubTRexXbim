@@ -1,5 +1,7 @@
 # Bitub TRex Xbim
 
+![](https://img.shields.io/nuget/v/Xbim.Geometry.svg)
+
 ## Goal
 
 BitubTRexXbim uses the [Xbim libraries](https://github.com/xBimTeam) and adds some domain driven functionalities to BitubTRex.

@@ -46,11 +46,6 @@ namespace Bitub.Xbim.Ifc.Concept
             return new DataConcept { Type = DataType.Guid, Guid = guid.ToGlobalUniqueId() };
         }
 
-        public static DataConcept ToDataConcept(this global::Xbim.Ifc2x3.Interfaces.IIfcValue p, DataOp dataOp = DataOp.Equals)
-        {
-            return ToDataConcept(p as IExpressValueType, dataOp);
-        }
-
         public static DataConcept ToDataConcept(this IIfcValue p, DataOp dataOp = DataOp.Equals)
         {
             return ToDataConcept(p as IExpressValueType, dataOp);

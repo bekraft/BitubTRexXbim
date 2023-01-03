@@ -17,14 +17,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
-    <UserHome>$(UserProfile)</UserHome>
-    <TargetFrameworks>net471;net48;net481;net6.0</TargetFrameworks>
+    <UserHome>$(UserProfile)</UserHome>   
     <DefineConstants>$(DefineConstants);Is_WINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
     <UserHome>$(HOME)</UserHome>
-    <TargetFrameworks>net6.0</TargetFrameworks>
     <DefineConstants>$(DefineConstants);Is_OSX_or_LINUX</DefineConstants>
   </PropertyGroup>
 
@@ -44,6 +42,12 @@
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Dev' ">
+    <BuildQualifier>-Dev</BuildQualifier>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+  </PropertyGroup>
+
   <PropertyGroup>
     <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)")];</AssemblyFileVersionAttribute>
     <AssemblyVersion>$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)</AssemblyVersion>
@@ -56,4 +60,11 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://www.github.com/bekraft/BitubTRexXbim</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
 </Project>

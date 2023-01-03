@@ -1,13 +1,7 @@
-﻿// Since OpenCascade native wrapper is CLR/CLI Windows only
-#if Is_WINDOWS
-
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
-using Microsoft.Extensions.Logging;
-
-using Xbim.Ifc;
 
 using Google.Protobuf;
 
@@ -16,6 +10,10 @@ using Bitub.Dto;
 using Bitub.Xbim.Ifc.Tests;
 
 using NUnit.Framework;
+
+using Xbim.Common;
+
+using Microsoft.Extensions.Logging;
 
 namespace Bitub.Xbim.Ifc.Export.Tests
 {
@@ -27,10 +25,16 @@ namespace Bitub.Xbim.Ifc.Export.Tests
             BodyExportType = SceneBodyExportType.FaceBody
         };
 
-        private async Task InternallyRunExport(string resourceName, ExportPreferences settings)
+        private async Task RunIfc4Export(string resourceName, ExportPreferences settings)
+            => RunExport(resourceName, settings, ReadIfc4Model);
+
+        private async Task RunIfc2x3Export(string resourceName, ExportPreferences settings)
+            => RunExport(resourceName, settings, ReadIfc2x3Model);
+
+        private async Task RunExport(string resourceName, ExportPreferences settings, Func<String, IModel> reader)
         {
             Dto.Scene.ComponentScene result;
-            using (var store = ReadIfc4Model(resourceName))
+            using (var store = reader(resourceName))
             {
                 var exporter = new ComponentModelExporter(new XbimTesselationContext(LoggerFactory), LoggerFactory);
                 exporter.Preferences = settings;
@@ -67,8 +71,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task BooleanResultCorrectionQuaternion()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc2x3-Slab-BooleanResult.ifc",
+            await RunIfc2x3Export(
+                @"Ifc2x3-Slab-BooleanResult.ifc",
                 new ExportPreferences(testPreferences) 
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion 
@@ -81,8 +85,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
             var filter = new Dto.Concept.CanonicalFilter(Dto.Concept.FilterMatchingType.SubOrEquiv, System.StringComparison.OrdinalIgnoreCase);
             filter.Filter.Add(new string[] { "Other", "Category" }.ToQualifier().ToClassifier());
 
-            await InternallyRunExport(
-                @"Resources\Ifc4-SampleHouse.ifc",
+            await RunIfc4Export(
+                @"Ifc4-SampleHouse.ifc",
                 new ExportPreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
@@ -94,8 +98,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task StoreyWithWallsNoCorrectionQuaternion()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc4-Storey-With-4Walls.ifc",
+            await RunIfc4Export(
+                @"Ifc4-Storey-With-4Walls.ifc",
                 new ExportPreferences(testPreferences) 
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion 
@@ -105,8 +109,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task SlabIfcSiteRotatedMostExtendedRegionCorrectionQuaternion()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc4-Rotated-IfcSite-1st-floor.ifc",
+            await RunIfc4Export(
+                @"Ifc4-Rotated-IfcSite-1st-floor.ifc",
                 new ExportPreferences(testPreferences)
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion, 
@@ -117,8 +121,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task WallsMostExtendedRegionCorrectionQuaternion()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc4-Base-Groundfloor.ifc",
+            await RunIfc4Export(
+                @"Ifc4-Base-Groundfloor.ifc",
                 new ExportPreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
@@ -129,8 +133,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task SlabMeanTranslationCorrectionMatrix()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc4-Rotated-1st-floor.ifc",
+            await RunIfc4Export(
+                @"Ifc4-Rotated-1st-floor.ifc",
                 new ExportPreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Matrix,
@@ -141,8 +145,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task MultiBodyHouseTranslationCorrectionQuaternion()
         {
-            await InternallyRunExport(
-                @"Resources\Ifc4-Multi-Body-House.ifc",
+            await RunIfc4Export(
+                @"Ifc4-Multi-Body-House.ifc",
                 new ExportPreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
@@ -153,8 +157,8 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         [Test]
         public async Task MappedRepresentationItem()
         {
-            await InternallyRunExport(
-                @"Resources\mapped-shape-with-transformation.ifc",
+            await RunIfc4Export(
+                @"mapped-shape-with-transformation.ifc",
                 new ExportPreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
@@ -163,5 +167,3 @@ namespace Bitub.Xbim.Ifc.Export.Tests
         }
     }
 }
-
-#endif
