@@ -3,11 +3,17 @@
   <PropertyGroup>
     <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Tests</AssemblyName>
-    <TargetFrameworks>net472;net48;net481</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <Configurations>Debug;Release;Beta;Dev</Configurations>
+    <Configurations>Debug;Release;Test;Dev</Configurations>    
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
+    <TargetFrameworks>net6.0</TargetFrameworks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <TargetFrameworks>net472;net48;net481;net6.0</TargetFrameworks>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -18,7 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Beta|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Test|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
@@ -32,7 +38,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -52,6 +58,14 @@
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.443-develop" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Dev' And '$(Configuration)' != 'Debug'">
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.443-develop" />
   </ItemGroup>
 

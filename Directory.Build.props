@@ -10,7 +10,7 @@
     <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
     <SecondsByHour>$([MSBuild]::Multiply($([System.DateTime]::Now.Hour), 3600))</SecondsByHour>
     <SecondsByDay>$([MSBuild]::Add($([MSBuild]::Add($([System.DateTime]::Now.Second),$(SecondsByMinute))), $(SecondsByHour)))</SecondsByDay>
-    <Build>$(SecondsByDay)</Build>
+    <Build>$([MSBuild]::Divide($(SecondsByDay), 2))</Build>
 
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
@@ -25,7 +25,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
-    <UserHome>$(HOME)</UserHome>
+    <UserHome>$(HOME)</UserHome>    
     <DefineConstants>$(DefineConstants);Is_OSX_or_LINUX</DefineConstants>
   </PropertyGroup>
 
