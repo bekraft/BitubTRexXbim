@@ -15,14 +15,28 @@ pool:
 variables:
   solution: '**/*.sln' 
   buildPlatform: 'Any CPU'
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    buildConfiguration: 'Test'
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
-    buildConfiguration: 'Beta'
-  ${{ else }}: 
+    buildConfiguration: 'Dev'
+  ${{ else }}:
     buildConfiguration: 'Debug'
 
 steps:
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Retrieving stable build number"
+      $date=Get-Date
+      [int] $buildSecond=([int]$date.Hour) * 3600 + ([int]$date.Minute) * 60 + ([int]$date.Second)
+      [string] $buildDate=-join($(Get-Date -format yy), ([string]$date.DayOfYear).PadLeft(3,'0'))
+      Write-Host "##vso[task.setvariable variable=buildSecond]$buildSecond"
+      Write-Host "##vso[task.setvariable variable=buildDate]$buildDate"
+      Write-Host "##vso[build.updatebuildnumber]$buildDate.$buildSecond"
+
 - task: NuGetToolInstaller@1
 
 - task: NuGetCommand@2
@@ -34,6 +48,7 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond)'
 
 - task: VSTest@2
   condition: and(succeeded(), eq(variables.skipTests, 'false'))
@@ -42,7 +57,7 @@ steps:
     configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Beta'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
