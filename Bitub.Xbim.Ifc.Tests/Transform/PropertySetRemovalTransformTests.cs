@@ -1,17 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
 using Bitub.Dto.Spatial;
 
-using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validation;
 
@@ -22,7 +19,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
     [TestFixture]
-    public class ModelPropertySetRemovalTransformTests : TestBase<ModelPropertySetRemovalTransformTests>
+    public class PropertySetRemovalTransformTests : TestBase<PropertySetRemovalTransformTests>
     {
         [Test]
         public async Task RemoveByName()
@@ -37,7 +34,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     .Where(s => s.Name == "AllplanAttributes")
                     .Count());
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "AllplanAttributes" },
                     IsNameMatchingCaseSensitive = false,
@@ -82,7 +79,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "AllplanAttributes" },
                     IncludePropertySetByName = new string[] { "AllplanAttributes", "AllplanAttributes Copy" },
@@ -130,7 +127,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "Other" },
                     IncludePropertySetByName = new string[] { "Pset_SpaceCommon", "Other" },
