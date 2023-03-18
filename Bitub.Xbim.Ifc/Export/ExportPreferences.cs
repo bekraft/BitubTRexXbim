@@ -75,7 +75,7 @@ namespace Bitub.Xbim.Ifc.Export
         /// <summary>
         /// Transformation strategy (default using global cooridinates).
         /// </summary>
-        public SceneTransformationStrategy Transforming { get; set; } = default(SceneTransformationStrategy);
+        public SceneTransformationStrategy Transforming { get; set; } = default;
 
         /// <summary>
         /// Given user translation (in units) a priori. Only applies of positioning is set to UserCorrection.
@@ -99,9 +99,14 @@ namespace Bitub.Xbim.Ifc.Export
         public SceneComponentIdentificationStrategy ComponentIdentificationStrategy { get; set; } = SceneComponentIdentificationStrategy.UseGloballyUniqueID;
 
         /// <summary>
-        /// Custom CRS rotation and scale as count of units per meter equal to the magnitude of each row vector.
+        /// Custom target CRS including additional offset in target system.
         /// </summary>
-        public Rotation CRS { get; set; } = Rotation.Identity;
+        public Dto.Scene.Transform CRS { get; set; } = Dto.Scene.Transform.Identity;
+
+        /// <summary>
+        /// Scale vector per dimension x,y and z denoting the count of units per meter.
+        /// </summary>
+        public XYZ Scale { get; set; } = XYZ.Ones;
 
         /// <summary>
         /// The representation contexts to transfer.

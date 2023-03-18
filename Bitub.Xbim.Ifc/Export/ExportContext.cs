@@ -21,7 +21,13 @@ namespace Bitub.Xbim.Ifc.Export
     {
         internal readonly ILogger logger;
 
-        public TSettings Current { get; private set; }
+        public ExportContext(TSettings settings, XbimVector3D scale, XbimMatrix3D crs) 
+        {
+            this.Settings = settings;
+            this.Scale = scale;
+            this.CRS = crs;
+        }
+        public TSettings Settings { get; private set; }
 
         public XbimVector3D Scale { get; private set; } = new XbimVector3D(1, 1, 1);
 
@@ -42,16 +48,11 @@ namespace Bitub.Xbim.Ifc.Export
             if (null == settings)
                 throw new ArgumentNullException(nameof(settings));
 
-            Current = settings;
+            Settings = settings;
+            Scale = (Settings.Scale * 1.0 / model.ModelFactors.OneMeter).ToXbimVector3D();
+            CRS = Settings.CRS.ToXbimMatrix();
 
-            var crs = new Rotation(Current.CRS);
-            Scale = crs.Row
-                .Select(r => r.Magnitude / model.ModelFactors.OneMeter)
-                .ToXbimVector3D();
-            crs.Row.ForEach(r => r.Normalize());
-            CRS = crs.ToXbimMatrix();
-
-            Current.SelectedContext = Current.SelectedContext.Select(c => new SceneContext
+            Settings.SelectedContext = Settings.SelectedContext.Select(c => new SceneContext
             {
                 Name = c.Name,
                 // Given in DEG => use as it is
@@ -122,7 +123,7 @@ namespace Bitub.Xbim.Ifc.Export
             return contextLabels
                    .Select(label => model.Instances[label])
                    .OfType<IIfcRepresentationContext>()
-                   .Select(c => (c.EntityLabel, Current.SelectedContext.FirstOrDefault(sc => sc.Name.IsSuperQualifierOf(c.ContextIdentifier.ToString().ToQualifier(), StringComparison.OrdinalIgnoreCase))))
+                   .Select(c => (c.EntityLabel, Settings.SelectedContext.FirstOrDefault(sc => sc.Name.IsSuperQualifierOf(c.ContextIdentifier.ToString().ToQualifier(), StringComparison.OrdinalIgnoreCase))))
                    .Where(t => t.Item2 != null);
         }
 
@@ -131,8 +132,7 @@ namespace Bitub.Xbim.Ifc.Export
         {
             foreach (var cr in contextRegions)
             {
-                SceneContext sc;
-                if (contextTable.TryGetValue(cr.ContextLabel, out sc))
+                if (contextTable.TryGetValue(cr.ContextLabel, out SceneContext sc))
                 {
                     XbimVector3D offset = XbimVector3D.Zero;
                     XbimVector3D mean = XbimVector3D.Zero;
@@ -143,11 +143,11 @@ namespace Bitub.Xbim.Ifc.Export
                     }
                     mean *= 1.0 / cr.Count;
 
-                    switch (Current.Positioning)
+                    switch (Settings.Positioning)
                     {
                         case ScenePositioningStrategy.UserCorrection:
                             // Center at user's center
-                            offset = Current.UserModelCenter.ToXbimVector3DMeter(factors);
+                            offset = Settings.UserModelCenter.ToXbimVector3DMeter(factors);
                             break;
                         case ScenePositioningStrategy.MostPopulatedRegionCorrection:
                             // Center at most populated
@@ -182,22 +182,22 @@ namespace Bitub.Xbim.Ifc.Export
                             logger?.LogInformation($"No translation correction applied by settings to context '{cr.ContextLabel}'");
                             break;
                         default:
-                            throw new NotImplementedException($"Missing implementation for '{Current.Positioning}'");
+                            throw new NotImplementedException($"Missing implementation for '{Settings.Positioning}'");
                     }
 
-                    switch (Current.Transforming)
+                    switch (Settings.Transforming)
                     {
                         case SceneTransformationStrategy.Matrix:
                             // If Matrix or Global use rotation matrix representation
-                            sc.Wcs = new XbimMatrix3D(offset).ToRotation(Scale);
+                            sc.Wcs = new XbimMatrix3D(offset).ToTransformM(Scale);
                             break;
                         case SceneTransformationStrategy.Quaternion:
                             // Otherwise use Quaternion representation
-                            sc.Wcs = new XbimMatrix3D(offset).ToQuaternion(Scale);
+                            sc.Wcs = new XbimMatrix3D(offset).ToTransformQ(Scale);
                             break;
                         default:
-                            throw new NotImplementedException($"{Current.Transforming}");
-                    }                        
+                            throw new NotImplementedException($"{Settings.Transforming}");
+                    }
 
                     // Set correction to negative offset shift (without scale since in model space units)
                     yield return new SceneContextTransform(cr.ContextLabel, sc, new XbimMatrix3D(offset * -1));

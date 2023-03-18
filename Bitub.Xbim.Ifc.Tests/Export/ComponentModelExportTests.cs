@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 using Google.Protobuf;
 
 using Bitub.Dto;
-
-using Bitub.Xbim.Ifc.Tests;
+using Bitub.Xbim.Ifc.Export;
 
 using NUnit.Framework;
 
@@ -15,7 +14,7 @@ using Xbim.Common;
 
 using Microsoft.Extensions.Logging;
 
-namespace Bitub.Xbim.Ifc.Export.Tests
+namespace Bitub.Xbim.Ifc.Tests.Export
 {
     [TestFixture]
     public class ComponentModelExportTests : TestBase<ComponentModelExportTests>

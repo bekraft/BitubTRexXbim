@@ -10,7 +10,7 @@
     <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
     <SecondsByHour>$([MSBuild]::Multiply($([System.DateTime]::Now.Hour), 3600))</SecondsByHour>
     <SecondsByDay>$([MSBuild]::Add($([MSBuild]::Add($([System.DateTime]::Now.Second),$(SecondsByMinute))), $(SecondsByHour)))</SecondsByDay>
-    <Build>$([MSBuild]::Divide($(SecondsByDay), 2))</Build>
+    <Build>$([System.Math]::Floor($([MSBuild]::Divide($(SecondsByDay), 2))))</Build>
 
     <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
@@ -33,6 +33,10 @@
     <DefineConstants>$(DefineConstants);Is_x64</DefineConstants>
   </PropertyGroup>
   
+  <PropertyGroup Condition=" '$(Configuration)' == '' ">
+    <Configuration>Debug</Configuration>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
     <BuildQualifier></BuildQualifier>

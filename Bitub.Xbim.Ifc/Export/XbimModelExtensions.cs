@@ -101,11 +101,11 @@ namespace Bitub.Xbim.Ifc.Export
 
         #region XbimMatrix3D context
 
-        public static Dto.Scene.Transform ToRotation(this XbimMatrix3D t, XbimVector3D scale)
+        public static Dto.Scene.Transform ToTransformM(this XbimMatrix3D t, XbimVector3D scale)
         {
             return new Dto.Scene.Transform
             {                
-                R = new Rotation
+                R = new M33
                 {   // XbimMatrix is transposed (left hand chaining)
                     Rx = new XbimVector3D(t.M11, t.M21, t.M31).Normalized().ToXYZ(),
                     Ry = new XbimVector3D(t.M12, t.M22, t.M32).Normalized().ToXYZ(),
@@ -115,12 +115,12 @@ namespace Bitub.Xbim.Ifc.Export
             };
         }
 
-        public static Dto.Scene.Transform ToQuaternion(this XbimMatrix3D t, XbimVector3D scale)
+        public static Dto.Scene.Transform ToTransformQ(this XbimMatrix3D t, XbimVector3D scale)
         {
             var q = t.GetRotationQuaternion();
             return new Dto.Scene.Transform
             {
-                Q = new Quaternion
+                Q = new Quat
                 {
                     X = (float)q.X,
                     Y = (float)q.Y,
@@ -162,15 +162,12 @@ namespace Bitub.Xbim.Ifc.Export
 
         public static RefId ToRefId(this IIfcRoot entity, SceneComponentIdentificationStrategy strategy)
         {
-            switch (strategy)
+            return strategy switch
             {
-                case SceneComponentIdentificationStrategy.UseGloballyUniqueID:
-                    return new RefId { Sid = entity.GlobalId.ToGlobalUniqueId().ToQualifier() };
-                case SceneComponentIdentificationStrategy.UseIfcInstanceLabel:
-                    return new RefId { Nid = entity.EntityLabel };
-                default:
-                    throw new NotImplementedException();
-            }
+                SceneComponentIdentificationStrategy.UseGloballyUniqueID => new RefId { Sid = entity.GlobalId.ToGlobalUniqueId().ToQualifier() },
+                SceneComponentIdentificationStrategy.UseIfcInstanceLabel => new RefId { Nid = entity.EntityLabel },
+                _ => throw new NotImplementedException(),
+            };
         }
 
         public static Component ToComponent(this IIfcProduct product, 

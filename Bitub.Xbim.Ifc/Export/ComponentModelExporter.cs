@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Bitub.Xbim.Ifc.Concept;
 using Bitub.Dto.Concept;
 using Google.Protobuf.WellKnownTypes;
+using System.Threading;
 
 namespace Bitub.Xbim.Ifc.Export
 {
@@ -79,13 +80,13 @@ namespace Bitub.Xbim.Ifc.Export
                 {
                     monitor?.State.MarkBroken();
                     logger.LogError("{0}: {1} [{2}]", e.GetType().Name, e.Message, e.StackTrace);
-                    throw e;
+                    throw new ThreadInterruptedException($"Export broke due to {e.Message}", e);
                 }
             });
         }
 
         // Runs the scene model export
-        private ComponentScene BuildScene(IModel model,ExportPreferences exportSettings, CancelableProgressing progressing)
+        private ComponentScene BuildScene(IModel model, ExportPreferences exportSettings, CancelableProgressing progressing)
         {
             var exportContext = new ExportContext<ExportPreferences>(loggerFactory);
             exportContext.InitContextsAndScaleFromModel(model, exportSettings);
@@ -127,8 +128,7 @@ namespace Bitub.Xbim.Ifc.Export
                         Component c;
                         if (!componentCache.TryGetValue(product.EntityLabel, out c))
                         {
-                            int? optParent;
-                            c = product.ToComponent(out optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
+                            c = product.ToComponent(out int? optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
 
                             componentCache.Add(product.EntityLabel, c);
                             componentScene.Components.Add(c);
@@ -160,13 +160,11 @@ namespace Bitub.Xbim.Ifc.Export
 
                 if (model.Instances[missingInstance.Dequeue()] is IIfcProduct product)
                 {
-                    Component c;
-                    if (!componentCache.TryGetValue(product.EntityLabel, out c))
+                    if (!componentCache.TryGetValue(product.EntityLabel, out Component c))
                     {
-                        int? optParent;
-                        c = product.ToComponent(out optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
+                        c = product.ToComponent(out int? optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
 
-                        componentCache.Add(product.EntityLabel, c);                       
+                        componentCache.Add(product.EntityLabel, c);
 
                         if (optParent.HasValue && !componentCache.ContainsKey(optParent.Value))
                             // Enqueue missing parents
