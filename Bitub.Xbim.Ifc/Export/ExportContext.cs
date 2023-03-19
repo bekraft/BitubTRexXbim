@@ -49,7 +49,7 @@ namespace Bitub.Xbim.Ifc.Export
                 throw new ArgumentNullException(nameof(settings));
 
             Settings = settings;
-            Scale = (Settings.Scale * 1.0 / model.ModelFactors.OneMeter).ToXbimVector3D();
+            Scale = (Settings.Scale * (1.0 / model.ModelFactors.OneMeter)).ToXbimVector3D();
             CRS = Settings.CRS.ToXbimMatrix();
 
             Settings.SelectedContext = Settings.SelectedContext.Select(c => new SceneContext

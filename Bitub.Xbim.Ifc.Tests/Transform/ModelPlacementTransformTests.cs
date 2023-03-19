@@ -38,11 +38,11 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
             Assert.IsNotNull(axis2);
             Assert.IsNotNull(axis2.SourceReferenceAxis);
-            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqual(axis1.SourceReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqual(axis1.SourceReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, precision));
             Assert.IsNotNull(axis2.TargetReferenceAxis);
-            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqual(axis1.TargetReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqual(axis1.TargetReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, precision));
         }
 
         [Test]
