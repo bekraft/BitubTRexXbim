@@ -48,11 +48,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Dev' Or $(Configuration)' == 'Debug'">
+  <ItemGroup Condition="'$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.443-develop" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'Dev' And $(Configuration)' != 'Debug'">
+  <ItemGroup Condition="'$(Configuration)' != 'Dev' And '$(Configuration)' != 'Debug'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
   </ItemGroup>
 
