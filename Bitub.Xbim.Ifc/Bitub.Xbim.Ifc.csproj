@@ -54,30 +54,30 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'Dev' And '$(Configuration)' != 'Debug'">    
-    <PackageReference Include="Bitub.Dto" Version="1.0.23072-Dev.27697" />
+    <PackageReference Include="Bitub.Dto" Version="1.0.23078-Dev.33517" />
     <PackageReference Include="Xbim.Common" Version="5.1.341" />    
     <PackageReference Include="Xbim.Ifc" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc4" Version="5.1.341" />
     <PackageReference Include="Xbim.IO.MemoryModel" Version="5.1.341" />
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
     <PackageReference Include="Xbim.IO.Esent" Version="5.1.341" />
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.437" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.666-develop" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug'">
-    <PackageReference Include="Bitub.Dto" Version="1.0.23072-Dev.27697" />
-    <PackageReference Include="Xbim.Common" Version="5.9.375-develop" />    
-    <PackageReference Include="Xbim.Ifc" Version="5.9.375-develop" />
-    <PackageReference Include="Xbim.Ifc2x3" Version="5.9.375-develop" />
-    <PackageReference Include="Xbim.Ifc4" Version="5.9.375-develop" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="5.9.375-develop" />    
-    <PackageReference Include="Xbim.IO.Esent" Version="5.9.375-develop" />
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.443-develop" />
+    <PackageReference Include="Bitub.Dto" Version="1.0.23078-Dev.33517" />
+    <PackageReference Include="Xbim.Common" Version="6.0.414-develop" />    
+    <PackageReference Include="Xbim.Ifc" Version="6.0.414-develop" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="6.0.414-develop" />
+    <PackageReference Include="Xbim.Ifc4" Version="6.0.414-develop" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="6.0.414-develop" />    
+    <PackageReference Include="Xbim.IO.Esent" Version="6.0.414-develop" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.666-develop" />
   </ItemGroup>
 
   <ItemGroup Condition="('$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug') And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.443-develop" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
   </ItemGroup>
 
   <Target Name="VersionReport" BeforeTargets="BeforeBuild">

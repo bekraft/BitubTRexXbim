@@ -312,8 +312,6 @@ namespace Bitub.Xbim.Ifc
             if (null == axisPlacement)
             {
                 axisPlacement = s.Instances.New<IfcAxis2Placement3D>();
-                if (null != placement.RelativePlacement)
-                    s.Logger.LogWarning($"Leaving orphan instance {placement.RelativePlacement}");
             }
 
             if (!newAxisInstances && axisPlacement.Axis is IfcDirection d1)
