@@ -125,8 +125,8 @@ namespace Bitub.Xbim.Ifc.Export
                         break;
                     case TesselationMessageType.Shape:
                         var product = model.Instances[msg.ProductShape.productLabel] as IIfcProduct;
-                        Component c;
-                        if (!componentCache.TryGetValue(product.EntityLabel, out c))
+                        
+                        if (!componentCache.TryGetValue(product.EntityLabel, out Component c))
                         {
                             c = product.ToComponent(out int? optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
 
@@ -138,7 +138,9 @@ namespace Bitub.Xbim.Ifc.Export
                         }
 
                         c.Shapes.AddRange(msg.ProductShape.shapes);
-                        c.BoundingBox = msg.ProductShape.shapes.Select(shape => shape.BoundingBox).Aggregate((a, b) => a.UnionWith(b));
+                        c.BoundingBox = msg.ProductShape.shapes
+                            .Select(shape => shape.BoundingBox)
+                            .Aggregate(new BoundingBox { ABox = ABox.Empty }, (a, b) => a.UnionWith(b));
                         break;
                 }
             }

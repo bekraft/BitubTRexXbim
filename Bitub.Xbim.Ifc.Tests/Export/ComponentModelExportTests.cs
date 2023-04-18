@@ -19,15 +19,15 @@ namespace Bitub.Xbim.Ifc.Tests.Export
     [TestFixture]
     public class ComponentModelExportTests : TestBase<ComponentModelExportTests>
     {
-        private ExportPreferences testPreferences = new ExportPreferences
+        private readonly ExportPreferences testPreferences = new ExportPreferences
         {
             BodyExportType = SceneBodyExportType.FaceBody
         };
 
-        private async Task RunIfc4Export(string resourceName, ExportPreferences settings)
+        private Task RunIfc4Export(string resourceName, ExportPreferences settings)
             => RunExport(resourceName, settings, ReadIfc4Model);
 
-        private async Task RunIfc2x3Export(string resourceName, ExportPreferences settings)
+        private Task RunIfc2x3Export(string resourceName, ExportPreferences settings)
             => RunExport(resourceName, settings, ReadIfc2x3Model);
 
         private async Task RunExport(string resourceName, ExportPreferences settings, Func<String, IModel> reader)
