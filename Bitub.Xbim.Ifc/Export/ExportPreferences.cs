@@ -73,7 +73,7 @@ namespace Bitub.Xbim.Ifc.Export
         public ScenePositioningStrategy Positioning { get; set; } = default(ScenePositioningStrategy);
 
         /// <summary>
-        /// Transformation strategy (default using global cooridinates).
+        /// Transformation strategy (default using global coordinates).
         /// </summary>
         public SceneTransformationStrategy Transforming { get; set; } = default;
 

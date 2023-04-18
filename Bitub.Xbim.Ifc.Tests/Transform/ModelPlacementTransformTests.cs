@@ -17,6 +17,7 @@ using Bitub.Xbim.Ifc.Validation;
 using Bitub.Dto.Spatial;
 
 using NUnit.Framework;
+using Xbim.Common.Configuration;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
@@ -48,7 +49,6 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task OffsetShiftAndRotateTest1()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = ReadIfc4Model("Ifc4-Rotated-1st-floor.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
@@ -89,7 +89,6 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task OffsetShiftAndRotateTest2_Change()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
@@ -134,7 +133,6 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task OffsetShiftAndRotateTest2_New()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
             using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();

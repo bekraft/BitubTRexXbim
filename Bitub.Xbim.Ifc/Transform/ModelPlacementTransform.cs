@@ -165,7 +165,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// </summary>
         public override ILogger Log { get; protected set; }
 
-        public override string Name { get => "Product Placement Transform"; }
+        public override string Name { get => "Model Placement"; }
 
         /// <summary>
         /// Default strategy is <see cref="ModelPlacementStrategy.AdjustRootPlacements"/>.

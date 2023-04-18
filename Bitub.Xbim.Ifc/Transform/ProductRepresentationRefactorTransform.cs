@@ -9,7 +9,6 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.UtilityResource;
 
 using Bitub.Dto;
-using Bitub.Xbim.Ifc;
 
 using Microsoft.Extensions.Logging;
 using System.Collections;
@@ -150,7 +149,7 @@ namespace Bitub.Xbim.Ifc.Transform
     /// </summary>
     public class ProductRepresentationRefactorTransform : ModelTransformTemplate<ProductRefactorTransformPackage>
     {
-        public override string Name => "Product Representation Decomposiong Transform";
+        public override string Name => "Product Multi-body Representation Decomposition";
 
         public override ILogger Log { get; protected set; }
 

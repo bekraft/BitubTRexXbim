@@ -132,7 +132,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// Name is "Property Set Removal"
         /// </summary>
-        public override string Name => "Model Property Set Removal Transform";
+        public override string Name => "Property Set Removal";
 
         /// <summary>
         /// Whether to use case sensitive matches. Default is <c>false</c>
