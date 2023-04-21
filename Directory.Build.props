@@ -37,6 +37,10 @@
     <Configuration>Debug</Configuration>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'XbimDev'">
+    <DefineConstants>$(DefineConstants);Is_XbimDev</DefineConstants>
+  </PropertyGroup>
+  
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
     <BuildQualifier></BuildQualifier>

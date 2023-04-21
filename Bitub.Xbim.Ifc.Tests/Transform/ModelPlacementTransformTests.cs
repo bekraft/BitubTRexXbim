@@ -17,7 +17,6 @@ using Bitub.Xbim.Ifc.Validation;
 using Bitub.Dto.Spatial;
 
 using NUnit.Framework;
-using Xbim.Common.Configuration;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
