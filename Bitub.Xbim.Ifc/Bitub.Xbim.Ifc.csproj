@@ -2,10 +2,11 @@
   <PropertyGroup>
     <Title>Bitub.Xbim.Ifc</Title>
     <Description>Xbim IFC toolset adaption</Description>
-    <Configurations>Debug;Release;Test;Dev</Configurations>
+    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
     <LangVersion>8</LangVersion>
     <IsPackable>true</IsPackable>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == '' ">
@@ -18,54 +19,25 @@
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
     <TargetFrameworks>net472;net48;net481;net6.0</TargetFrameworks>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'XbimDev|x64' ">
+    <IsPackable>true</IsPackable>
+    <BuildQualifier>-Dev</BuildQualifier>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Test\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dev|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Dev\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(Configuration)' != 'Dev' And '$(Configuration)' != 'Debug'">    
+  <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">
     <PackageReference Include="Bitub.Dto" Version="1.0.23108-Dev.26271" />
     <PackageReference Include="Xbim.Common" Version="5.1.341" />    
     <PackageReference Include="Xbim.Ifc" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc4" Version="5.1.341" />
     <PackageReference Include="Xbim.IO.MemoryModel" Version="5.1.341" />
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
     <PackageReference Include="Xbim.IO.Esent" Version="5.1.341" />
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.666-develop" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.437" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug'">
+  <ItemGroup Condition="'$(Configuration)' == 'XbimDev'">
     <PackageReference Include="Bitub.Dto" Version="1.0.23108-Dev.26271" />
     <PackageReference Include="Xbim.Common" Version="6.0.414-develop" />    
     <PackageReference Include="Xbim.Ifc" Version="6.0.414-develop" />
@@ -76,10 +48,14 @@
     <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.666-develop" />
   </ItemGroup>
 
-  <ItemGroup Condition="('$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug') And '$(IsWindows)' == 'true'">
+  <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
+  </ItemGroup>
+  
   <Target Name="VersionReport" BeforeTargets="BeforeBuild">
     <Message Text="$(TargetFramework) ==&gt; Building version  : $(BuildVersion)" Importance="High" />
     <Message Text="$(TargetFramework) ==&gt; Building platform : Windows" Importance="High" Condition="'$(IsWindows)' == 'true'" />

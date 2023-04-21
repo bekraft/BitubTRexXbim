@@ -13,14 +13,16 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln' 
-  buildPlatform: 'Any CPU'
+  solution: '**/*.sln'
+  buildPlatform: 'x64'
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     buildConfiguration: 'Test'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
     buildConfiguration: 'Dev'
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'xbim-dev') }}:
+    buildConfiguration: 'XbimDev'
   ${{ else }}:
     buildConfiguration: 'Debug'
 

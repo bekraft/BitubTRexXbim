@@ -4,7 +4,8 @@
     <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Configurations>Debug;Release;Test;Dev</Configurations>    
+    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
+    <Platforms>x64</Platforms>    
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
@@ -13,39 +14,11 @@
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
     <TargetFrameworks>net472;net48;net481;net6.0</TargetFrameworks>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Test|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Test\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Dev|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>portable</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Dev\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugSymbols>false</DebugSymbols>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <WarningLevel>4</WarningLevel>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'XbimDev|x64' ">
+    <IsPackable>true</IsPackable>
+    <BuildQualifier>-Dev</BuildQualifier>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,11 +28,11 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'Dev' And '$(Configuration)' != 'Debug'">
+  <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'Dev' Or '$(Configuration)' == 'Debug'">
+  <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
   </ItemGroup>
 
