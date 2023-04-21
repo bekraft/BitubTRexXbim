@@ -55,6 +55,10 @@
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+  </ItemGroup>
   
   <Target Name="VersionReport" BeforeTargets="BeforeBuild">
     <Message Text="$(TargetFramework) ==&gt; Building version  : $(BuildVersion)" Importance="High" />
