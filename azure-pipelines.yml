@@ -9,6 +9,7 @@ trigger:
     exclude:
       - .gitignore
       - README.md
+      - azure-pipelines.yml
 
 pool:
   vmImage: 'windows-latest'
@@ -62,12 +63,6 @@ steps:
     command: 'test'
     projects: '**/*Tests/*.csproj'
     arguments: '--configuration $(buildConfiguration) --arch $(buildPlatform)'
-
-#- task: VSTest@2
-#  condition: and(succeeded(), eq(variables.skipTests, 'false'))
-#  inputs:
-#    platform: '$(buildPlatform)'
-#    configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
   condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
