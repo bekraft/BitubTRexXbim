@@ -3,6 +3,7 @@ trigger:
    include:
      - dev
      - master
+     - xbim-dev
      - feature/*
   paths:
     exclude:
@@ -54,12 +55,19 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
     msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond)'
-
-- task: VSTest@2
+    
+- task: DotNetCoreCLI@2
   condition: and(succeeded(), eq(variables.skipTests, 'false'))
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: 'test'
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --arch $(buildPlatform)'
+
+#- task: VSTest@2
+#  condition: and(succeeded(), eq(variables.skipTests, 'false'))
+#  inputs:
+#    platform: '$(buildPlatform)'
+#    configuration: '$(buildConfiguration)'
 
 - task: NuGetCommand@2
   condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
