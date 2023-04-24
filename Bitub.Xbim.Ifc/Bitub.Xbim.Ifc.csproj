@@ -4,9 +4,10 @@
     <Description>Xbim IFC toolset adaption</Description>
     <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
-    <LangVersion>8</LangVersion>
+    <LangVersion>8</LangVersion>  
     <IsPackable>true</IsPackable>
     <Platforms>x64</Platforms>
+    <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == '' ">
@@ -16,14 +17,9 @@
   <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
     <TargetFrameworks>net6.0</TargetFrameworks>
   </PropertyGroup>
+  
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
     <TargetFrameworks>net472;net48;net481;net6.0</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'XbimDev|x64' ">
-    <IsPackable>true</IsPackable>
-    <BuildQualifier>-Dev</BuildQualifier>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">
