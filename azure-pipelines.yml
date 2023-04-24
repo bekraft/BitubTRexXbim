@@ -19,16 +19,25 @@ variables:
   buildPlatform: 'x64'
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     buildConfiguration: 'Test'
+    buildQualifier: '-Test'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
+    buildQualifier: ''
   ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
     buildConfiguration: 'Dev'
+    buildQualifier: '-Dev'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'xbim-dev') }}:
     buildConfiguration: 'XbimDev'
+    buildQualifier: '-XbimDev'
   ${{ else }}:
     buildConfiguration: 'Debug'
+    buildQualifier: '-Debug'
 
 steps:
+- checkout: self
+  persistCredentials: true
+  clean: true
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -55,7 +64,7 @@ steps:
     solution: '$(solution)'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
-    msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond)'
+    msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond) -p:BuildQualifier=$(buildQualifier)'
     
 - task: DotNetCoreCLI@2
   condition: and(succeeded(), eq(variables.skipTests, 'false'))
@@ -65,9 +74,17 @@ steps:
     arguments: '--configuration $(buildConfiguration) --arch $(buildPlatform)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
+    
+- script: |
+    git tag $(majorVersion).$(minorVersion).$(buildDate)$(buildQualifier).$(buildSecond)
+    git push origin $(majorVersion).$(minorVersion).$(buildDate)$(buildQualifier).$(buildSecond)
+  workingDirectory: $(Build.SourcesDirectory)
+  displayName: Git Commit and Tag from pipeline
+  continueOnError: true
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
