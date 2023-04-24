@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Extensions.Logging;
-
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,16 +9,21 @@ using Xbim.IO;
 
 using Bitub.Dto;
 
+using Microsoft.Extensions.Logging;
+
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validation;
+
 using Bitub.Dto.Spatial;
+
+using NUnit.Framework;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
-    [TestClass]
+    [TestFixture]
     public class ModelPlacementTransformTests : TestBase<ModelPlacementTransformTests>
     {
-        [TestMethod]
+        [Test]
         public void AxisAlignmentSerializationTest()
         {
             var axis1 = new IfcAxisAlignment()
@@ -36,24 +38,21 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
             Assert.IsNotNull(axis2);
             Assert.IsNotNull(axis2.SourceReferenceAxis);
-            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqual(axis1.SourceReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqual(axis1.SourceReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, precision));
             Assert.IsNotNull(axis2.TargetReferenceAxis);
-            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqual(axis1.TargetReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqual(axis1.TargetReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, precision));
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Rotated-1st-floor.ifc")]
-        [DeploymentItem(@"Resources\IfcAlignmentTestAxis1.xml")]
+        [Test]
         public async Task OffsetShiftAndRotateTest1()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-Rotated-1st-floor.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Rotated-1st-floor.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis1.xml");
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis1.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);
@@ -81,24 +80,19 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                         var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
-
-                        result.Target.SaveAsIfc(new FileStream("Ifc4-Rotated-1st-floor-Transformed.ifc", FileMode.Create));
                     }
                 }
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-SampleHouse.ifc")]
-        [DeploymentItem(@"Resources\IfcAlignmentTestAxis2.xml")]
+        [Test]
         public async Task OffsetShiftAndRotateTest2_Change()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-SampleHouse.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis2.xml");
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis2.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);
@@ -130,24 +124,19 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                         var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
-
-                        result.Target.SaveAsIfc(new FileStream("Ifc4-SampleHouse-Transformed.ifc", FileMode.Create));
                     }
                 }
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-SampleHouse.ifc")]
-        [DeploymentItem(@"Resources\IfcAlignmentTestAxis2.xml")]
+        [Test]
         public async Task OffsetShiftAndRotateTest2_New()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-SampleHouse.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.LoadFromFile(@"Resources\IfcAlignmentTestAxis2.xml");
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis2.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);
@@ -179,8 +168,6 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                         var stampAfter = result.Target.ToSchemeValidator();
                         //Assert.AreEqual(stampBefore, stampAfter);
-
-                        result.Target.SaveAsIfc(new FileStream("Ifc4-SampleHouse-Transformed.ifc", FileMode.Create));
                     }
                 }
             }

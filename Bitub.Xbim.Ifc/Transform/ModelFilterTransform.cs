@@ -1,10 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
 
 using Xbim.Common;
 using Xbim.Common.Metadata;
 
 using Bitub.Dto;
+using Bitub.Xbim.Ifc;
+
+using Xbim.Ifc4.Interfaces;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -47,25 +53,110 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// Combined flag of all relationship flags.
         /// </summary>
-        WithAllIfcRelations = 0x0f,
+        WithAllIfcRelations = 0x0f
     }
 
+    /// <summary>
+    /// Runtime transform package. Keeps the transient knowledge of model filltering transformation. 
+    /// </summary>
     public class ModelFilterTransformPackage : TransformPackage
     {
-        public int[] ExclusiveEntityLabels { get; private set; }
+        public int[] ExclusiveEntityLabels { get; private set; } = new int[] { };
+
+        public int[] InclusiveEntityLabels { get; private set; } = new int[] { };
+
+        public short[] ExclusiveTypeIds { get; private set; } = new short[] { };
+
+        public short[] InclusiveTypeIds { get; private set; } = new short[] { };
+        
+
         public ModelFilterStrategy RelationalStrategy { get; private set; }
 
-        public ModelFilterTransformPackage(IModel source, IModel target, CancelableProgressing progressMonitor,
-            int[] labelFilter, ModelFilterStrategy rules = 0) : base(source, target, progressMonitor)
+        private enum InstanceStateType
         {
-            ExclusiveEntityLabels = labelFilter ?? new int[] { };
+            Unknown, Including, Excluding
+        }
+
+        private IDictionary<XbimInstanceHandle, InstanceStateType> instanceState;
+
+        internal ModelFilterTransformPackage(IModel source, IModel target, CancelableProgressing progressMonitor,
+            ModelFilterStrategy rules = 0) : base(source, target, progressMonitor)
+        {
             Array.Sort(ExclusiveEntityLabels);
-            RelationalStrategy = rules;            
+            RelationalStrategy = rules;
+        }
+
+        internal ModelFilterTransformPackage WithInclusiveEntities(IEnumerable<int> entityLabels)
+        {
+            InclusiveEntityLabels = entityLabels.ToArray();
+            Array.Sort(InclusiveEntityLabels);
+            return this;
+        }
+
+        internal ModelFilterTransformPackage WithExclusiveEntities(IEnumerable<int> entityLabels)
+        {
+            ExclusiveEntityLabels = entityLabels.ToArray();
+            Array.Sort(ExclusiveEntityLabels);
+            return this;
+        }
+
+        internal ModelFilterTransformPackage WithInclusiveExpressTypes(IEnumerable<ExpressType> expressTypes)
+        {
+            InclusiveTypeIds = expressTypes.Select(t => t.TypeId).ToArray();
+            Array.Sort(InclusiveTypeIds);
+            return this;
+        }
+
+        internal ModelFilterTransformPackage WithExclusiveExpressTypes(IEnumerable<ExpressType> expressTypes)
+        {
+            ExclusiveTypeIds = expressTypes.Select(t => t.TypeId).ToArray();
+            Array.Sort(ExclusiveTypeIds);
+            return this;
         }
 
         internal bool IsAccepted(IPersistEntity entity)
         {
-            return 0 > Array.BinarySearch(ExclusiveEntityLabels, entity.EntityLabel);
+            return IsAcceptedByLabel(entity) && IsAcceptedByTypeId(entity);
+        }
+
+        internal bool IsAcceptedByLabel(IPersistEntity entity)
+        {
+            var byLabelExcluded = 0 <= Array.BinarySearch(ExclusiveEntityLabels, entity.EntityLabel);
+            var byLabelIncluded = (InclusiveEntityLabels.Length == 0) || (0 <= Array.BinarySearch(InclusiveEntityLabels, entity.EntityLabel));
+
+            return !byLabelExcluded && byLabelIncluded;
+        }
+
+        internal bool IsAcceptedByTypeId(IPersistEntity entity)
+        {
+            var byTypeIdExcluded = 0 <= Array.BinarySearch(ExclusiveTypeIds, entity.ExpressType.TypeId);
+            var byTypeIdIncluded = (InclusiveTypeIds.Length == 0) || (0 <= Array.BinarySearch(InclusiveTypeIds, entity.ExpressType.TypeId));
+
+            return !byTypeIdExcluded && byTypeIdIncluded;
+        }
+
+        internal bool IsFollowReleation(PropertyInfo propertyInfo)
+        {
+            bool isFollowing = true;
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRepresentation))
+            {
+                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcProductRepresentation>();
+            }
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRelDefinesByType))
+            {
+                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcRelDefinesByType>();
+            }
+            return isFollowing;
+        }
+
+        internal bool IsPassingEntity(IPersistEntity entity)
+        {
+            bool isPassing = true;
+            if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRepresentation))
+            {
+                isPassing &= !typeof(IIfcProductRepresentation).IsAssignableFrom(entity.GetType());
+            }
+            return isPassing;
         }
     }
 
@@ -81,12 +172,22 @@ namespace Bitub.Xbim.Ifc.Transform
 
         public int[] ExclusiveEntityLabels { get; set; } = new int[] { };
 
+        public int[] InclusiveEntityLabels { get; set; } = new int[] { };
+
+        public ExpressType[] ExclusiveExpressTypes { get; set; } = new ExpressType[] { };
+
+        public ExpressType[] InclusiveExpressTypes { get; set; } = new ExpressType[] { };
+
         public ModelFilterStrategy RelationalStrategy { get; set; } = ModelFilterStrategy.PureCopy;
 
         protected override ModelFilterTransformPackage CreateTransformPackage(IModel aSource, IModel aTarget, 
             CancelableProgressing progressMonitor)
         {
-            return new ModelFilterTransformPackage(aSource, aTarget, progressMonitor, ExclusiveEntityLabels, RelationalStrategy);
+            return new ModelFilterTransformPackage(aSource, aTarget, progressMonitor, RelationalStrategy)
+                .WithExclusiveEntities(ExclusiveEntityLabels)
+                .WithInclusiveEntities(InclusiveEntityLabels)
+                .WithExclusiveExpressTypes(ExclusiveExpressTypes)
+                .WithInclusiveExpressTypes(InclusiveExpressTypes);
         }
 
         protected override object PropertyTransform(ExpressMetaProperty property, 

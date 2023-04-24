@@ -7,28 +7,83 @@
     <BuildMinor>0</BuildMinor>
 
     <BuildRelease>$([System.DateTime]::Now.ToString("yy"))$([System.String]::Format("{0:000}",$([System.DateTime]::Now.DayOfYear)))</BuildRelease>
-    <DayOfMonth>$([MSBuild]::Multiply($([MSBuild]::Multiply($([System.DateTime]::Now.Day), 24)), 60))</DayOfMonth>
-    <HourOfDay>$([MSBuild]::Multiply($([System.DateTime]::Now.Hour), 60))</HourOfDay>
-    <Build>$([MSBuild]::Add($([MSBuild]::Add($([System.DateTime]::Now.Minute),$(HourOfDay))), $(DayOfMonth)))</Build>
+    <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
+    <SecondsByHour>$([MSBuild]::Multiply($([System.DateTime]::Now.Hour), 3600))</SecondsByHour>
+    <SecondsByDay>$([MSBuild]::Add($([MSBuild]::Add($([System.DateTime]::Now.Second),$(SecondsByMinute))), $(SecondsByHour)))</SecondsByDay>
+    <Build>$([System.Math]::Floor($([MSBuild]::Divide($(SecondsByDay), 2))))</Build>
+
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+  
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <UserHome>$(UserProfile)</UserHome>   
+    <DefineConstants>$(DefineConstants);Is_WINDOWS</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
+    <UserHome>$(HOME)</UserHome>    
+    <DefineConstants>$(DefineConstants);Is_OSX_or_LINUX</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Platform)' == 'x64'">
+    <DefineConstants>$(DefineConstants);Is_x64</DefineConstants>
   </PropertyGroup>
   
+  <PropertyGroup Condition=" '$(Configuration)' == '' ">
+    <Configuration>Debug</Configuration>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'XbimDev'">
+    <DefineConstants>$(DefineConstants);Is_XbimDev</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <IsPackable>true</IsPackable>
+    <BuildQualifier></BuildQualifier>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <IsPackable>false</IsPackable>
     <BuildQualifier>-Debug</BuildQualifier>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Beta' ">
-    <BuildQualifier>-Beta</BuildQualifier>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Dev' ">
+    <IsPackable>true</IsPackable>
+    <BuildQualifier>-Dev</BuildQualifier>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'XbimDev' ">
+    <IsPackable>true</IsPackable>
+    <BuildQualifier>-XbimDev</BuildQualifier>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <IncludeSymbols>true</IncludeSymbols>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)' == 'Test' ">
+    <IsPackable>false</IsPackable>
+    <BuildQualifier>-Test</BuildQualifier>
+    <IncludeSymbols>false</IncludeSymbols>
+  </PropertyGroup>
+
   <PropertyGroup>
-    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)")];</AssemblyFileVersionAttribute>
-    <AssemblyVersion>$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)</AssemblyVersion>
-    <FileVersion>$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)</FileVersion>
-    <Version>$(BuildMajor).$(BuildMinor).$(BuildRelease)$(BuildQualifier).$(Build)</Version>
+    <ReleaseVersion>$(BuildMajor).$(BuildMinor).$(BuildRelease).$(Build)</ReleaseVersion>
+    <BuildVersion>$(BuildMajor).$(BuildMinor).$(BuildRelease)$(BuildQualifier).$(Build)</BuildVersion>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <AssemblyFileVersionAttribute>[assembly:System.Reflection.AssemblyVersionAttribute("$(ReleaseVersion)")];</AssemblyFileVersionAttribute>
+    <AssemblyVersion>$(ReleaseVersion)</AssemblyVersion>
+    <FileVersion>$(ReleaseVersion)</FileVersion>
+    <Version>$(BuildVersion)</Version>
 
     <Authors>Bernold Kraft</Authors>
     <Company>Bitub</Company>
@@ -36,4 +91,11 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://www.github.com/bekraft/BitubTRexXbim</PackageProjectUrl>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+
 </Project>

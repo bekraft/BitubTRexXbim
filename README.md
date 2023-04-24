@@ -1,11 +1,15 @@
 # Bitub TRex Xbim
 
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=master&label=MASTER)
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev&label=DEV)
+![Nuget](https://img.shields.io/nuget/v/Bitub.Xbim.Ifc.svg)
+
 ## Goal
 
 BitubTRexXbim uses the [Xbim libraries](https://github.com/xBimTeam) and adds some domain driven functionalities to BitubTRex.
 
 Provided assemblies:
-- ```Bitub.Ifc``` (net47) wraps all extensions, workflows and additions concerning Xbim IFC model handling 
+- ```Bitub.Ifc``` wraps all extensions, workflows and additions concerning Xbim IFC model handling 
 
 ## Use cases
 

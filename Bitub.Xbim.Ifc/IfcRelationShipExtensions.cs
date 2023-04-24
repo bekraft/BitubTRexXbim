@@ -162,19 +162,25 @@ namespace Bitub.Xbim.Ifc
         /// <returns>The modified target instance</returns>
         public static T2 CreateSameRelationshipsLike<T1, T2>(this T2 target, T1 template) where T1 : IPersistEntity where T2 : T1
         {
-            // Scan trough hosted indirect relations of template type T
-            foreach (var relationProperty in typeof(T1)
+            var templateType = template.GetType();
+            var targetType = target.GetType();
+
+            // Scan through hosted indirect relations of template type T
+            foreach (var relationProperty in templateType
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
-                .Where(property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod.ReturnType.GenericTypeArguments[0])))
+                .Where(
+                    property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
+                .Where(
+                    property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod.ReturnType.GenericTypeArguments[0])))
             {   
                 // Scan through relation objects of type IEnumerable<? extends IIfcRelationship>
                 foreach (var relation in (relationProperty.GetValue(template) as IEnumerable))
                 {
+                    var t1 = relation.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(p => p.PropertyType).ToArray();
                     foreach (var invRelationProperty in relation.GetType()
                         .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(property => typeof(IItemSet).IsAssignableFrom(property.ReflectedType) && property.ReflectedType.IsGenericType)
-                        .Where(property => typeof(T1).IsAssignableFrom(property.ReflectedType.GetGenericArguments()[0])))
+                        .Where(property => typeof(IItemSet).IsAssignableFrom(property.PropertyType) && property.PropertyType.IsGenericType)
+                        .Where(property => property.PropertyType.GetGenericArguments()[0].IsAssignableFrom(targetType)))
                     {
                         var itemSet = invRelationProperty.GetValue(relation);
                         itemSet.GetType().GetMethod("Add").Invoke(itemSet, new object[] { target });
@@ -184,6 +190,14 @@ namespace Bitub.Xbim.Ifc
             return target;
         }
 
+        /// <summary>
+        /// Finds a relation typed by lower constraint <c>TParam</c> which implements <see cref="IItemSet"/>.
+        /// </summary>
+        /// <typeparam name="T">The type of lower base property type.</typeparam>
+        /// <typeparam name="TParam">The relation type</typeparam>
+        /// <param name="t">The host type</param>
+        /// <param name="relationName">The relation name</param>
+        /// <returns>Reflected property info.</returns>
         public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<T,TParam>(this Type t, string propertyName)
         {
             return t.GetInterfaces()
@@ -205,15 +219,18 @@ namespace Bitub.Xbim.Ifc
         }
 
         /// <summary>
-        /// Determines whether the given property is a super generic type of given <c>TParam</c>
+        /// Determines whether the given property is a sub (generic) type of given <c>TParam</c>.
+        /// If the property redirects to a simple relation <c>TParam</c> denotes the expected base type.
+        /// If the property redirects to a n-ary relation <c>TParam</c> denotes the expected generic parameter base type.
         /// </summary>
         /// <typeparam name="TParam">The generic argument of relation</typeparam>
         /// <param name="propertyInfo">The property</param>
         /// <returns>True, if relation is a super generic type of given type</returns>
         public static bool IsLowerConstraintRelationType<TParam>(this PropertyInfo propertyInfo)
         {
-            return typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType)
-                && propertyInfo.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam)));
+            return typeof(TParam).IsAssignableFrom(propertyInfo.PropertyType) 
+                || (typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType)
+                    && propertyInfo.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam))));
         }
 
         /// <summary>

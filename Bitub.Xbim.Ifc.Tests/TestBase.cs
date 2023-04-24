@@ -1,17 +1,23 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
+using System.Reflection;
 
-using Xbim.Ifc;
-using Xbim.Ifc4.Interfaces;
-
-using Xbim.Common.Geometry;
-
-using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Transform;
 
 using Bitub.Dto;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Extensions.Logging;
+
+using NUnit.Framework;
+
+using Xbim.IO;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
+using Xbim.Common;
+using Xbim.Common.Step21;
+using Xbim.Common.Enumerations;
+using Xbim.Common.Geometry;
+
 
 namespace Bitub.Xbim.Ifc.Tests
 {
@@ -19,10 +25,7 @@ namespace Bitub.Xbim.Ifc.Tests
     {
         protected readonly double precision = 1e-5;
 
-        protected static ILoggerFactory LoggerFactory 
-        { 
-            get; 
-        } = Microsoft.Extensions.Logging.LoggerFactory.Create(b => b.AddConsole());
+        protected static ILoggerFactory LoggerFactory { get; } = Microsoft.Extensions.Logging.LoggerFactory.Create(b => b.AddConsole());
 
         protected ILogger logger;
 
@@ -42,10 +45,11 @@ namespace Bitub.Xbim.Ifc.Tests
             EditorsOrganisationName = "Selfemployed"
         };
 
-        protected CancelableProgressing NewProgressMonitor(bool cancelable)
+        protected CancelableProgressing NewProgressMonitor(bool cancelable = false)
         {
             var monitor = new CancelableProgressing(cancelable);
             monitor.OnProgressChange += (sender, e) => logger.LogDebug($"State {e.State}: Percentage = {e.Percentage}; State object = {e.StateObject}");
+            monitor.OnProgressEnd += (sender, e) => logger.LogInformation($"Progress has ended: {e.State}");
             return monitor;
         }
 
@@ -80,5 +84,53 @@ namespace Bitub.Xbim.Ifc.Tests
                 Assert.Fail($"Wrong type RelativePlacement type '{localPlacement.RelativePlacement?.ExpressType.ExpressName}'");
             }
         }
+
+        protected IModel ReadIfc2x3Model(string resourceName)
+        {
+            return IfcStore.Open(
+                ReadEmbeddedFileStream(resourceName), StorageType.Ifc, XbimSchemaVersion.Ifc2X3, XbimModelType.MemoryModel);
+        }
+
+        protected IModel ReadIfc4Model(string resourceName)
+        {
+            return IfcStore.Open(
+                ReadEmbeddedFileStream(resourceName), StorageType.Ifc, XbimSchemaVersion.Ifc4, XbimModelType.MemoryModel);
+        }
+
+        protected Stream ReadEmbeddedFileStream(string resourceName)
+        {
+            var name = Assembly.GetExecutingAssembly().GetName().Name;
+            return Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.Resources.{resourceName}");
+        }
+
+        protected string ReadUtf8TextFrom(string resourceName)
+        {
+            using (var fs = ReadEmbeddedFileStream(resourceName))
+            {
+                return ReadUtf8TextFrom(fs);
+            }
+        }
+
+        protected string ReadUtf8TextFrom(Stream binStream)
+        {
+            using (var sr = new StreamReader(binStream, System.Text.Encoding.UTF8))
+            {
+                return sr.ReadToEnd();
+            }    
+        }
+
+        protected string ResolveFilename(string localPath)
+        {
+            return Path.Combine(ExecutingFullpath, localPath);
+        }
+
+        protected string ExecutingFullpath
+        {
+            get {
+                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                return Path.GetDirectoryName(assemblyLocation);
+            }
+        }
+
     }
 }

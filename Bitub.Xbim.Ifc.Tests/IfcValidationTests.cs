@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System.Linq;
+﻿using System.Linq;
 
 using Xbim.Ifc;
 using Xbim.Common;
@@ -8,17 +6,17 @@ using Xbim.Common.Enumerations;
 
 using Bitub.Xbim.Ifc.Validation;
 
+using NUnit.Framework;
+
 namespace Bitub.Xbim.Ifc.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class IfcValidationTests : TestBase<IfcValidationTests>
     {
-        [DeploymentItem(@"Resources\Ifc2x3-Slab-BooleanResult.ifc")]
-        [TestMethod]
+        [Test]
         public void IsSchemataCompliant()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc2x3-Slab-BooleanResult.ifc"))
+            using (var source = ReadIfc2x3Model("Ifc2x3-Slab-BooleanResult.ifc"))
             {
                 var validationStamp = source.ToSchemeValidator(
                     ValidationFlags.Properties | ValidationFlags.Inverses);
@@ -38,12 +36,10 @@ namespace Bitub.Xbim.Ifc.Tests
             }
         }
 
-        [DeploymentItem(@"Resources\Ifc2x3-Slab-BooleanResult.ifc")]
-        [TestMethod]
+        [Test]
         public void IsSchemetaConstraintCompliant()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc2x3-Slab-BooleanResult.ifc"))
+            using (var source = ReadIfc2x3Model("Ifc2x3-Slab-BooleanResult.ifc"))
             {
                 var validationStamp = source.ToSchemeValidator(
                     ValidationFlags.TypeWhereClauses | ValidationFlags.EntityWhereClauses);
@@ -55,7 +51,7 @@ namespace Bitub.Xbim.Ifc.Tests
                 Assert.IsFalse(validationStamp.IsConstraintToSchema);
                 Assert.IsTrue(validationStamp.IsCompliantToSchema);
 
-                var results = lookUp[new XbimInstanceHandle(source.Model.Instances[25])];
+                var results = lookUp[new XbimInstanceHandle(source.Instances[25])];
                 Assert.AreEqual(1, results.Count());
 
                 Assert.IsFalse(validationStamp.Results.Diff(validationStamp.Results).Any());

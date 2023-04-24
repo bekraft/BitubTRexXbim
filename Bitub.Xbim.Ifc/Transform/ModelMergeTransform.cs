@@ -7,11 +7,12 @@ using Xbim.Common.Geometry;
 
 using Xbim.Ifc4.Interfaces;
 
-using Xbim.ModelGeometry.Scene;
-
-using Xbim.Geometry.Engine.Interop;
 using Microsoft.Extensions.Logging;
 using Bitub.Dto;
+using System.Runtime.InteropServices;
+
+using Xbim.ModelGeometry.Scene;
+using Xbim.Geometry.Engine.Interop;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -23,7 +24,16 @@ namespace Bitub.Xbim.Ifc.Transform
 
         internal XbimGeometryEngine Engine
         {
-            get { return engine ?? (engine = new XbimGeometryEngine()); }
+            get 
+            { 
+                if (null == engine)
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        throw new NotSupportedException($"${nameof(ModelMergeTransformPackage)}) requires WinOS platform.");
+                    else
+                        engine = new XbimGeometryEngine();
+
+                return engine; 
+            }
         }
 
         internal XbimMatrix3D PlacementOf(IIfcProduct p)
