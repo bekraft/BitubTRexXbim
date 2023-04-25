@@ -8,7 +8,6 @@ using Xbim.Ifc;
 using Xbim.Ifc2x3.UtilityResource;
 using Xbim.Ifc2x3.DateTimeResource;
 using Xbim.Ifc2x3.ActorResource;
-using Xbim.Ifc2x3.Interfaces;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.Kernel;
@@ -149,7 +148,7 @@ namespace Bitub.Xbim.Ifc
             return newEntry;
         }
 
-        public static T NewIfc2x3Product<T>(this IModel s, IfcObjectDefinition container = null, string name = null) where T : IInstantiableEntity, IIfcProduct
+        public static T NewIfc2x3Product<T>(this IModel s, IfcObjectDefinition container = null, string name = null) where T : IfcProduct, IInstantiableEntity
         {
             var product = s.Instances.New<T>(p => p.Name = name);
 
@@ -313,8 +312,6 @@ namespace Bitub.Xbim.Ifc
             if (null == axisPlacement)
             {
                 axisPlacement = s.Instances.New<IfcAxis2Placement3D>();
-                if (null != placement.RelativePlacement)
-                    s.Logger.LogWarning($"Leaving orphan instance {placement.RelativePlacement}");
             }
 
             if (!newAxisInstances && axisPlacement.Axis is IfcDirection d1)

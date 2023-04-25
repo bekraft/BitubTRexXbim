@@ -145,15 +145,15 @@ namespace Bitub.Xbim.Ifc.Export
                                 Id = new RefId { Nid = geometry.ShapeLabel },
                             };
 
-                            if (ec.Current.BodyExportType.HasFlag(SceneBodyExportType.FaceBody))
+                            if (ec.Settings.BodyExportType.HasFlag(SceneBodyExportType.FaceBody))
                             {
                                 shapeBody.Bodies.Add(new Body { FaceBody = CreateFaceBody(ec, tr, new RefId { Nid = shapeBody.Points.Count }) });
                             }
-                            if (ec.Current.BodyExportType.HasFlag(SceneBodyExportType.MeshBody))
+                            if (ec.Settings.BodyExportType.HasFlag(SceneBodyExportType.MeshBody))
                             {
                                 shapeBody.Bodies.Add(new Body { MeshBody = CreateMeshBody(ec, tr, new RefId { Nid = shapeBody.Points.Count }) });
                             }
-                            if (ec.Current.BodyExportType.HasFlag(SceneBodyExportType.WireBody))
+                            if (ec.Settings.BodyExportType.HasFlag(SceneBodyExportType.WireBody))
                             {
                                 // TODO Support wires, find curves by mesh investigation, see tesselation validation support
                                 throw new NotImplementedException("Wire body currently not supported/implemented.");
@@ -176,8 +176,7 @@ namespace Bitub.Xbim.Ifc.Export
                                 var product = model.Instances[shape.IfcProductLabel] as IIfcProduct;
 
                                 // Try first to find the referenced component
-                                XbimCompositeShape cShape;
-                                if (!componentCache.TryGetValue(shape.IfcProductLabel, out cShape))
+                                if (!componentCache.TryGetValue(shape.IfcProductLabel, out XbimCompositeShape cShape))
                                 {
                                     // New component ToDo shape tuple built from component and todo ShapeGeometryLabel
                                     cShape = new XbimCompositeShape(gReader.ShapeInstancesOfEntity(product)
@@ -227,7 +226,7 @@ namespace Bitub.Xbim.Ifc.Export
         #region Mesh creation
 
         // Append vertices and return shift
-        private PtArray CreatePtArray(ExportContext<ExportPreferences> ec, IEnumerable<XbimPoint3D> points)
+        private static PtArray CreatePtArray(ExportContext<ExportPreferences> ec, IEnumerable<XbimPoint3D> points)
         {
             PtArray ptArray = new PtArray();
             foreach (var p in points)
@@ -297,14 +296,14 @@ namespace Bitub.Xbim.Ifc.Export
             return meshBody;
         }
 
-        private Dto.Scene.Transform CreateTransform(SceneTransformationStrategy transformationStrategy, XbimVector3D scale, XbimMatrix3D matrix3D)
+        private static Dto.Scene.Transform CreateTransform(SceneTransformationStrategy transformationStrategy, XbimVector3D scale, XbimMatrix3D matrix3D)
         {
             switch (transformationStrategy)
             {
                 case SceneTransformationStrategy.Matrix:
-                    return matrix3D.ToRotation(scale);                    
+                    return matrix3D.ToTransformM(scale);                    
                 case SceneTransformationStrategy.Quaternion:
-                    return matrix3D.ToQuaternion(scale);                    
+                    return matrix3D.ToTransformQ(scale);                    
                 default:
                     throw new NotImplementedException($"Missing implementation for '{transformationStrategy}'");
             }
@@ -313,9 +312,8 @@ namespace Bitub.Xbim.Ifc.Export
         private Shape CreateShape(ExportContext<ExportPreferences> ec, XbimShapeInstance shapeInstance)
         {
             // Context transformation (relative offset shift => make final transform relative to context shift)
-            SceneContextTransform ctxTransform;
             XbimMatrix3D shapeTransform = shapeInstance.Transformation;
-            if (ec.contextCache.TryGetValue(shapeInstance.RepresentationContext, out ctxTransform))
+            if (ec.contextCache.TryGetValue(shapeInstance.RepresentationContext, out SceneContextTransform ctxTransform))
             {
                 shapeTransform *= ctxTransform.transform * ec.CRS;
             }
@@ -330,7 +328,7 @@ namespace Bitub.Xbim.Ifc.Export
                 // Encode typeId has material ID with negative magnitude if style label isn't defined
                 Material = new RefId { Nid = shapeInstance.StyleLabel > 0 ? shapeInstance.StyleLabel : shapeInstance.IfcTypeId * -1 },
                 Context = ctxTransform.sceneContext.Name,
-                Transform = CreateTransform(ec.Current.Transforming, ec.Scale, shapeTransform),
+                Transform = CreateTransform(ec.Settings.Transforming, ec.Scale, shapeTransform),
                 ShapeBody = new RefId { Nid = shapeInstance.ShapeGeometryLabel },
                 BoundingBox = new BoundingBox 
                 { 

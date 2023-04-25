@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
+﻿using System;
 using System.Linq;
 
 using Xbim.Common;
@@ -9,16 +7,17 @@ using Xbim.Common.Geometry;
 
 using Xbim.Ifc;
 
+using NUnit.Framework;
+
 namespace Bitub.Xbim.Ifc.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class XbimRegressionTests : TestBase<XbimRegressionTests>
     {
-        [DeploymentItem(@"Resources\Ifc4-Storey-With-4Walls.ifc")]
-        [TestMethod]
+        [Test]
         public void Compliance_CloneIfcStore()
         {
-            using (var store = IfcStore.Open(@"Resources\Ifc4-Storey-With-4Walls.ifc"))
+            using (var store = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
             {
                 var testStore = IfcStore.Create(store.SchemaVersion, XbimStoreType.InMemoryModel);
                 var map = new XbimInstanceHandleMap(store, testStore);
@@ -35,7 +34,7 @@ namespace Bitub.Xbim.Ifc.Tests
             }
         }
 
-        [TestMethod]
+        [Test]
         public void Compliance_QuaternionAndMatrixOrientation()
         {
             var t = new XbimMatrix3D(new XbimVector3D(1, 1, 0));
@@ -52,7 +51,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.AreEqual(0, q.Y, 1e-8);
         }
 
-        [TestMethod]
+        [Test]
         public void Compliance_QuaternionVersusMatrixMoving()
         {
             XbimVector3D t = new XbimVector3D(2, 0, 0);

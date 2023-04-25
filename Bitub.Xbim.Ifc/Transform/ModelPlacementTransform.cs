@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using Xbim.Common;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
-using Xbim.ModelGeometry.Scene;
 
 using Bitub.Dto;
 using Microsoft.Extensions.Logging;
 
+using Xbim.ModelGeometry.Scene;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -45,7 +46,7 @@ namespace Bitub.Xbim.Ifc.Transform
         public IfcAxisAlignment AppliedAxisAlignment { get; private set; }
         public int[] SourceRootPlacementsLabels { get; private set; }
 
-        private IIfcLocalPlacement _newRootPlacement;
+        private IIfcLocalPlacement newRootPlacement;
 
 
         public ModelPlacementTransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor,
@@ -59,6 +60,9 @@ namespace Bitub.Xbim.Ifc.Transform
 
         internal void Prepare(CancelableProgressing cancelableProgress)
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new NotSupportedException($"${nameof(ModelPlacementTransformPackage)}) requires WinOS platform.");
+
             PlacementTree = new XbimPlacementTree(Source, false);
             SourceRootPlacementsLabels = Source.Instances
                 .OfType<IIfcLocalPlacement>()
@@ -112,13 +116,13 @@ namespace Bitub.Xbim.Ifc.Transform
             switch(AppliedPlacementStrategy)
             {
                 case ModelPlacementStrategy.NewRootPlacement:
-                    if (null == _newRootPlacement)
+                    if (null == newRootPlacement)
                     {
-                        _newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
-                        LogAction(new XbimInstanceHandle(_newRootPlacement), TransformActionResult.Added);
+                        newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
+                        LogAction(new XbimInstanceHandle(newRootPlacement), TransformActionResult.Added);
                     }
                     LogAction(new XbimInstanceHandle(sourcePlacement), TransformActionResult.Modified);
-                    targetPlacement.PlacementRelTo = _newRootPlacement;
+                    targetPlacement.PlacementRelTo = newRootPlacement;
                     break;
 
                 case ModelPlacementStrategy.ChangeRootPlacements:
@@ -161,7 +165,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// </summary>
         public override ILogger Log { get; protected set; }
 
-        public override string Name { get => "Product Placement Transform"; }
+        public override string Name { get => "Model Placement"; }
 
         /// <summary>
         /// Default strategy is <see cref="ModelPlacementStrategy.AdjustRootPlacements"/>.

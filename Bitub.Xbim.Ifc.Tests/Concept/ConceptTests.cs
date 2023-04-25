@@ -1,27 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Xbim.Common.Step21;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
 using Bitub.Dto.Concept;
-using Bitub.Xbim.Ifc.Tests;
+using Bitub.Xbim.Ifc.Concept;
 
-namespace Bitub.Xbim.Ifc.Concept.Tests
+using NUnit.Framework;
+
+namespace Bitub.Xbim.Ifc.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class ConceptTests : TestBase<ConceptTests>
     {
         protected CanonicalFilter existsWallFilter;
         protected CanonicalFilter subOrEquivWallFilter;
 
-        [TestInitialize]
+        [SetUp]
         public void Setup()
         {
             var wallClassifier1 = new[] { "Ifc4", "IfcWall" }.ToQualifier().ToClassifier();
@@ -32,7 +29,7 @@ namespace Bitub.Xbim.Ifc.Concept.Tests
             subOrEquivWallFilter.Filter.Add(wallClassifier1);
         }
 
-        [TestMethod]
+        [Test]
         public void IsIfcWallPassingFilter()
         {
             Assert.AreEqual(3, IfcAssemblyScope.SchemaAssemblyScope.Count);

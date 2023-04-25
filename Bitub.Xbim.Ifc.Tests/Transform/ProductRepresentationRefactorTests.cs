@@ -7,14 +7,14 @@ using Xbim.Ifc;
 using Xbim.IO;
 using Xbim.Ifc4.Interfaces;
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validation;
 
+using NUnit.Framework;
+
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
-    [TestClass]
+    [TestFixture]
     public class ProductRepresentationRefactorTests : TestBase<ProductRepresentationRefactorTests>
     {
         private TransformActionResult[] defaultLogResultTypes = new[]
@@ -48,12 +48,10 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         }
 
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc")]
+        [Test]
         public async Task RefactorBody()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-MultipleBodiesPerProduct.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -77,16 +75,14 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-1.ifc", FileMode.Create));
+                //result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-1.ifc", FileMode.Create));
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\mapped-shape-with-transformation.ifc")]
+        [Test]
         public async Task RefactorMappedBodyWithIfcAssembly()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\mapped-shape-with-transformation.ifc"))
+            using (var source = ReadIfc4Model("mapped-shape-with-transformation.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -112,16 +108,14 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-1.ifc", FileMode.Create));
+                //result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-1.ifc", FileMode.Create));
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\mapped-shape-with-transformation.ifc")]
+        [Test]
         public async Task RefactorKeepMappedBody()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\mapped-shape-with-transformation.ifc"))
+            using (var source = ReadIfc4Model("mapped-shape-with-transformation.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -145,16 +139,14 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-2.ifc", FileMode.Create));
+                //result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-2.ifc", FileMode.Create));
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc")]
+        [Test]
         public async Task RefactorBodyWithIfcAssembly()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-MultipleBodiesPerProduct.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-MultipleBodiesPerProduct.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -180,7 +172,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 var stampAfter = result.Target.ToSchemeValidator();
                 Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-2.ifc", FileMode.Create));
+                //result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-2.ifc", FileMode.Create));
             }
         }
     }

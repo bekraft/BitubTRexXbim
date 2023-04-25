@@ -8,6 +8,7 @@ using Xbim.Common;
 using Microsoft.Extensions.Logging;
 
 using Bitub.Dto;
+using Bitub.Dto.Concept;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -29,13 +30,12 @@ namespace Bitub.Xbim.Ifc.Transform
     public sealed class PropertyRemovalTransformPackage : TransformPackage
     {
         public PropertyRemovalStrategy RemovalStrategy { get; private set; }
-        public Qualifier[] RemovePropertyByQualifier { get; private set; }
+        public CanonicalFilterRule PropertyFilter { get; private set; }
 
         internal PropertyRemovalTransformPackage(IModel aSource, IModel aTarget, 
-            CancelableProgressing progressMonitor, Qualifier[] propertyQualifiers) 
+            CanonicalFilterRule filterRule, CancelableProgressing progressMonitor) 
             : base(aSource, aTarget, progressMonitor)
-        {
-            RemovePropertyByQualifier = propertyQualifiers.ToArray();
+        {            
         }
     }
 

@@ -1,18 +1,17 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using System.Linq;
+﻿using System.Linq;
 
 using Xbim.Common.Step21;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 
+using NUnit.Framework;
 
 namespace Bitub.Xbim.Ifc.Tests
 {
-    [TestClass]
+    [TestFixture]
     public class IfcModelBuildingTests : TestBase<IfcModelBuildingTests>
     {
-        [TestMethod]
+        [Test]
         public void BuildingIFC2x3()
         {
             var builder = IfcBuilder.WithNewProject("Test", EditorCredentials, XbimSchemaVersion.Ifc2X3, LoggerFactory);
@@ -29,7 +28,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.AreEqual(3, builder.model.Instances.OfType<IIfcRelAggregates>().Count());
         }
 
-        [TestMethod]
+        [Test]
         public void BuildingIFC4()
         {
             var builder = IfcBuilder.WithNewProject("Test", EditorCredentials, XbimSchemaVersion.Ifc4, LoggerFactory);
@@ -46,7 +45,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Assert.AreEqual(3, builder.model.Instances.OfType<IIfcRelAggregates>().Count());
         }
 
-        [TestMethod]
+        [Test]
         public void BuildingIFC4_Relations()
         {
             var builder = IfcBuilder.WithNewProject("Test", EditorCredentials, XbimSchemaVersion.Ifc2X3, LoggerFactory);

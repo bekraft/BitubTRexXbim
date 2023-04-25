@@ -106,8 +106,16 @@ namespace Bitub.Xbim.Ifc.Transform
         {
             using(var reader = new FileStream(fileName, FileMode.Open))
             {
-                return serializer.Deserialize(reader) as IfcAxisAlignment;                
+                return serializer.Deserialize(reader) as IfcAxisAlignment;
             }            
+        }
+
+        ///<summary>
+        /// Reads an axis alignment from stream.
+        ///</summary>
+        public static IfcAxisAlignment Load(Stream inStream)
+        {
+            return serializer.Deserialize(inStream) as IfcAxisAlignment;
         }
 
         /// <summary>

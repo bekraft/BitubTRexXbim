@@ -1,34 +1,30 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
 using Bitub.Dto.Spatial;
 
-using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validation;
 
 using Xbim.IO;
 
+using NUnit.Framework;
+
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
-    [TestClass]
-    public class ModelPropertySetRemovalTransformTests : TestBase<ModelPropertySetRemovalTransformTests>
+    [TestFixture]
+    public class PropertySetRemovalTransformTests : TestBase<PropertySetRemovalTransformTests>
     {
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Storey-With-4Walls.ifc")]
+        [Test]
         public async Task RemoveByName()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-Storey-With-4Walls.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -38,7 +34,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     .Where(s => s.Name == "AllplanAttributes")
                     .Count());
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "AllplanAttributes" },
                     IsNameMatchingCaseSensitive = false,
@@ -47,10 +43,8 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     EditorCredentials = EditorCredentials
                 };
 
-                var cp = new CancelableProgressing(true);
-                cp.OnProgressChange += (sender, e) => logger.LogDebug($"State {e.State}: Percentage = {e.Percentage}; State object = {e.StateObject}");
-
-                using (var result = await request.Run(source, cp))
+                CancelableProgressing cp;
+                using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
                         logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
@@ -73,23 +67,19 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
                     Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-
-                    result.Target.SaveAsIfc(new FileStream("Ifc4-Storey-With-4Walls-AllplanAttributes-Copy-1.ifc", FileMode.Create));
                 }
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-Storey-With-4Walls.ifc")]
+        [Test]
         public async Task KeepAndRemoveByNameBoth()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-Storey-With-4Walls.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "AllplanAttributes" },
                     IncludePropertySetByName = new string[] { "AllplanAttributes", "AllplanAttributes Copy" },
@@ -100,10 +90,8 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     EditorCredentials = EditorCredentials
                 };
 
-                var cp = new CancelableProgressing(true);
-                cp.OnProgressChange += (sender, e) => logger.LogDebug($"State {e.State}: Percentage = {e.Percentage}; State object = {e.StateObject}");
-
-                using (var result = await request.Run(source, cp))
+                CancelableProgressing cp;
+                using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
                         logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
@@ -127,23 +115,19 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                     Assert.IsTrue(stampAfter.IsCompliantToSchema);
                     Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-
-                    result.Target.SaveAsIfc(new FileStream("Ifc4-Storey-With-4Walls-AllplanAttributes-Copy-2.ifc", FileMode.Create));
                 }
             }
         }
 
-        [TestMethod]
-        [DeploymentItem(@"Resources\Ifc4-SampleHouse.ifc")]
+        [Test]
         public async Task KeepOrRemoveByName()
         {
-            IfcStore.ModelProviderFactory.UseMemoryModelProvider();
-            using (var source = IfcStore.Open(@"Resources\Ifc4-SampleHouse.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-                var request = new ModelPropertySetRemovalTransform(LoggerFactory)
+                var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
                     ExludePropertySetByName = new string[] { "Other" },
                     IncludePropertySetByName = new string[] { "Pset_SpaceCommon", "Other" },
@@ -154,10 +138,8 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                     EditorCredentials = EditorCredentials
                 };
 
-                var cp = new CancelableProgressing(true);
-                cp.OnProgressChange += (sender, e) => logger.LogDebug($"State {e.State}: Percentage = {e.Percentage}; State object = {e.StateObject}");
-
-                using (var result = await request.Run(source, cp))
+                CancelableProgressing cp;
+                using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
                         logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
@@ -176,8 +158,6 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                     Assert.IsTrue(stampAfter.IsCompliantToSchema);
                     Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-
-                    result.Target.SaveAsIfc(new FileStream("Ifc4-SampleHouse-Pset_SpaceCommon-Other.ifc", FileMode.Create));
                 }
             }
         }

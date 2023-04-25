@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.PropertyResource;
 using Bitub.Xbim.Ifc.Transform;
-using Microsoft.Extensions.Logging;
 using Bitub.Xbim.Ifc.Export;
 
 namespace Bitub.Xbim.Ifc
@@ -292,9 +291,7 @@ namespace Bitub.Xbim.Ifc
             var refAxis = placement.RelativePlacement as IfcAxis2Placement3D;
             if (null == refAxis)
             {
-                refAxis = s.Instances.New<IfcAxis2Placement3D>();
-                if (null != placement.RelativePlacement)
-                    s.Logger.LogWarning($"Leaving potentially orphan instance '{placement.RelativePlacement}'");
+                refAxis = s.Instances.New<IfcAxis2Placement3D>(); 
             }
 
             if (!newAxisInstances && refAxis.Axis is IfcDirection d1)

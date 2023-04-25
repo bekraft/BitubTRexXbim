@@ -122,9 +122,9 @@ namespace Bitub.Xbim.Ifc.Transform
         }
 
         protected IEnumerable<E> EmptyToNull<E>(IEnumerable<E> elements)
-        {
+        {            
             if (elements.Any())
-                return elements.ToArray();
+                return new ExpressEnumerableDelegate<E>(elements);
             else
                 return null;
         }
@@ -187,7 +187,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 model = s.Model;
             if (model is global::Xbim.IO.Memory.MemoryModel)
                 return XbimStoreType.InMemoryModel;
-            else if (model is global::Xbim.IO.Esent.EsentModel)
+            else if (model is global::Xbim.IO.Esent.EsentModel)            
                 return XbimStoreType.EsentDatabase;
             else
                 throw new NotSupportedException($"Unsupported / unknown type {model.GetType()}");
