@@ -12,14 +12,14 @@ BitubTRexXbim uses the [Xbim libraries](https://github.com/xBimTeam) and adds so
 - IFC model-2-model property clean-up and transformation (i.e. removing property sets or single properties, mapping properties)
 - IFC model export and further evaluation in model usage pipes (JSON export and via [Dynamo TRex](https://github.com/bekraft/BitubTRexDynamo) and [Assimp](https://github.com/assimp/assimp) to a number of visualization formats.
 
-See the [Wiki](https://github.com/bekraft/BitubTRex/wiki) for the use cases.
+See the [Wiki](https://github.com/bekraft/BitubTRexXbim/wiki) for the use cases.
 
 Provided assemblies:
 - ```Bitub.Xbim.Ifc``` wraps all extensions, workflows and additions concerning Xbim IFC model handling 
 
 ## Building
 
-Build library
+Building library
 ```
 dotnet build -c (Release|Dev|XbimDev)
 ```
@@ -35,6 +35,8 @@ Deployment configurations and dependencies
 | Release | Xbim master nugets | net472, net48, net481, net6.0 |
 | Dev | Xbim master nugets |  net472, net48, net481, net6.0 |
 | XbimDev | Xbim develop nugets | net472, net48, net481, net6.0 |
+
+Its part of the Dynamo plugin  [BitubTRexDynamo](https://github.com/bekraft/BitubTRexDynamo).
 
 ## Licenses
 
