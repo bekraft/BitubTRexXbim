@@ -48,7 +48,7 @@ namespace Bitub.Xbim.Ifc
             return newVersion;
         }
 
-        protected IfcSIUnit ChangeOrNewLengthUnit(IfcSIUnitName name, IfcSIPrefix? prefix = null)
+        private IfcSIUnit ChangeOrNewLengthUnit(IfcSIUnitName name, IfcSIPrefix? prefix = null)
         {
             var project = model.Instances.OfType<IfcProject>().First();
             var assigment = project.UnitsInContext;

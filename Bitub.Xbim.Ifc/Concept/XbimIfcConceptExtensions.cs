@@ -19,16 +19,25 @@ namespace Bitub.Xbim.Ifc.Concept
     public static class XbimIfcConceptExtensions
     {
 
+        /// <summary>
+        /// Predefined role qualifier "hasIfcType".
+        /// </summary>
         public static Qualifier FeatureHasIfcType 
         { 
             get => "hasIfcType".ToQualifier(); 
         }
 
+        /// <summary>
+        /// Predefined feature "name".
+        /// </summary>
         public static Qualifier FeatureName
         {
             get => "name".ToQualifier();
         }
 
+        /// <summary>
+        /// Predefined feature "globallyUniqueId"
+        /// </summary>
         public static Qualifier FeatureGloballyUniqueId
         {
             get => "globallyUniqueId".ToQualifier();
@@ -123,7 +132,7 @@ namespace Bitub.Xbim.Ifc.Concept
             yield return new ELFeature
             {
                 Name = FeatureHasIfcType,
-                Role = new RoleConcept { Filler = o.ToImplementingClassQualifier() }
+                Role = new RoleConcept { Qualifier = o.ToImplementingClassQualifier() }
             };
         }
 
@@ -141,6 +150,11 @@ namespace Bitub.Xbim.Ifc.Concept
 
         #region FeatureConcept conversion
 
+        /// <summary>
+        /// Wraps an IFC generic (root) object into a qualifier based on its name and its GUID.
+        /// </summary>
+        /// <param name="o">The object</param>
+        /// <returns>A qualifier for use as concept reference</returns>
         public static Qualifier ToCanonical(this IIfcRoot o)
         {
             return new string[] { o.Name ?? "Anonymous", o.GlobalId.ToString() }.ToQualifier();
@@ -170,15 +184,12 @@ namespace Bitub.Xbim.Ifc.Concept
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public static IEnumerable<ELConcept> ToConceptAssertion(this IIfcObject p, IEnumerable<Qualifier> superior = null)
+        public static IEnumerable<ELConcept> ToConceptAssertion(this IIfcObject p)
         {
             var productConcept = new ELConcept 
             { 
                 Canonical = p.ToCanonical(),                
             };
-
-            if (null != superior)
-                productConcept.Superior.AddRange(superior);
 
             productConcept.Feature.Add(p.ToIfcTypeFeature());
             productConcept.Feature.Add(p.ToIfcObjectNameFeature());
@@ -193,8 +204,7 @@ namespace Bitub.Xbim.Ifc.Concept
         #region IFC to concept domain context
 
         /// <summary>
-        /// Converts the given schema into feature concepts of given upper bound type. All implementing subtypes are queried by their
-        /// inheritance structure.
+        /// Will convert a given upper bound generic type of given IFC schema version into an enumerable of EL concepts.
         /// </summary>
         /// <typeparam name="T">The upper bound type.</typeparam>
         /// <param name="schemaVersion">The IFC schema version</param>
@@ -204,7 +214,7 @@ namespace Bitub.Xbim.Ifc.Concept
             var conceptCache = new Dictionary<Qualifier, ELConcept>();
             foreach (var classifier in schemaVersion.ToImplementingClassifiers<T>())
             {
-                for (int k = 0; k < classifier.Path.Count-1; ++k)
+                for (int k = 0; k < classifier.Path.Count - 1; ++k)
                 {
                     ELConcept concept;
                     if (!conceptCache.TryGetValue(classifier.Path[k], out concept))
@@ -212,29 +222,24 @@ namespace Bitub.Xbim.Ifc.Concept
                         concept = new ELConcept
                         {
                             Canonical = classifier.Path[k]
-                        };
-                        concept.Feature.Add(new ELFeature { Name = FeatureHasIfcType, Role = new RoleConcept { Filler = classifier.Path[k] } });
+                        };          
                         conceptCache.Add(concept.Canonical, concept);
 
                         if (k > 0)
-                            concept.Superior.Add(classifier.Path[k - 1]);
+                            concept.Subsumes.Add(classifier.Path[k - 1]);
 
                         yield return concept;
                     }
                 }
             }
-
-            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Converts the given schema into feature concept domain of given upper bound type. All implementing subtypes are queried by their
-        /// inheritance structure.
+        /// Wraps the given IFC schema version into a EL domain description.
         /// </summary>
-        /// <typeparam name="T">The upper bound type.</typeparam>
         /// <param name="schemaVersion">The IFC schema version</param>
         /// <returns>A domain</returns>
-        public static ELDomain ToDomain<T>(this XbimSchemaVersion schemaVersion) where T : IPersistEntity
+        public static ELDomain ToDomain(this XbimSchemaVersion schemaVersion)
         {
             var ifcDomain = new ELDomain
             {
@@ -242,7 +247,6 @@ namespace Bitub.Xbim.Ifc.Concept
                 Canonical = schemaVersion.ToString().ToQualifier(),
                 Description = $"buildingSMART IFC specification ({schemaVersion})"
             };
-            //ifcDomain.Concepts.AddRange(ToFeatureConcepts<T>(schemaVersion));
             return ifcDomain;
         }
 

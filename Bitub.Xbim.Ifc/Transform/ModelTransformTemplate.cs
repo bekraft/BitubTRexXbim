@@ -139,7 +139,7 @@ namespace Bitub.Xbim.Ifc.Transform
             catch(Exception e)
             {
                 Log?.LogError("Exception at #{2}{3}: '{0}' with '{1}'.", e.GetType().Name, e.Message, instance.EntityLabel, instance.ExpressType.Name);
-                throw e;
+                throw;
             }
         }
 

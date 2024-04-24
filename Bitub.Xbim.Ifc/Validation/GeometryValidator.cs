@@ -11,21 +11,40 @@ using Xbim.Geometry.Engine.Interop;
 
 using Xbim.Ifc4.Interfaces;
 
-using Bitub.Xbim.Ifc;
+using System.Runtime.InteropServices;
+using Xbim.Common.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bitub.Xbim.Ifc.Validation
 {
     public class GeometryValidator
     {
         #region Internals
-        private readonly XbimGeometryEngine engine;
-        private readonly ILogger<XbimGeometryEngine> log;
+        private XbimGeometryEngine geometryEngine;
+        private ILogger logger;
         #endregion
 
-        public GeometryValidator(ILoggerFactory loggerFactory)
+        public GeometryValidator()
         {
-            log = loggerFactory.CreateLogger<XbimGeometryEngine>();
-            engine = new XbimGeometryEngine(log);
+        }
+
+        public IXbimGeometryEngine GeometryEngine
+        {
+            get
+            {
+                if (null == geometryEngine)
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        throw new NotSupportedException($"${nameof(GeometryValidator)}) requires WinOS platform.");
+
+                    var geometryServices = XbimServices.Current.ServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
+                    var loggingFactory = XbimServices.Current.ServiceProvider.GetRequiredService<ILoggerFactory>();
+                    logger = loggingFactory.CreateLogger<GeometryValidator>();
+                    geometryEngine = new XbimGeometryEngine(geometryServices, loggingFactory);
+                }
+
+                return geometryEngine;
+            }
         }
 
         public bool IsReturningSolidsOnly { get; set; } = true;
@@ -64,13 +83,13 @@ namespace Bitub.Xbim.Ifc.Validation
                 try
                 {
                     if (useDedicatedCreateMethod && entity is IIfcGeometricRepresentationItem gItem)
-                        geometryObject = engine.Create(gItem, log);
+                        geometryObject = GeometryEngine.Create(gItem);
                     else
-                        geometryObject = methodInfo.Invoke(engine, new object[] { entity, log });
+                        geometryObject = methodInfo.Invoke(GeometryEngine, new object[] { entity });
                 }
                 catch (Exception e)
                 {
-                    log.LogError("Got exception '{0}' with call to '{1}({2})'", e.Message, methodInfo.Name, type.Name);
+                    logger.LogError("Got exception '{0}' with call to '{1}({2})'", e.Message, methodInfo.Name, type.Name);
                     continue;
                 }
 

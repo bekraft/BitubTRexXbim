@@ -13,6 +13,8 @@ using System.Runtime.InteropServices;
 
 using Xbim.ModelGeometry.Scene;
 using Xbim.Geometry.Engine.Interop;
+using Xbim.Common.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
@@ -20,19 +22,28 @@ namespace Bitub.Xbim.Ifc.Transform
     {
         private IDictionary<IModel, XbimPlacementTree> placements = new Dictionary<IModel, XbimPlacementTree>();
         private IDictionary<XbimInstanceHandle, XbimMatrix3D> tInverted = new Dictionary<XbimInstanceHandle, XbimMatrix3D>();
-        private XbimGeometryEngine engine;
+        private XbimGeometryEngine geometryEngine;
+
+        public ModelMergeTransformPackage()
+        {
+            XbimServices.Current.ConfigureServices(opt => opt.AddXbimToolkit(conf => conf.AddGeometryServices()));
+        }
 
         internal XbimGeometryEngine Engine
         {
             get 
-            { 
-                if (null == engine)
+            {      
+                if (null == geometryEngine)
+                {
                     if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                         throw new NotSupportedException($"${nameof(ModelMergeTransformPackage)}) requires WinOS platform.");
-                    else
-                        engine = new XbimGeometryEngine();
 
-                return engine; 
+                    var geometryServices = XbimServices.Current.ServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
+                    var loggingFactory = XbimServices.Current.ServiceProvider.GetRequiredService<ILoggerFactory>();
+                    geometryEngine = new XbimGeometryEngine(geometryServices, loggingFactory);
+                }
+
+                return geometryEngine; 
             }
         }
 

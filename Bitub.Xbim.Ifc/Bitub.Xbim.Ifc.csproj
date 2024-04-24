@@ -4,7 +4,7 @@
     <Description>Xbim IFC toolset adaption</Description>
     <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
-    <LangVersion>8</LangVersion>  
+    <LangVersion>10</LangVersion>  
     <IsPackable>true</IsPackable>
     <Platforms>x64</Platforms>
     <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
@@ -15,15 +15,15 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
-    <TargetFrameworks>net472;net48;net481;net6.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">
-    <PackageReference Include="Bitub.Dto" Version="1.0.23108-Dev.26271" />
+    <PackageReference Include="Bitub.Dto" Version="1.0.24082-Dev.25149" />
     <PackageReference Include="Xbim.Common" Version="5.1.341" />    
     <PackageReference Include="Xbim.Ifc" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.1.341" />
@@ -34,18 +34,19 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <PackageReference Include="Bitub.Dto" Version="1.0.23108-Dev.26271" />
-    <PackageReference Include="Xbim.Common" Version="6.0.414-develop" />    
-    <PackageReference Include="Xbim.Ifc" Version="6.0.414-develop" />
-    <PackageReference Include="Xbim.Ifc2x3" Version="6.0.414-develop" />
-    <PackageReference Include="Xbim.Ifc4" Version="6.0.414-develop" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="6.0.414-develop" />    
-    <PackageReference Include="Xbim.IO.Esent" Version="6.0.414-develop" />
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.666-develop" />
+    <PackageReference Include="Bitub.Dto" Version="1.0.24114-Dev.25614" />
+    <PackageReference Include="Xbim.Common" Version="6.0.450-develop" />    
+    <PackageReference Include="Xbim.Ifc" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.Ifc4" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.Ifc4x3" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="6.0.450-develop" />    
+    <PackageReference Include="Xbim.IO.Esent" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.0.0-dev" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.666-develop" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.0.0-dev" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">

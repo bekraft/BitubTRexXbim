@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bitub.Dto;
 using Bitub.Dto.Concept;
 
 namespace Bitub.Xbim.Ifc.TRex
@@ -17,6 +18,8 @@ namespace Bitub.Xbim.Ifc.TRex
             feature = f;
             stage = s;
         }
+
+        public Qualifier FeatureName => feature.Name;
 
         public int CompareTo(FeatureStage other)
         {
