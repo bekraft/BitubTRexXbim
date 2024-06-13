@@ -1,5 +1,4 @@
-﻿using System;
-using Bitub.Dto;
+﻿using Bitub.Dto;
 using Bitub.Dto.Scene;
 
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
     /// <summary>
     /// A concrete shape of a product referencing a known / or unknown representation.
@@ -70,19 +69,19 @@ namespace Bitub.Xbim.Ifc.Export
         public ShapeRepresentation ShapeRepresentation { get => message as ShapeRepresentation; }
         public SceneContextTransform SceneContext { get => message as SceneContextTransform; }
 
-        internal TesselationMessage(ProductShape productShape)
+        public TesselationMessage(ProductShape productShape)
         {
             message = productShape;
             messageType = TesselationMessageType.Shape;
         }
 
-        internal TesselationMessage(ShapeRepresentation shapeRepresentation)
+        public TesselationMessage(ShapeRepresentation shapeRepresentation)
         {
             message = shapeRepresentation;
             messageType = TesselationMessageType.Representation;
         }
 
-        internal TesselationMessage(SceneContextTransform sceneContext)
+        public TesselationMessage(SceneContextTransform sceneContext)
         {
             message = sceneContext;
             messageType = TesselationMessageType.Context;
@@ -92,8 +91,8 @@ namespace Bitub.Xbim.Ifc.Export
     /// <summary>
     /// A tesselation provider contract emitting either context, representation or shape instance in an abitrary order.
     /// </summary>
-    public interface ITesselationContext<TSettings> where TSettings : ExportPreferences
+    public interface ITesselationContext<TSettings> where TSettings : ScenePreferences
     {
-        IEnumerable<TesselationMessage> Tesselate(IModel m, ExportContext<TSettings> ec, CancelableProgressing progressing);
+        IEnumerable<TesselationMessage> Tesselate(IModel m, SceneContext<TSettings> ec, CancelableProgressing progressing);
     }
 }

@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
 using Bitub.Dto;
-using Bitub.Dto.Concept;
-using Bitub.Xbim.Ifc.Concept;
 using Bitub.Xbim.Ifc.TRex;
 
 using Xbim.Common;
-using Xbim.Ifc4.Interfaces;
 
 namespace Bitub.Xbim.Ifc.Transform
 {

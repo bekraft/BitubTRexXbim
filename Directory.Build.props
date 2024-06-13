@@ -4,7 +4,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
     <BuildMajor>1</BuildMajor>
-    <BuildMinor>0</BuildMinor>
+    <BuildMinor>1</BuildMinor>
 
     <BuildRelease>$([System.DateTime]::Now.ToString("yy"))$([System.String]::Format("{0:000}",$([System.DateTime]::Now.DayOfYear)))</BuildRelease>
     <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
@@ -92,10 +92,10 @@
     <PackageProjectUrl>https://www.github.com/bekraft/BitubTRexXbim</PackageProjectUrl>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
+  <Target Name="VersionReport" BeforeTargets="BeforeBuild">
+    <Message Text="$(TargetFramework) ==&gt; Building version  : $(BuildVersion)" Importance="High" />
+    <Message Text="$(TargetFramework) ==&gt; Building platform : Windows" Importance="High" Condition="'$(IsWindows)' == 'true'" />
+    <Message Text="$(TargetFramework) ==&gt; Building platform : OSX or Linux" Importance="High" Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'" />
+  </Target>
 
 </Project>

@@ -2,11 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 
-using Microsoft.Extensions.Logging;
-
-using Xbim.Ifc;
 using Xbim.Ifc2x3.UtilityResource;
-using Xbim.Ifc2x3.DateTimeResource;
 using Xbim.Ifc2x3.ActorResource;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using Xbim.Ifc2x3.GeometryResource;
@@ -23,8 +19,7 @@ using Xbim.Common;
 using Xbim.Common.Geometry;
 
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Export;
-
+using Bitub.Xbim.Ifc.Tesselate;
 
 namespace Bitub.Xbim.Ifc
 {

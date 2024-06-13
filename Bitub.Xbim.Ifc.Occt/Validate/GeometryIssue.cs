@@ -1,19 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 
 using Xbim.Common;
-using Xbim.Common.Geometry;
-
-using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto.Spatial;
-using Bitub.Xbim.Ifc.Export;
-using Xbim.Ifc2x3.SharedBldgElements;
 
 namespace Bitub.Xbim.Ifc.Validation
 {
@@ -44,7 +33,7 @@ namespace Bitub.Xbim.Ifc.Validation
 
         #region Internals
 
-        private GeometryIssue(GeometryValidator validator, XbimInstanceHandle instanceHandle)
+        public GeometryIssue(GeometryValidator validator, XbimInstanceHandle instanceHandle)
         {
             Validator = validator;
             InstanceHandle = instanceHandle;

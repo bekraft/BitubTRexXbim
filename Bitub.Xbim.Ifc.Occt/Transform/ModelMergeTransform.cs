@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Runtime.InteropServices;
 using System.Collections.Generic;
 
 using Xbim.Common;
@@ -7,14 +7,15 @@ using Xbim.Common.Geometry;
 
 using Xbim.Ifc4.Interfaces;
 
-using Microsoft.Extensions.Logging;
 using Bitub.Dto;
-using System.Runtime.InteropServices;
 
 using Xbim.ModelGeometry.Scene;
 using Xbim.Geometry.Engine.Interop;
 using Xbim.Common.Configuration;
+
 using Microsoft.Extensions.DependencyInjection;
+
+using Microsoft.Extensions.Logging;
 
 namespace Bitub.Xbim.Ifc.Transform
 {

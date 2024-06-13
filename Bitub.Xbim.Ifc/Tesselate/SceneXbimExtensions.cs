@@ -7,9 +7,9 @@ using Bitub.Dto.Spatial;
 using Xbim.Common;
 using Xbim.Common.Geometry;
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
-    public static class ComponentModelExtensions
+    public static class SceneXbimExtensions
     {
         #region XYZ context
 

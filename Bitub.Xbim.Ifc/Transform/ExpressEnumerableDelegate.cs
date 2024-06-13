@@ -6,6 +6,10 @@ using Xbim.Common;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
+    /// <summary>
+    /// Enumerable delegate of type <see cref="IExpressEnumerable"/> wrapping a generic enumerable.
+    /// </summary>
+    /// <typeparam name="T">The type of enumerable</typeparam>
     public sealed class ExpressEnumerableDelegate<T> : IExpressEnumerable, IEnumerable<T>, IList
     {
         private List<T> items;

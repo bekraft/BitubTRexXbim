@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using Xbim.Common;
 
-using Xbim.Ifc4.Interfaces;
+using Bitub.Dto;
 
 using Microsoft.Extensions.Logging;
-using Bitub.Dto;
 
 namespace Bitub.Xbim.Ifc.Transform
 {

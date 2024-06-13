@@ -15,35 +15,61 @@ using Google.Protobuf.WellKnownTypes;
 
 using Microsoft.Extensions.Logging;
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
-    public class ExportContext<TSettings> where TSettings: ExportPreferences
+    /// <summary>
+    /// Builds up an export context based on settings and model configuration.
+    /// </summary>
+    /// <typeparam name="TSettings">The settings type</typeparam>
+    public class SceneContext<TSettings> where TSettings: ScenePreferences
     {
-        internal readonly ILogger logger;
+        #region Private members
+        private readonly ILogger _logger;
+        #endregion
 
-        public ExportContext(TSettings settings, XbimVector3D scale, XbimMatrix3D crs) 
+        public SceneContext(ILoggerFactory loggerFactory)
+        {
+            _logger = loggerFactory?.CreateLogger<SceneContext<TSettings>>();
+        }
+
+        public SceneContext(TSettings settings, XbimVector3D scale, XbimMatrix3D crs) 
         {
             this.Settings = settings;
             this.Scale = scale;
             this.CRS = crs;
         }
+
+        /// <summary>
+        /// Settings.
+        /// </summary>
         public TSettings Settings { get; private set; }
 
+        /// <summary>
+        /// Scene scale in each direction.
+        /// </summary>
         public XbimVector3D Scale { get; private set; } = new XbimVector3D(1, 1, 1);
 
+        /// <summary>
+        /// Coordinate Reference System (global transformation).
+        /// </summary>
         public XbimMatrix3D CRS { get; private set; } = XbimMatrix3D.Identity;
 
-        // Ifc context label vs. scene context
-        internal readonly ConcurrentDictionary<int, SceneContextTransform> contextCache = new ConcurrentDictionary<int, SceneContextTransform>();
-        // Ifc shape label vs. representation qualifier.
-        internal readonly ConcurrentDictionary<int, Qualifier> representationQualifierCache = new ConcurrentDictionary<int, Qualifier>();
+        /// <summary>
+        /// IFC context label versus Scene Context Transform.
+        /// </summary>
+        public ConcurrentDictionary<int, SceneContextTransform> ContextCache { get; } = new ConcurrentDictionary<int, SceneContextTransform>();
+        /// <summary>
+        /// IFC shape label versus Representation Qualifier.
+        /// </summary>
+        public ConcurrentDictionary<int, Qualifier> RepresentationQualifierCache { get; } = new ConcurrentDictionary<int, Qualifier>();
 
-        internal ExportContext(ILoggerFactory loggerFactory)
-        {
-            logger = loggerFactory?.CreateLogger<ExportContext<TSettings>>();
-        }
-
-        internal void InitContextsAndScaleFromModel(IModel model, TSettings settings)
+        /// <summary>
+        /// Initialize context and scale from given Xbim IFC model using the given settings.
+        /// </summary>
+        /// <param name="model">The model</param>
+        /// <param name="settings">The settings</param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public void InitContextsAndScaleFromModel(IModel model, TSettings settings)
         {
             if (null == settings)
                 throw new ArgumentNullException(nameof(settings));
@@ -62,7 +88,12 @@ namespace Bitub.Xbim.Ifc.Export
             }).ToArray();
         }
 
-        internal SceneContext CreateContextByIfcRepresentationContext(IIfcRepresentationContext representationContext)
+        /// <summary>
+        /// Create a <see cref="SceneContext"/> from IFC representation context.
+        /// </summary>
+        /// <param name="representationContext">The representation context.</param>
+        /// <returns>A scene context</returns>
+        public SceneContext CreateContextByIfcRepresentationContext(IIfcRepresentationContext representationContext)
         {
             return new SceneContext
             {
@@ -74,19 +105,35 @@ namespace Bitub.Xbim.Ifc.Export
             };
         }
 
+        /// <summary>
+        /// Active scene contexts.
+        /// </summary>
         public SceneContext[] ActiveContexts 
         { 
-            get => contextCache.Values.Select(v => v.sceneContext).ToArray(); 
+            get => ContextCache.Values.Select(v => v.sceneContext).ToArray(); 
         }
 
+        /// <summary>
+        /// Context labels (as refered inside the IFC file).
+        /// </summary>
         public int[] ActiveContextLabels 
         { 
-            get => contextCache.Keys.ToArray(); 
+            get => ContextCache.Keys.ToArray(); 
         }
 
-        public bool IsInContext(int contextLabel) => contextCache.ContainsKey(contextLabel);
+        /// <summary>
+        /// If true, the context is held by the cache.
+        /// </summary>
+        /// <param name="contextLabel">The context label (reference inside IFC)</param>
+        /// <returns></returns>
+        public bool IsInContext(int contextLabel) => ContextCache.ContainsKey(contextLabel);
 
-        internal ComponentScene CreateEmptySceneModelFromProject(IIfcProject p)
+        /// <summary>
+        /// Creates an empty new <see cref="ComponentScene"/> from IFC project reference.
+        /// </summary>
+        /// <param name="p">The project</param>
+        /// <returns>An empty initialized scene</returns>
+        public ComponentScene CreateEmptySceneModelFromProject(IIfcProject p)
         {
             return new ComponentScene()
             {
@@ -99,7 +146,7 @@ namespace Bitub.Xbim.Ifc.Export
             };
         }
 
-        private IDictionary<int, SceneContext> ContextsCreateFromModel(IModel model, IGeometryStoreReader gReader)
+        public IDictionary<int, SceneContext> ContextsCreateFromModel(IModel model, IGeometryStoreReader gReader)
         {
             return gReader.ContextIds
                    .Select(label => model.Instances[label])
@@ -107,7 +154,7 @@ namespace Bitub.Xbim.Ifc.Export
                    .ToDictionary(c => c.EntityLabel, c => new SceneContext { Name = c.ContextIdentifier.ToString().ToQualifier() });
         }
 
-        private IDictionary<int, SceneContext> ContextsCreateFrom(IModel model, IGeometryStoreReader gReader, string[] contextIdentifiers)
+        public IDictionary<int, SceneContext> ContextsCreateFrom(IModel model, IGeometryStoreReader gReader, string[] contextIdentifiers)
         {
             return gReader.ContextIds
                    .Select(label => model.Instances[label])
@@ -117,7 +164,7 @@ namespace Bitub.Xbim.Ifc.Export
                    .ToDictionary(t => t.EntityLabel, t => new SceneContext { Name = t.Item2.ToQualifier() });
         }
 
-        internal IEnumerable<(int, SceneContext)> FilterActiveUserSceneContexts(IModel model, int[] contextLabels)
+        public IEnumerable<(int, SceneContext)> FilterActiveUserSceneContexts(IModel model, int[] contextLabels)
         {
             // Retrieve all context with geometry and match those to pregiven in settings
             return contextLabels
@@ -128,7 +175,7 @@ namespace Bitub.Xbim.Ifc.Export
         }
 
         // Compute contexts and related transformation
-        internal IEnumerable<SceneContextTransform> CreateSceneContextTransforms(IModelFactors factors, XbimContextRegionCollection contextRegions, IDictionary<int, SceneContext> contextTable)
+        public IEnumerable<SceneContextTransform> CreateSceneContextTransforms(IModelFactors factors, XbimContextRegionCollection contextRegions, IDictionary<int, SceneContext> contextTable)
         {
             foreach (var cr in contextRegions)
             {
@@ -179,7 +226,7 @@ namespace Bitub.Xbim.Ifc.Export
                             break;
                         case ScenePositioningStrategy.NoCorrection:
                             // No correction
-                            logger?.LogInformation($"No translation correction applied by settings to context '{cr.ContextLabel}'");
+                            _logger?.LogInformation($"No translation correction applied by settings to context '{cr.ContextLabel}'");
                             break;
                         default:
                             throw new NotImplementedException($"Missing implementation for '{Settings.Positioning}'");
@@ -204,7 +251,7 @@ namespace Bitub.Xbim.Ifc.Export
                 }
                 else
                 {
-                    logger?.LogWarning("Excluding context label '{0}'. Not mentioned by settings.", cr.ContextLabel);
+                    _logger?.LogWarning("Excluding context label '{0}'. Not mentioned by settings.", cr.ContextLabel);
                 }
             }
         }

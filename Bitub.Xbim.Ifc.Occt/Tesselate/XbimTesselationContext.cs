@@ -6,6 +6,7 @@ using System.Linq;
 using Bitub.Dto;
 using Bitub.Dto.Scene;
 using Bitub.Dto.Spatial;
+using Bitub.Xbim.Ifc.Export;
 
 using Xbim.Common;
 using Xbim.Common.Geometry;
@@ -19,12 +20,12 @@ using Xbim.Common.Metadata;
 using Microsoft.Extensions.Logging;
 
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
     /// <summary>
     /// Tesselation context implementing Xbim shape triangulation via Open Cascade.
     /// </summary>
-    public sealed partial class XbimTesselationContext : ITesselationContext<ExportPreferences>
+    public sealed partial class XbimTesselationContext : ITesselationContext<ScenePreferences>
     {
         #region Internals
         private readonly ILogger logger;
@@ -76,13 +77,13 @@ namespace Bitub.Xbim.Ifc.Export
         /// <param name="summary">The scene export summary</param>
         /// <param name="monitor">The progress emitter instance</param>
         /// <returns>An enumerable of tesselated product representations</returns>
-        public IEnumerable<TesselationMessage> Tesselate(IModel model, ExportContext<ExportPreferences> ec, CancelableProgressing monitor)
+        public IEnumerable<TesselationMessage> Tesselate(IModel model, SceneContext<ScenePreferences> ec, CancelableProgressing monitor)
         {
             return Tesselate(model, ec, monitor, XbimGeometryRepresentationType.OpeningsAndAdditionsIncluded);
         }
 
         public IEnumerable<TesselationMessage> Tesselate(IModel model, 
-            ExportContext<ExportPreferences> ec, CancelableProgressing monitor, params XbimGeometryRepresentationType[] geometryTypes)
+            SceneContext<ScenePreferences> ec, CancelableProgressing monitor, params XbimGeometryRepresentationType[] geometryTypes)
         {
             var geometryStore = ReadGeometryStore(model, monitor);
             Array.Sort(geometryTypes);
@@ -102,7 +103,7 @@ namespace Bitub.Xbim.Ifc.Export
                 var activeContexts = ec.FilterActiveUserSceneContexts(model, gReader.ContextIds.ToArray()).ToDictionary(g => g.Item1, g => g.Item2);
                 foreach (var contextTransform in ec.CreateSceneContextTransforms(model.ModelFactors, gReader.ContextRegions, activeContexts))
                 {
-                    ec.contextCache.TryAdd(contextTransform.contextLabel, contextTransform);
+                    ec.ContextCache.TryAdd(contextTransform.contextLabel, contextTransform);
                     yield return new TesselationMessage(contextTransform);
                 }
 
@@ -226,7 +227,7 @@ namespace Bitub.Xbim.Ifc.Export
         #region Mesh creation
 
         // Append vertices and return shift
-        private static PtArray CreatePtArray(ExportContext<ExportPreferences> ec, IEnumerable<XbimPoint3D> points)
+        private static PtArray CreatePtArray(SceneContext<ScenePreferences> ec, IEnumerable<XbimPoint3D> points)
         {
             PtArray ptArray = new PtArray();
             foreach (var p in points)
@@ -264,7 +265,7 @@ namespace Bitub.Xbim.Ifc.Export
         }
 
         // Creates a faceted body having explicit faces
-        private FaceBody CreateFaceBody(ExportContext<ExportPreferences> ec, XbimShapeTriangulation tr, RefId pts)
+        private FaceBody CreateFaceBody(SceneContext<ScenePreferences> ec, XbimShapeTriangulation tr, RefId pts)
         {
             var faceBody = new FaceBody { Pts = pts };
 
@@ -282,7 +283,7 @@ namespace Bitub.Xbim.Ifc.Export
             return faceBody;
         }
 
-        private MeshBody CreateMeshBody(ExportContext<ExportPreferences> ec, XbimShapeTriangulation tr, RefId pts)
+        private MeshBody CreateMeshBody(SceneContext<ScenePreferences> ec, XbimShapeTriangulation tr, RefId pts)
         {
             var meshBody = new MeshBody()
             {
@@ -309,11 +310,11 @@ namespace Bitub.Xbim.Ifc.Export
             }
         }
 
-        private Shape CreateShape(ExportContext<ExportPreferences> ec, XbimShapeInstance shapeInstance)
+        private Shape CreateShape(SceneContext<ScenePreferences> ec, XbimShapeInstance shapeInstance)
         {
             // Context transformation (relative offset shift => make final transform relative to context shift)
             XbimMatrix3D shapeTransform = shapeInstance.Transformation;
-            if (ec.contextCache.TryGetValue(shapeInstance.RepresentationContext, out SceneContextTransform ctxTransform))
+            if (ec.ContextCache.TryGetValue(shapeInstance.RepresentationContext, out SceneContextTransform ctxTransform))
             {
                 shapeTransform *= ctxTransform.transform * ec.CRS;
             }

@@ -1,4 +1,7 @@
-﻿using Xbim.Ifc;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
 using Xbim.Ifc4.UtilityResource;
 using Xbim.Ifc4.DateTimeResource;
 using Xbim.Ifc4.ActorResource;
@@ -11,16 +14,13 @@ using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.RepresentationResource;
 using Xbim.Ifc4.PresentationAppearanceResource;
 
-using System.Linq;
-
 using Xbim.Common;
-using System;
 using Xbim.Ifc4.TopologyResource;
-using System.Collections.Generic;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.PropertyResource;
+
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Export;
+using Bitub.Xbim.Ifc.Tesselate;
 
 namespace Bitub.Xbim.Ifc
 {

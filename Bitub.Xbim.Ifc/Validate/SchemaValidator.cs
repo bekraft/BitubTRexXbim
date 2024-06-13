@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 using Xbim.Common;
@@ -7,10 +6,10 @@ using Xbim.Common.Enumerations;
 using Xbim.Common.ExpressValidation;
 using Xbim.Common.Step21;
 
-namespace Bitub.Xbim.Ifc.Validation
+namespace Bitub.Xbim.Ifc.Validate
 {
     /// <summary>
-    /// IFC model validation "stamp".
+    /// Principle Xbim Ifc Schema Validation helper.
     /// </summary>
     public class SchemaValidator
     {

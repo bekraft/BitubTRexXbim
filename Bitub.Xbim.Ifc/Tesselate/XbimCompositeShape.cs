@@ -5,25 +5,28 @@ using Xbim.Common.Geometry;
 
 namespace Bitub.Xbim.Ifc.Export
 {
-    // Aggregates component and remaining shape labels.
+    /// <summary>
+    /// Aggregates component and remaining shape labels.
+    /// </summary>
     public sealed class XbimCompositeShape
     {
-        // Sorted list
-        private List<int> instanceLabels = new List<int>();
-        private List<Shape> shapeList = new List<Shape>();
+        #region Private members
+        private List<int> _instanceLabels = new List<int>();
+        private List<Shape> _shapeList = new List<Shape>();
+        #endregion
 
         public XbimCompositeShape(IEnumerable<XbimShapeInstance> productShapeInstances)
         {
-            instanceLabels = productShapeInstances.Select(i => i.InstanceLabel).OrderBy(i => i).ToList();
+            _instanceLabels = productShapeInstances.Select(i => i.InstanceLabel).OrderBy(i => i).ToList();
         }
 
         public bool MarkDone(XbimShapeInstance productShapeInstance)
         {
-            var idx = instanceLabels.BinarySearch(productShapeInstance.InstanceLabel);
+            var idx = _instanceLabels.BinarySearch(productShapeInstance.InstanceLabel);
             if (0 > idx)
                 return false;
             else
-                instanceLabels.RemoveAt(idx);
+                _instanceLabels.RemoveAt(idx);
 
             return true;
         }
@@ -31,18 +34,18 @@ namespace Bitub.Xbim.Ifc.Export
         public bool Add(XbimShapeInstance productShapeInstance, Shape productShape)
         {
             var isHeldAndDone = MarkDone(productShapeInstance);
-            shapeList.Add(productShape);
+            _shapeList.Add(productShape);
             return isHeldAndDone;
         }
 
-        internal IEnumerable<Shape> Shapes
+        public IEnumerable<Shape> Shapes
         {
-            get => shapeList.ToArray();
+            get => _shapeList.ToArray();
         }
 
-        internal bool IsComplete
+        public bool IsComplete
         {
-            get => instanceLabels.Count == 0;
+            get => _instanceLabels.Count == 0;
         }
     }
 }

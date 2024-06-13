@@ -14,9 +14,9 @@ using Bitub.Dto.Spatial;
 
 using Google.Protobuf.Collections;
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
-    public static class XbimModelExtensions
+    public static class XbimSceneExtensions
     {
         #region Point context 
 
@@ -133,6 +133,8 @@ namespace Bitub.Xbim.Ifc.Export
 
         #endregion
 
+        #region Spatial context
+
         public static ABox ToABox(this XbimRect3D rect3D, XbimVector3D scale, Func<XbimPoint3D, XbimPoint3D> adapter = null)
         {
             return new ABox
@@ -159,6 +161,8 @@ namespace Bitub.Xbim.Ifc.Export
                 Label = r.Name
             };
         }
+
+        #endregion
 
         public static RefId ToRefId(this IIfcRoot entity, SceneComponentIdentificationStrategy strategy)
         {
@@ -206,6 +210,35 @@ namespace Bitub.Xbim.Ifc.Export
             };
         }
 
+
+        public static Color ToColor(this IIfcColourRgb rgb, float alpha = 1.0f)
+        {
+            return new Color()
+            {
+                R = (float)rgb.Red,
+                G = (float)rgb.Green,
+                B = (float)rgb.Blue,
+                A = alpha
+            };
+        }
+
+        public static ColorOrNormalised ToColorOrNormalised(this IIfcColourOrFactor rgbOrFactor, ColorChannel colorChannel, float alpha = 1.0f)
+        {
+            if (null == rgbOrFactor)
+                return null;
+
+            var color = new ColorOrNormalised();
+            if (rgbOrFactor is IExpressRealType real)
+            {
+                color.Normalised = (float)real.Value;
+            }
+            else if (rgbOrFactor is IIfcColourRgb rgb)
+            {
+                color.Color = rgb.ToColor(alpha);
+            }
+            return color;
+        }
+
         public static IEnumerable<Material> ToMaterialBySurfaceStyles(this IModel model)
         {
             foreach (var style in model.Instances.OfType<IIfcSurfaceStyle>())
@@ -248,6 +281,92 @@ namespace Bitub.Xbim.Ifc.Export
         public static IEnumerable<Material> ToMaterialByIfcTypeIDs(this XbimColourMap defaultColorMap, IModel model, IEnumerable<int> typeIDs, Func<int, RefId> generator)
         {
             return typeIDs.Select(typeID => ToMaterialByIfcTypeID(defaultColorMap, model, typeID, generator));
+        }
+
+      
+        public static Material ToMaterial(this IIfcSurfaceStyle style)
+        {
+            var material = new Material()
+            {
+                Id = new RefId { Nid = style.EntityLabel },
+                Name = style.Name?.ToString() ?? $"{style.EntityLabel}",
+                HintRenderBothFaces = style.Side == IfcSurfaceSide.BOTH,
+                HintSwitchFrontRearFaces = style.Side == IfcSurfaceSide.NEGATIVE
+            };
+
+            foreach (var surfaceStyle in style.Styles)
+            {
+                if (surfaceStyle is IIfcSurfaceStyleShading ss)
+                {
+                    material.ColorChannels.AddRange(ss.ToColorChannel());
+                }
+                else if (surfaceStyle is IIfcSurfaceStyleRendering sr)
+                {
+                    material.ColorChannels.AddRange(sr.ToColorChannel());
+                    material.HintReflectionShader = sr.ReflectanceMethod.ToString();
+                }
+                else if (surfaceStyle is IIfcSurfaceStyleLighting sl)
+                {
+                    material.ColorChannels.AddRange(sl.ToColorChannnel());
+                }
+            }
+            return material;
+        }
+
+        public static IEnumerable<ColorOrNormalised> ToColorChannel(this IIfcSurfaceStyleShading ss)
+        {
+            return new ColorOrNormalised[] {
+                new ColorOrNormalised()
+                {
+                    Channel = ColorChannel.Albedo,
+                    Color = ss.SurfaceColour.ToColor(1.0f - (float)(ss.Transparency ?? 0))
+                }
+            };
+        }
+
+        public static IEnumerable<ColorOrNormalised> ToColorChannel(this IIfcSurfaceStyleRendering sr)
+        {
+            // Adapting Xbim Texture transformation logic here
+            float alpha = 1.0f - (float)(sr.Transparency ?? 0);
+            return new ColorOrNormalised[]
+            {
+                new ColorOrNormalised() {
+                    Channel = ColorChannel.Albedo,
+                    Color = sr.SurfaceColour.ToColor()
+                },
+                sr.DiffuseColour?.ToColorOrNormalised(ColorChannel.Diffuse, alpha),
+                sr.ReflectionColour?.ToColorOrNormalised(ColorChannel.Diffuse, alpha),
+                sr.TransmissionColour?.ToColorOrNormalised(ColorChannel.Emmissive, alpha),
+                //sr.DiffuseTransmissionColour?.ToColorOrNormalised(ColorChannel.DiffuseEmmisive, alpha),
+                sr.SpecularColour?.ToColorOrNormalised(ColorChannel.Specular, alpha)
+            }.OfType<ColorOrNormalised>();
+        }
+
+        public static IEnumerable<ColorOrNormalised> ToColorChannnel(this IIfcSurfaceStyleLighting sl)
+        {
+            return new ColorOrNormalised[]
+            {
+                new ColorOrNormalised()
+                {
+                    Channel = ColorChannel.Diffuse,
+                    Color = sl.DiffuseReflectionColour.ToColor()
+                },
+                /*new ColorOrNormalised()
+                {
+                    Channel = ColorChannel.DiffuseEmmisive,
+                    Color = sl.DiffuseTransmissionColour.ToColor()
+                },*/
+                new ColorOrNormalised()
+                {
+                    Channel = ColorChannel.Emmissive,
+                    Color = sl.TransmissionColour.ToColor()
+                },
+                new ColorOrNormalised()
+                {
+                    Channel = ColorChannel.Reflective,
+                    Color = sl.ReflectanceColour.ToColor()
+                }
+            }.OfType<ColorOrNormalised>();
         }
 
         #endregion

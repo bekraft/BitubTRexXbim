@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,9 +7,11 @@ using Xbim.Common;
 using Xbim.Common.Metadata;
 
 using Bitub.Dto;
-using Bitub.Xbim.Ifc;
 
 using Xbim.Ifc4.Interfaces;
+
+using Microsoft.Extensions.Logging;
+
 
 namespace Bitub.Xbim.Ifc.Transform
 {

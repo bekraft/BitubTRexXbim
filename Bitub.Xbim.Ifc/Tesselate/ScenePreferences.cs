@@ -5,9 +5,8 @@ using System.Xml.Serialization;
 using Bitub.Dto;
 using Bitub.Dto.Scene;
 using Bitub.Dto.Spatial;
-using Bitub.Dto.Concept;
 
-namespace Bitub.Xbim.Ifc.Export
+namespace Bitub.Xbim.Ifc.Tesselate
 {
     /// <summary>
     /// Identification strategy.
@@ -64,8 +63,8 @@ namespace Bitub.Xbim.Ifc.Export
         FaceBody = 0x04        
     }
 
-    [XmlRoot("ExportPreferences", Namespace = "https://github.com/bekraft/BitubTRex/Bitub.Ifc.Export")]
-    public class ExportPreferences
+    [XmlRoot("ScenePreferences", Namespace = "https://github.com/bekraft/BitubTRexXbim/Bitub.Xbim.Ifc.Tesselate")]
+    public class ScenePreferences
     {
         /// <summary>
         /// Translation correction strategy to be applied while transferring data.
@@ -118,11 +117,11 @@ namespace Bitub.Xbim.Ifc.Export
         /// </summary>
         public SceneBodyExportType BodyExportType { get; set; } = SceneBodyExportType.Auto;
 
-        public ExportPreferences()
+        public ScenePreferences()
         {
         }
 
-        public ExportPreferences(ExportPreferences settings)
+        public ScenePreferences(ScenePreferences settings)
         {
             foreach (var prop in GetType().GetProperties())
             {
@@ -130,15 +129,15 @@ namespace Bitub.Xbim.Ifc.Export
             }
         }
 
-        public static ExportPreferences ReadFrom(string fileName)
+        public static ScenePreferences ReadFrom(string fileName)
         {
-            var serializer = new XmlSerializer(typeof(ExportPreferences));
-            return serializer.Deserialize(File.OpenText(fileName)) as ExportPreferences;
+            var serializer = new XmlSerializer(typeof(ScenePreferences));
+            return serializer.Deserialize(File.OpenText(fileName)) as ScenePreferences;
         }
 
         public void SaveTo(string fileName)
         {
-            var serializer = new XmlSerializer(typeof(ExportPreferences));
+            var serializer = new XmlSerializer(typeof(ScenePreferences));
             serializer.Serialize(File.CreateText(fileName), this);
         }
     }

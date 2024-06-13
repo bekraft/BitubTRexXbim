@@ -8,9 +8,9 @@ using Xbim.Common;
 using Xbim.Common.Enumerations;
 using Xbim.Common.ExpressValidation;
 
-namespace Bitub.Xbim.Ifc.Validation
+namespace Bitub.Xbim.Ifc.Validate
 {
-    public static class Extensions
+    public static class XbimExtensions
     {
         #region Ifc GUID validation
 

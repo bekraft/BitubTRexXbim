@@ -243,9 +243,7 @@ namespace Bitub.Xbim.Ifc.Concept
         {
             var ifcDomain = new ELDomain
             {
-                Name = schemaVersion.ToString(),
-                Canonical = schemaVersion.ToString().ToQualifier(),
-                Description = $"buildingSMART IFC specification ({schemaVersion})"
+                Canonical = schemaVersion.ToString().ToQualifier()
             };
             return ifcDomain;
         }

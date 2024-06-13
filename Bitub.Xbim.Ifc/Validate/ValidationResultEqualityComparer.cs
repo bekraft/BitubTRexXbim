@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+
 using Xbim.Common.ExpressValidation;
 
-namespace Bitub.Xbim.Ifc.Validation
+namespace Bitub.Xbim.Ifc.Validate
 {
     public class ValidationResultEqualityComparer : IEqualityComparer<ValidationResult>
     {
