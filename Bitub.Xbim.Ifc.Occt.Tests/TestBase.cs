@@ -13,15 +13,15 @@ using Xbim.Common;
 using Xbim.Common.Step21;
 using Xbim.Common.Geometry;
 
-using NUnit.Framework;
-
 using Microsoft.Extensions.Logging;
 
-namespace Bitub.Xbim.Ifc.Tests
+using NUnit.Framework;
+
+namespace Bitub.Xbim.Ifc.Occt.Tests
 {
     public abstract class TestBase<T>
     {
-        protected double Precision { get; } = 1e-5;
+        protected double Precision { get;  } = 1e-5;
 
         protected static ILoggerFactory LoggerFactory { get; } = Microsoft.Extensions.Logging.LoggerFactory.Create(b => b.AddConsole());
 

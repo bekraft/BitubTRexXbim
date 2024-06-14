@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Title>Bitub.Xbim.Speckle</Title>
+    <Description>IFC Speckle Adapter Library</Description>
+    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
+    <RootNamespace>Bitub.Xbim.Speckle</RootNamespace>
+    <LangVersion>10</LangVersion>
+    <IsPackable>true</IsPackable>
+    <Platforms>x64</Platforms>
+    <GenerateRuntimeConfigDevFile>true</GenerateRuntimeConfigDevFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == '' ">
+    <Configuration>Debug</Configuration>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Speckle.Objects" Version="2.19.2" />
+  </ItemGroup>
+
+</Project>

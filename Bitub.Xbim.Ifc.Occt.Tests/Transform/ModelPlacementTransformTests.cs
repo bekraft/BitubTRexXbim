@@ -1,24 +1,21 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 
-using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 using Xbim.IO;
 
-using Bitub.Dto;
-
-using Microsoft.Extensions.Logging;
-
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Validation;
+using Bitub.Xbim.Ifc.Occt.Tests;
+using Bitub.Xbim.Ifc.Validate;
 
+using Bitub.Dto;
 using Bitub.Dto.Spatial;
 
 using NUnit.Framework;
 
-namespace Bitub.Xbim.Ifc.Tests.Transform
+using Microsoft.Extensions.Logging;
+
+namespace Bitub.Xbim.Ifc.Tests.Occt.Transform
 {
     [TestFixture]
     public class ModelPlacementTransformTests : TestBase<ModelPlacementTransformTests>
@@ -38,11 +35,11 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
             Assert.IsNotNull(axis2);
             Assert.IsNotNull(axis2.SourceReferenceAxis);
-            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, Precision));
+            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, Precision));
             Assert.IsNotNull(axis2.TargetReferenceAxis);
-            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, precision));
-            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, Precision));
+            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, Precision));
         }
 
         [Test]
@@ -68,12 +65,12 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                 using (var cp = new CancelableProgressing(true))
                 {
-                    cp.OnProgressChange += (s, o) => logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
+                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
 
                     using (var result = await request.Run(source, cp))
                     {
                         if (null != result.Cause)
-                            logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                         //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                         // TODO Specific tests
@@ -108,12 +105,12 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                 using (var cp = new CancelableProgressing(true))
                 {
-                    cp.OnProgressChange += (s, o) => logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
+                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
 
                     using (var result = await request.Run(source, cp))
                     {
                         if (null != result.Cause)
-                            logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                         var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
                         Assert.IsNotNull(rootPlacement.PlacesObject);
@@ -152,12 +149,12 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
                 using (var cp = new CancelableProgressing(true))
                 {
-                    cp.OnProgressChange += (s, o) => logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
+                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
 
                     using (var result = await request.Run(source, cp))
                     {
                         if (null != result.Cause)
-                            logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                         var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
                         Assert.IsNotNull(rootPlacement.PlacesObject);
@@ -175,7 +172,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
 
         public void Report(ProgressStateToken value)
         {
-            logger.LogDebug($"State {value.State}: Percentage = {value.Percentage}; State object = {value.StateObject}");
+            Logger.LogDebug($"State {value.State}: Percentage = {value.Percentage}; State object = {value.StateObject}");
         }
     }
 }

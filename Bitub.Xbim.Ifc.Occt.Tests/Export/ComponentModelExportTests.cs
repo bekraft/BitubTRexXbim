@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 
 using Google.Protobuf;
 
+using Xbim.Common;
+
 using Bitub.Dto;
 using Bitub.Xbim.Ifc.Export;
+using Bitub.Xbim.Ifc.Occt.Tests;
+using Bitub.Xbim.Ifc.Tesselate;
 
 using NUnit.Framework;
-
-using Xbim.Common;
 
 using Microsoft.Extensions.Logging;
 
@@ -19,18 +21,18 @@ namespace Bitub.Xbim.Ifc.Tests.Export
     [TestFixture]
     public class ComponentModelExportTests : TestBase<ComponentModelExportTests>
     {
-        private readonly ExportPreferences testPreferences = new ExportPreferences
+        private readonly ScenePreferences testPreferences = new ScenePreferences
         {
             BodyExportType = SceneBodyExportType.FaceBody
         };
 
-        private Task RunIfc4Export(string resourceName, ExportPreferences settings)
+        private Task RunIfc4Export(string resourceName, ScenePreferences settings)
             => RunExport(resourceName, settings, ReadIfc4Model);
 
-        private Task RunIfc2x3Export(string resourceName, ExportPreferences settings)
+        private Task RunIfc2x3Export(string resourceName, ScenePreferences settings)
             => RunExport(resourceName, settings, ReadIfc2x3Model);
 
-        private async Task RunExport(string resourceName, ExportPreferences settings, Func<String, IModel> reader)
+        private async Task RunExport(string resourceName, ScenePreferences settings, Func<String, IModel> reader)
         {
             Dto.Scene.ComponentScene result;
             using (var store = reader(resourceName))
@@ -56,14 +58,14 @@ namespace Bitub.Xbim.Ifc.Tests.Export
                 var json = formatter.Format(result);
                 jsonStream.WriteLine(json);
                 jsonStream.Close();
-                logger.LogInformation($"JSON example has been written.");
+                Logger.LogInformation($"JSON example has been written.");
             }
 
             using (var binStream = File.Create($"{Path.GetFileNameWithoutExtension(resourceName)}.scene"))
             {
                 var binScene = result.ToByteArray();
                 binStream.Write(binScene, 0, binScene.Length);
-                logger.LogInformation($"Binary scene of {binScene.Length} bytes has been written.");
+                Logger.LogInformation($"Binary scene of {binScene.Length} bytes has been written.");
             }
         }
 
@@ -72,7 +74,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc2x3Export(
                 @"Ifc2x3-Slab-BooleanResult.ifc",
-                new ExportPreferences(testPreferences) 
+                new ScenePreferences(testPreferences) 
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion 
                 });
@@ -86,7 +88,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
 
             await RunIfc4Export(
                 @"Ifc4-SampleHouse.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
                     Positioning = ScenePositioningStrategy.UserCorrection,
@@ -99,7 +101,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"Ifc4-Storey-With-4Walls.ifc",
-                new ExportPreferences(testPreferences) 
+                new ScenePreferences(testPreferences) 
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion 
                 });
@@ -110,7 +112,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"Ifc4-Rotated-IfcSite-1st-floor.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 { 
                     Transforming = SceneTransformationStrategy.Quaternion, 
                     Positioning = ScenePositioningStrategy.MostExtendedRegionCorrection
@@ -122,7 +124,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"Ifc4-Base-Groundfloor.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
                     Positioning = ScenePositioningStrategy.MostExtendedRegionCorrection
@@ -134,7 +136,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"Ifc4-Rotated-1st-floor.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Matrix,
                     Positioning = ScenePositioningStrategy.MeanTranslationCorrection
@@ -146,7 +148,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"Ifc4-Multi-Body-House.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
                     Positioning = ScenePositioningStrategy.MeanTranslationCorrection                    
@@ -158,7 +160,7 @@ namespace Bitub.Xbim.Ifc.Tests.Export
         {
             await RunIfc4Export(
                 @"mapped-shape-with-transformation.ifc",
-                new ExportPreferences(testPreferences)
+                new ScenePreferences(testPreferences)
                 {
                     Transforming = SceneTransformationStrategy.Quaternion,
                     Positioning = ScenePositioningStrategy.NoCorrection

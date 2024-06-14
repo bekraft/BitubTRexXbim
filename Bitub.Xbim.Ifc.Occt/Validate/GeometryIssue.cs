@@ -4,7 +4,7 @@ using Xbim.Common;
 
 using Bitub.Dto.Spatial;
 
-namespace Bitub.Xbim.Ifc.Validation
+namespace Bitub.Xbim.Ifc.Validate
 {
     [Flags]
     public enum GeometryIssueType

@@ -1,20 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
-using Bitub.Dto.Spatial;
-
+using Bitub.Xbim.Ifc.Occt.Tests;
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Validation;
+using Bitub.Xbim.Ifc.Validate;
 
 using Xbim.IO;
 
 using NUnit.Framework;
+
+using Microsoft.Extensions.Logging;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform
 {
@@ -47,7 +46,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
-                        logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                     Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                     Assert.AreEqual(0, result.Target.Instances
@@ -94,7 +93,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
-                        logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                     Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
 
@@ -142,7 +141,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
                 using (var result = await request.Run(source, cp = NewProgressMonitor()))
                 {
                     if (null != result.Cause)
-                        logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
 
                     var psetsRemaining = result.Target.Instances
                         .OfType<IIfcPropertySet>()

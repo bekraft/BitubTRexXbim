@@ -1,10 +1,9 @@
 ﻿using System.Linq;
 
-using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Common.Enumerations;
 
-using Bitub.Xbim.Ifc.Validation;
+using Bitub.Xbim.Ifc.Validate;
 
 using NUnit.Framework;
 
@@ -31,7 +30,7 @@ namespace Bitub.Xbim.Ifc.Tests
                 var results = lookUp[new XbimInstanceHandle(source.Instances[176464])];
                 Assert.AreEqual(1, results.Count());
 
-                Assert.IsFalse(Extensions.Diff(validationStamp.Results, validationStamp.Results).Any());
+                Assert.IsFalse(validationStamp.Results.Diff(validationStamp.Results).Any());
                 Assert.IsTrue(validationStamp.Results.IsSameByResults(validationStamp.Results));
             }
         }

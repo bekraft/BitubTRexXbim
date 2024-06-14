@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-
-using System.Linq;
+﻿using System.Linq;
 
 using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
@@ -12,6 +10,8 @@ using Xbim.Common.Step21;
 using Bitub.Dto;
 using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Concept;
+
+using NUnit.Framework;
 
 namespace Bitub.Xbim.Ifc.Tests
 {

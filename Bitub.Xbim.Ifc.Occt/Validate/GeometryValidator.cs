@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 using Xbim.Common.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Bitub.Xbim.Ifc.Validation
+namespace Bitub.Xbim.Ifc.Validate
 {
     public class GeometryValidator
     {
