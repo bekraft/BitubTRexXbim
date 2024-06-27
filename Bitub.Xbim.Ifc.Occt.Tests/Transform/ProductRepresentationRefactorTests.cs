@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Bitub.Xbim.Ifc.Tests;
 using Xbim.IO;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Occt.Tests;
 using Bitub.Xbim.Ifc.Validate;
 
 using NUnit.Framework;
 
-namespace Bitub.Xbim.Ifc.Tests.Transform
+namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
     public class ProductRepresentationRefactorTests : TestBase<ProductRepresentationRefactorTests>
@@ -50,7 +49,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task RefactorBody()
         {
-            using (var source = ReadIfc4Model("Ifc4-MultipleBodiesPerProduct.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Pile-GroupOfBodies.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -81,7 +80,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task RefactorMappedBodyWithIfcAssembly()
         {
-            using (var source = ReadIfc4Model("mapped-shape-with-transformation.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-BuildingProxy-WithMappedShapeAndTransformation.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -114,7 +113,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task RefactorKeepMappedBody()
         {
-            using (var source = ReadIfc4Model("mapped-shape-with-transformation.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-BuildingProxy-WithMappedShapeAndTransformation.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -145,7 +144,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task RefactorBodyWithIfcAssembly()
         {
-            using (var source = ReadIfc4Model("Ifc4-MultipleBodiesPerProduct.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Pile-GroupOfBodies.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);

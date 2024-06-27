@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
-using Bitub.Xbim.Ifc.Occt.Tests;
+using Bitub.Xbim.Ifc.Tests;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validate;
 
@@ -15,7 +15,7 @@ using NUnit.Framework;
 
 using Microsoft.Extensions.Logging;
 
-namespace Bitub.Xbim.Ifc.Tests.Transform
+namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
     public class PropertySetRemovalTransformTests : TestBase<PropertySetRemovalTransformTests>
@@ -23,7 +23,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task RemoveByName()
         {
-            using (var source = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Storey-Walls.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);
@@ -73,7 +73,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform
         [Test]
         public async Task KeepAndRemoveByNameBoth()
         {
-            using (var source = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-Storey-Walls.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
                 Assert.IsTrue(stampBefore.IsCompliantToSchema);

@@ -8,7 +8,6 @@ using Xbim.IO;
 using Xbim.Common.Step21;
 
 using Bitub.Dto;
-using Bitub.Xbim.Ifc;
 using Bitub.Xbim.Ifc.Concept;
 
 using NUnit.Framework;

@@ -17,7 +17,7 @@ namespace Bitub.Xbim.Ifc.Tests
         [Test]
         public void Compliance_CloneIfcStore()
         {
-            using (var store = ReadIfc4Model("Ifc4-Storey-With-4Walls.ifc"))
+            using (var store = ReadIfc4Model("Ifc4-SimpleStoreyWithWalls.ifc"))
             {
                 var testStore = IfcStore.Create(store.SchemaVersion, XbimStoreType.InMemoryModel);
                 var map = new XbimInstanceHandleMap(store, testStore);

@@ -5,17 +5,16 @@ using Xbim.Ifc4.Interfaces;
 using Xbim.IO;
 
 using Bitub.Xbim.Ifc.Transform;
-using Bitub.Xbim.Ifc.Occt.Tests;
 using Bitub.Xbim.Ifc.Validate;
 
 using Bitub.Dto;
 using Bitub.Dto.Spatial;
-
+using Bitub.Xbim.Ifc.Tests;
 using NUnit.Framework;
 
 using Microsoft.Extensions.Logging;
 
-namespace Bitub.Xbim.Ifc.Tests.Occt.Transform
+namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
     public class ModelPlacementTransformTests : TestBase<ModelPlacementTransformTests>
@@ -45,11 +44,11 @@ namespace Bitub.Xbim.Ifc.Tests.Occt.Transform
         [Test]
         public async Task OffsetShiftAndRotateTest1()
         {
-            using (var source = ReadIfc4Model("Ifc4-Rotated-1st-floor.ifc"))
+            using (var source = ReadIfc4Model("Ifc4-RotatedStorey-Slab.ifc"))
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis1.xml"));
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis1.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);
@@ -89,7 +88,7 @@ namespace Bitub.Xbim.Ifc.Tests.Occt.Transform
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis2.xml"));
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);
@@ -133,7 +132,7 @@ namespace Bitub.Xbim.Ifc.Tests.Occt.Transform
             {
                 var stampBefore = source.ToSchemeValidator();
 
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("IfcAlignmentTestAxis2.xml"));
+                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
                 Assert.IsNotNull(testConfig);
                 Assert.IsNotNull(testConfig.SourceReferenceAxis);
                 Assert.IsNotNull(testConfig.TargetReferenceAxis);

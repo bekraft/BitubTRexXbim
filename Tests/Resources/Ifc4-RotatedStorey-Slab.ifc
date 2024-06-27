@@ -1,6 +1,6 @@
 ISO-10303-21;
 HEADER;FILE_DESCRIPTION(('no view'),'2;1');
-FILE_NAME('Ifc4-Rotated-1st-floor.ifc','2018-12-21T10:47:48',('Someone'),('No Organization',''),'EDMsix Version 2.0100.09 Sep  7 2016','Allplan 2018.0 31.01.2018 - 17:00:38','');
+FILE_NAME('Ifc4-RotatedStorey-Slab.ifc','2018-12-21T10:47:48',('Someone'),('No Organization',''),'EDMsix Version 2.0100.09 Sep  7 2016','Allplan 2018.0 31.01.2018 - 17:00:38','');
 FILE_SCHEMA(('IFC4'));
 ENDSEC;
 

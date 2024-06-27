@@ -23,7 +23,12 @@ namespace Bitub.Xbim.Ifc.Tests
     {
         protected double Precision { get; } = 1e-5;
 
-        protected static ILoggerFactory LoggerFactory { get; } = Microsoft.Extensions.Logging.LoggerFactory.Create(b => b.AddConsole());
+        protected ILoggerFactory LoggerFactory { get; } = Microsoft.Extensions.Logging.LoggerFactory.Create(builder => builder.AddSimpleConsole(options =>
+        {
+            options.IncludeScopes = true;
+            options.SingleLine = true;
+            options.TimestampFormat = "HH:mm:ss ";
+        }));
 
         protected ILogger Logger { get; private set; }
 
@@ -32,7 +37,7 @@ namespace Bitub.Xbim.Ifc.Tests
             Logger = LoggerFactory.CreateLogger<T>();
         }
 
-        protected XbimEditorCredentials EditorCredentials = new XbimEditorCredentials
+        protected XbimEditorCredentials EditorCredentials { get; } = new XbimEditorCredentials
         {
             ApplicationDevelopersName = "Bitub",
             ApplicationFullName = "Testing Bitub.Ifc",
@@ -40,7 +45,7 @@ namespace Bitub.Xbim.Ifc.Tests
             ApplicationVersion = "1.0",
             EditorsFamilyName = "One",
             EditorsGivenName = "Some",
-            EditorsOrganisationName = "Selfemployed"
+            EditorsOrganisationName = "Self Employed"
         };
 
         protected CancelableProgressing NewProgressMonitor(bool cancelable = false)
@@ -97,24 +102,19 @@ namespace Bitub.Xbim.Ifc.Tests
 
         protected Stream ReadEmbeddedFileStream(string resourceName)
         {
-            var name = Assembly.GetExecutingAssembly().GetName().Name;
-            return Assembly.GetExecutingAssembly().GetManifestResourceStream($"{name}.Resources.{resourceName}");
+            return Assembly.GetAssembly(typeof(T))?.GetManifestResourceStream(resourceName);
         }
 
         protected string ReadUtf8TextFrom(string resourceName)
         {
-            using (var fs = ReadEmbeddedFileStream(resourceName))
-            {
-                return ReadUtf8TextFrom(fs);
-            }
+            using var fs = ReadEmbeddedFileStream(resourceName);
+            return ReadUtf8TextFrom(fs);
         }
 
         protected string ReadUtf8TextFrom(Stream binStream)
         {
-            using (var sr = new StreamReader(binStream, System.Text.Encoding.UTF8))
-            {
-                return sr.ReadToEnd();
-            }    
+            using var sr = new StreamReader(binStream, System.Text.Encoding.UTF8);
+            return sr.ReadToEnd();
         }
 
         protected string ResolveFilename(string localPath)

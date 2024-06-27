@@ -29,7 +29,7 @@ namespace Bitub.Xbim.Ifc.Export
     /// var result = await exporter.Run(myModel);
     /// </code>
     /// </summary>
-    public class ComponentModelExporter : IExporter<ComponentScene>
+    public class ComponentModelExporter : IModelExporter<ComponentScene>
     {
         #region Internals
         private readonly ILoggerFactory _loggerFactory;

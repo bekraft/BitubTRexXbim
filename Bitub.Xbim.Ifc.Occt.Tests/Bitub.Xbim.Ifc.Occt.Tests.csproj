@@ -5,23 +5,18 @@
     <AssemblyName>Bitub.Xbim.Ifc.Occt.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
-    <Platforms>x64</Platforms>    
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'">
+    <Platforms>x64</Platforms>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.3.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+    <!--<PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.108-netcore" />-->
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
@@ -29,25 +24,48 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.0.0-dev" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.108-netcore" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Bitub.Xbim.Ifc.Occt\Bitub.Xbim.Ifc.Occt.csproj" />
+    <ProjectReference Include="..\Bitub.Xbim.Ifc.Tests\Bitub.Xbim.Ifc.Tests.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Ifc4-Storey-With-4Walls.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-Storey-With-Slab.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-Base-Groundfloor.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-Rotated-1st-floor.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-Rotated-IfcSite-1st-floor.ifc" />
-    <EmbeddedResource Include="Resources\Ifc2x3-Slab-BooleanResult.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-Multi-Body-House.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-MultipleBodiesPerProduct.ifc" />
-    <EmbeddedResource Include="Resources\Ifc4-SampleHouse.ifc" />
-    <EmbeddedResource Include="Resources\IfcAlignmentTestAxis1.xml" />
-    <EmbeddedResource Include="Resources\IfcAlignmentTestAxis2.xml" />
-    <EmbeddedResource Include="Resources\mapped-shape-with-transformation.ifc" />
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-Storey-Walls.ifc">
+      <LogicalName>Ifc4-Storey-Walls.ifc</LogicalName>
+    </EmbeddedResource>
+    <!-- Not used -->
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-Storey-Slab.ifc">
+      <LogicalName>Ifc4-Storey-Slab.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-Storey-WallsAndDoor-Plate.ifc">
+      <LogicalName>Ifc4-Storey-WallsAndDoor-Plate.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-RotatedStorey-Slab.ifc">
+      <LogicalName>Ifc4-RotatedStorey-Slab.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc2x3-Slab-BooleanCut.ifc">
+      <LogicalName>Ifc2x3-Slab-BooleanCut.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-SampleHouse-GroupOfBodies.ifc">
+      <LogicalName>Ifc4-SampleHouse-GroupOfBodies.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-Pile-GroupOfBodies.ifc">
+      <LogicalName>Ifc4-Pile-GroupOfBodies.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-SampleHouse.ifc">
+      <LogicalName>Ifc4-SampleHouse.ifc</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\IfcAlignmentTestAxis1.xml">
+      <LogicalName>AlignmentAxis1.xml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\IfcAlignmentTestAxis2.xml">
+      <LogicalName>AlignmentAxis2.xml</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-BuildingProxy-WithMappedShapeAndTransformation.ifc">
+      <LogicalName>Ifc4-BuildingProxy-WithMappedShapeAndTransformation.ifc</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

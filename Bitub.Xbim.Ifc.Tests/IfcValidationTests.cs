@@ -15,7 +15,7 @@ namespace Bitub.Xbim.Ifc.Tests
         [Test]
         public void IsSchemataCompliant()
         {
-            using (var source = ReadIfc2x3Model("Ifc2x3-Slab-BooleanResult.ifc"))
+            using (var source = ReadIfc2x3Model("Ifc2x3-SchemeValidationExample.ifc"))
             {
                 var validationStamp = source.ToSchemeValidator(
                     ValidationFlags.Properties | ValidationFlags.Inverses);
@@ -38,7 +38,7 @@ namespace Bitub.Xbim.Ifc.Tests
         [Test]
         public void IsSchemetaConstraintCompliant()
         {
-            using (var source = ReadIfc2x3Model("Ifc2x3-Slab-BooleanResult.ifc"))
+            using (var source = ReadIfc2x3Model("Ifc2x3-SchemeValidationExample.ifc"))
             {
                 var validationStamp = source.ToSchemeValidator(
                     ValidationFlags.TypeWhereClauses | ValidationFlags.EntityWhereClauses);

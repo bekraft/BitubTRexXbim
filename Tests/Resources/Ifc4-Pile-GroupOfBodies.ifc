@@ -1,7 +1,7 @@
 ISO-10303-21;
 HEADER;FILE_DESCRIPTION(('no view'),'2;1');
 FILE_NAME(
-'Ifc4-MultipleBodiesPerProduct.ifc'
+'Ifc4-Pile-GroupOfBodies.ifc'
 ,
 '2021-08-03T15:58:58',('Some one'),('No Organization',''),
 'EDMsix Version 2.0100.09 Sep  7 2016',
