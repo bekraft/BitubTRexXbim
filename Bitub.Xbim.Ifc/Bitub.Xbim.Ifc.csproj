@@ -22,12 +22,12 @@
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev'"> 
     <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
-    <PackageReference Include="Xbim.Common" Version="6.0.450-develop" />
-    <PackageReference Include="Xbim.Ifc" Version="6.0.450-develop" />
-    <PackageReference Include="Xbim.Ifc2x3" Version="6.0.450-develop" />
-    <PackageReference Include="Xbim.Ifc4" Version="6.0.450-develop" />
-    <PackageReference Include="Xbim.Ifc4x3" Version="6.0.450-develop" />
-    <PackageReference Include="Xbim.IO.MemoryModel" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.Common" Version="6.0.481-develop" />
+    <PackageReference Include="Xbim.Ifc" Version="6.0.481-develop" />
+    <PackageReference Include="Xbim.Ifc2x3" Version="6.0.481-develop" />
+    <PackageReference Include="Xbim.Ifc4" Version="6.0.481-develop" />
+    <PackageReference Include="Xbim.Ifc4x3" Version="6.0.481-develop" />
+    <PackageReference Include="Xbim.IO.MemoryModel" Version="6.0.481-develop" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsWindows)' == 'true' And '$(Configuration)' == 'XbimDev'">
-    <PackageReference Include="Xbim.IO.Esent" Version="6.0.450-develop" />
+    <PackageReference Include="Xbim.IO.Esent" Version="6.0.481-develop" />
   </ItemGroup>
 
 </Project>

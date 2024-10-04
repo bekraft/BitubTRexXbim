@@ -14,13 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Bitub.Xbim.Ifc\Bitub.Xbim.Ifc.csproj" />
   </ItemGroup>
-
-  <!--<ItemGroup>
-    
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.108-netcore" />
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.108-netcore" />
-  </ItemGroup>-->
-
+  
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">  
     <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.437" />
   </ItemGroup>
@@ -30,11 +24,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.108-netcore" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.111-netcore" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.108-netcore" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.111-netcore" />
   </ItemGroup>
   
 </Project>
