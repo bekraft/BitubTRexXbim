@@ -10,10 +10,10 @@ namespace Bitub.Xbim.Ifc.TRex
     /// </summary>
     public class FeatureStage : IEquatable<FeatureStage>, IComparable<FeatureStage>
     {
-        public readonly ELFeature feature;
+        public readonly Feature feature;
         public readonly int stage;
 
-        public FeatureStage(int s, ELFeature f)
+        public FeatureStage(int s, Feature f)
         {
             feature = f;
             stage = s;
@@ -42,7 +42,7 @@ namespace Bitub.Xbim.Ifc.TRex
         public override int GetHashCode()
         {
             int hashCode = -1497673742;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ELFeature>.Default.GetHashCode(feature);
+            hashCode = hashCode * -1521134295 + EqualityComparer<Feature>.Default.GetHashCode(feature);
             hashCode = hashCode * -1521134295 + stage.GetHashCode();
             return hashCode;
         }

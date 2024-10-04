@@ -11,7 +11,7 @@
   </PropertyGroup>
   
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">
-    <PackageReference Include="Bitub.Dto" Version="1.1.24151-Devb70215e4.40010" />
+    <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
     <PackageReference Include="Xbim.Common" Version="5.1.341" />    
     <PackageReference Include="Xbim.Ifc" Version="5.1.341" />
     <PackageReference Include="Xbim.Ifc2x3" Version="5.1.341" />
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev'"> 
-    <PackageReference Include="Bitub.Dto" Version="1.1.24151-Devb70215e4.40010" />
+    <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
     <PackageReference Include="Xbim.Common" Version="6.0.450-develop" />
     <PackageReference Include="Xbim.Ifc" Version="6.0.450-develop" />
     <PackageReference Include="Xbim.Ifc2x3" Version="6.0.450-develop" />

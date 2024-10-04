@@ -16,6 +16,7 @@ using Xbim.Common.Geometry;
 using NUnit.Framework;
 
 using Microsoft.Extensions.Logging;
+using Xbim.Common.Configuration;
 
 namespace Bitub.Xbim.Ifc.Tests
 {
@@ -75,7 +76,7 @@ namespace Bitub.Xbim.Ifc.Tests
                     Assert.IsTrue(a.Axis.ToXbimVector3D().IsEqual(new XbimVector3D(1, 0, 0), Precision), "RefDirection fails");
                 if (a.Location is IIfcCartesianPoint p)
                 {
-                    Assert.IsTrue(p.ToXbimVector3D().IsEqual(XbimVector3D.Zero, Precision), "Location fails");
+                    Assert.IsTrue(p?.ToXbimVector3D().IsEqual(XbimVector3D.Zero, Precision), "Location fails");
                 }
                 else
                 {
