@@ -51,6 +51,8 @@ steps:
       Write-Host "##vso[build.updatebuildnumber]$buildDate.$buildSecond"
 
 - task: NuGetToolInstaller@1
+  
+- task: NuGetAuthenticate@1
 
 - task: NuGetCommand@2
   inputs:
