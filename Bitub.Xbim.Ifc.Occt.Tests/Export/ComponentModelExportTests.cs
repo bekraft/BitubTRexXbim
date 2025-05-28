@@ -11,7 +11,6 @@ using Bitub.Dto;
 using Bitub.Dto.Scene;
 using Bitub.Xbim.Ifc.Export;
 using Bitub.Xbim.Ifc.Tesselate;
-using Bitub.Xbim.Ifc.Tests;
 
 using NUnit.Framework;
 
@@ -20,7 +19,7 @@ using Microsoft.Extensions.Logging;
 namespace Bitub.Xbim.Ifc.Occt.Tests.Export
 {
     [TestFixture]
-    public class ComponentModelExportTests : TestBase<ComponentModelExportTests>
+    public class ComponentModelExportTests : GeometryTestBase<ComponentModelExportTests>
     {
         private readonly ScenePreferences _testPreferences = new ScenePreferences
         {

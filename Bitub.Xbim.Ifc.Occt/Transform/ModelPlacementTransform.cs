@@ -8,8 +8,10 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
+using Xbim.Common.Configuration;
+using Xbim.Geometry.Engine.Interop;
 using Xbim.ModelGeometry.Scene;
 
 namespace Bitub.Xbim.Ifc.Transform
@@ -46,8 +48,8 @@ namespace Bitub.Xbim.Ifc.Transform
         public IfcAxisAlignment AppliedAxisAlignment { get; private set; }
         public int[] SourceRootPlacementsLabels { get; private set; }
 
-        private IIfcLocalPlacement newRootPlacement;
-
+        private XbimGeometryEngine _geometryEngine;
+        private IIfcLocalPlacement _newRootPlacement;
 
         public ModelPlacementTransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor,
             ModelPlacementStrategy placementStrategy, IfcAxisAlignment axisAlignment) : base(aSource, aTarget, progressMonitor)
@@ -57,13 +59,31 @@ namespace Bitub.Xbim.Ifc.Transform
             UnitsPerMeterTarget = (float)aTarget.ModelFactors.OneMeter;
             AppliedAxisAlignment = new IfcAxisAlignment(axisAlignment);
         }
+        
+        public XbimGeometryEngine GeometryEngine
+        {
+            get 
+            {      
+                if (null == _geometryEngine)
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                        throw new NotSupportedException($"${nameof(ModelMergeTransformPackage)}) requires WinOS platform.");
+
+                    var geometryServices = XbimServices.Current.ServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
+                    var loggingFactory = XbimServices.Current.ServiceProvider.GetRequiredService<ILoggerFactory>();
+                    _geometryEngine = new XbimGeometryEngine(geometryServices, loggingFactory);
+                }
+
+                return _geometryEngine; 
+            }
+        }
 
         internal void Prepare(CancelableProgressing cancelableProgress)
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new NotSupportedException($"${nameof(ModelPlacementTransformPackage)}) requires WinOS platform.");
 
-            PlacementTree = new XbimPlacementTree(Source, false);
+            PlacementTree = new XbimPlacementTree(Source, GeometryEngine, false);
             SourceRootPlacementsLabels = Source.Instances
                 .OfType<IIfcLocalPlacement>()
                 .Where(p => p.PlacementRelTo == null).Select(p => p.EntityLabel).ToArray();
@@ -116,13 +136,13 @@ namespace Bitub.Xbim.Ifc.Transform
             switch(AppliedPlacementStrategy)
             {
                 case ModelPlacementStrategy.NewRootPlacement:
-                    if (null == newRootPlacement)
+                    if (null == _newRootPlacement)
                     {
-                        newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
-                        LogAction(new XbimInstanceHandle(newRootPlacement), TransformActionResult.Added);
+                        _newRootPlacement = AppliedAxisAlignment.NewRootIfcLocalPlacement(Target);
+                        LogAction(new XbimInstanceHandle(_newRootPlacement), TransformActionResult.Added);
                     }
                     LogAction(new XbimInstanceHandle(sourcePlacement), TransformActionResult.Modified);
-                    targetPlacement.PlacementRelTo = newRootPlacement;
+                    targetPlacement.PlacementRelTo = _newRootPlacement;
                     break;
 
                 case ModelPlacementStrategy.ChangeRootPlacements:
@@ -158,7 +178,7 @@ namespace Bitub.Xbim.Ifc.Transform
     /// <summary>
     /// IFC placement transformation request.
     /// </summary>
-    public class ModelPlacementTransform : ModelTransformTemplate<ModelPlacementTransformPackage>
+    public sealed class ModelPlacementTransform : ModelTransformTemplate<ModelPlacementTransformPackage>
     {
         /// <summary>
         /// The logger.

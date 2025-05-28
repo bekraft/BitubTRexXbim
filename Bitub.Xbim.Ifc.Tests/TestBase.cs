@@ -16,7 +16,6 @@ using Xbim.Common.Geometry;
 using NUnit.Framework;
 
 using Microsoft.Extensions.Logging;
-using Xbim.Common.Configuration;
 
 namespace Bitub.Xbim.Ifc.Tests
 {

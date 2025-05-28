@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
-using Bitub.Xbim.Ifc.Tests;
+
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validate;
 
@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
-    public class PropertySetRemovalTransformTests : TestBase<PropertySetRemovalTransformTests>
+    public class PropertySetRemovalTransformTests : GeometryTestBase<PropertySetRemovalTransformTests>
     {
         [Test]
         public async Task RemoveByName()
@@ -30,8 +30,7 @@ namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 
                 Assert.AreEqual(4, source.Instances
                     .OfType<IIfcPropertySet>()
-                    .Where(s => s.Name == "AllplanAttributes")
-                    .Count());
+                    .Count(s => s.Name == "AllplanAttributes"));
 
                 var request = new PropertySetRemovalTransform(LoggerFactory)
                 {
@@ -51,8 +50,7 @@ namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
                     Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
                     Assert.AreEqual(0, result.Target.Instances
                         .OfType<IIfcPropertySet>()
-                        .Where(s => s.Name == "AllplanAttributes")
-                        .Count());
+                        .Count(s => s.Name == "AllplanAttributes"));
 
                     var pset = result.Target.Instances
                         .OfType<IIfcPropertySet>()
@@ -99,8 +97,7 @@ namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 
                     Assert.AreEqual(0, result.Target.Instances
                         .OfType<IIfcPropertySet>()
-                        .Where(s => s.Name == "AllplanAttributes")
-                        .Count());
+                        .Count(s => s.Name == "AllplanAttributes"));
 
                     var pset = result.Target.Instances
                         .OfType<IIfcPropertySet>()

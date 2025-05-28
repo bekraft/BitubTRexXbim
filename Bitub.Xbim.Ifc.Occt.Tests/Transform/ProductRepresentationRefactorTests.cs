@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using Bitub.Xbim.Ifc.Tests;
+
 using Xbim.IO;
 using Xbim.Ifc4.Interfaces;
 
@@ -13,7 +12,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
-    public class ProductRepresentationRefactorTests : TestBase<ProductRepresentationRefactorTests>
+    public class ProductRepresentationRefactorTests : GeometryTestBase<ProductRepresentationRefactorTests>
     {
         private TransformActionResult[] defaultLogResultTypes = new[]
         {

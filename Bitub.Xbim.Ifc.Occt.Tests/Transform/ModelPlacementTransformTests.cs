@@ -17,7 +17,7 @@ using Microsoft.Extensions.Logging;
 namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
 {
     [TestFixture]
-    public class ModelPlacementTransformTests : TestBase<ModelPlacementTransformTests>
+    public class ModelPlacementTransformTests : GeometryTestBase<ModelPlacementTransformTests>
     {
         [Test]
         public void AxisAlignmentSerializationTest()

@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.111-netcore" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.823-netcore" />
   </ItemGroup>
 
   <ItemGroup>
