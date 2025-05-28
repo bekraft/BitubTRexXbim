@@ -62,19 +62,18 @@ steps:
     feedsToUse: 'config'
     nugetConfigPath: 'nuget.config'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond) -p:BuildQualifier=$(buildQualifier)'
+    command: 'build'
+    projects: '**/*/*.csproj'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform) -p:Build=$(buildSecond) -p:BuildRelease=$(buildDate) -p:BuildQualifier=$(buildQualifier)'
     
 - task: DotNetCoreCLI@2
   condition: and(succeeded(), eq(variables.skipTests, 'false'))
   inputs:
     command: 'test'
     projects: '**/*Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --arch $(buildPlatform)'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform)'
 
 - task: NuGetCommand@2
   condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
