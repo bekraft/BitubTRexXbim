@@ -12,7 +12,7 @@ namespace Bitub.Xbim.Ifc
     /// </summary>
     public class AssemblyScope
     {
-        public readonly Assembly[] assemblySpaces;
+        public readonly Assembly[] _assemblySpaces;
         public readonly StringComparison comparisonType;
 
         public AssemblyScope(params Assembly[] assemblies) : this(StringComparison.Ordinal, assemblies)
@@ -21,33 +21,33 @@ namespace Bitub.Xbim.Ifc
 
         public AssemblyScope(StringComparison stringComparisonType, params Assembly[] assemblies)
         {
-            assemblySpaces = assemblies;
+            _assemblySpaces = assemblies;
             comparisonType = stringComparisonType;
         }
 
         public IEnumerable<Type> Implementing(Type baseType)
         {
-            return assemblySpaces.SelectMany(a => a.ExportedTypes.Where(t => t.IsSubclassOf(baseType) || t.GetInterfaces().Any(i => i == baseType)));
+            return _assemblySpaces.SelectMany(a => a.ExportedTypes.Where(t => t.IsSubclassOf(baseType) || t.GetInterfaces().Any(i => i == baseType)));
         }
 
         public IEnumerable<Type> GetLocalType(Qualifier name)
         {
-            return assemblySpaces.SelectMany(a => a.ExportedTypes.Where(t => 0 == string.Compare(t.Name, name.GetLastFragment(), comparisonType)));
+            return _assemblySpaces.SelectMany(a => a.ExportedTypes.Where(t => 0 == string.Compare(t.Name, name.GetLastFragment(), comparisonType)));
         }
 
         public IEnumerable<Qualifier> TypeNames
         {
-            get => assemblySpaces.SelectMany(a => a.ExportedTypes.Select(t => t.ToQualifier()));            
+            get => _assemblySpaces.SelectMany(a => a.ExportedTypes.Select(t => t.ToQualifier()));            
         }
 
         public IEnumerable<AssemblyName> SpaceNames
         {
-            get => assemblySpaces.Select(a => a.GetName());
+            get => _assemblySpaces.Select(a => a.GetName());
         }
 
         public IEnumerable<Module> Modules
         {
-            get => assemblySpaces.SelectMany(a => a.Modules);
+            get => _assemblySpaces.SelectMany(a => a.Modules);
         }
 
         public virtual Qualifier GetModuleQualifer(Module module)

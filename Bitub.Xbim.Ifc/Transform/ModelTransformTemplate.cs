@@ -41,7 +41,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// Actions to be logged by transformation process.
         /// </summary>
-        public ISet<TransformActionResult> LogFilter { get; } = new HashSet<TransformActionResult>();
+        public ISet<TransformActionResult> LogFilter { get; }
 
         /// <summary>
         /// Transformation action type.
@@ -281,7 +281,9 @@ namespace Bitub.Xbim.Ifc.Transform
                     }
                     finally
                     {
-                        progressMonitor?.State.MarkTerminated();
+                        if (progressMonitor.State.IsAlive)
+                            progressMonitor?.State.MarkTerminated();
+                        
                         progressMonitor?.NotifyOnProgressEnd($"Transform '{Name}' has been finalized.");
                     }
                 }

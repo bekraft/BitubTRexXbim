@@ -151,7 +151,7 @@ namespace Bitub.Xbim.Ifc.Transform
     {
         public override string Name => "Product Multi-body Representation Decomposition";
 
-        public override ILogger Log { get; protected set; }
+        public sealed override ILogger Log { get; protected set; }
 
         public ProductRepresentationRefactorTransform(ILoggerFactory loggerFactory, params TransformActionResult[] logFilter) : base(logFilter)
         {
@@ -309,9 +309,12 @@ namespace Bitub.Xbim.Ifc.Transform
                             .ToHashSet();
 
                         if (products.Count > 0)
+                        {
                             package.ProductReferences.Add(
-                                new PropertyReference(new XbimInstanceHandle(hostObject as IPersistEntity), property.PropertyInfo),
+                                new PropertyReference(new XbimInstanceHandle(hostObject as IPersistEntity),
+                                    property.PropertyInfo),
                                 products.Select(p => new XbimInstanceHandle(p)).ToArray());
+                        }
 
                         return EmptyToNull(instances.OfType<IPersist>().Where(e => !products.Contains(e)));
                     }

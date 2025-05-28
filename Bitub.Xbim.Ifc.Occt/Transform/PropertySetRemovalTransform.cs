@@ -127,7 +127,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// The logger.
         /// </summary>
-        public override ILogger Log { get; protected set; }
+        public sealed override ILogger Log { get; protected set; }
 
         /// <summary>
         /// Name is "Property Set Removal"

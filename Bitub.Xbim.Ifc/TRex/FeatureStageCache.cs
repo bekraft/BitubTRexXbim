@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Bitub.Dto;
 using Bitub.Dto.Concept;
@@ -12,13 +10,13 @@ namespace Bitub.Xbim.Ifc.TRex
     public class FeatureStageCache
     {
         #region Internals
-        private Dictionary<Qualifier, SortedList<int, Feature>> cache;
-        private int stage;
+        private Dictionary<Qualifier, SortedList<int, Feature>> _cache;
+        private int _stage;
         #endregion
 
         public FeatureStageCache(QualifierCaseEqualityComparer comparer) 
         {
-            cache = new Dictionary<Qualifier, SortedList<int, Feature>>(comparer);
+            _cache = new Dictionary<Qualifier, SortedList<int, Feature>>(comparer);
         }
 
         public FeatureStageCache() : this(new QualifierCaseEqualityComparer(StringComparison.OrdinalIgnoreCase))
@@ -26,13 +24,13 @@ namespace Bitub.Xbim.Ifc.TRex
 
         public int Stage 
         {
-            get => stage;
-            set => stage = value;
+            get => _stage;
+            set => _stage = value;
         }
 
         public IEnumerable<Feature> GetAllByDepth(Qualifier qualifier, FeatureStageStrategy strategy, FeatureStageRange stageRange)
         {
-            var features = cache[qualifier]?.Where(f => f.Key <= stage);
+            var features = _cache[qualifier]?.Where(f => f.Key <= _stage);
             if (null == features)
                 yield break;
 
@@ -59,14 +57,14 @@ namespace Bitub.Xbim.Ifc.TRex
 
         public FeatureStage AddFeatureStage(FeatureStage featureStage)
         {
-            return AddFeatureStage(featureStage.stage, featureStage.feature);
+            return AddFeatureStage(featureStage._stage, featureStage._feature);
         }
 
         public FeatureStage AddFeatureStage(int stage, Feature feature)
         {
             SortedList<int, Feature> features;
-            if (!cache.TryGetValue(feature.Name, out features))
-                cache.Add(feature.Name, features = new SortedList<int, Feature>());
+            if (!_cache.TryGetValue(feature.Name, out features))
+                _cache.Add(feature.Name, features = new SortedList<int, Feature>());
 
             var formerFeature = features[stage];
             features[stage] = feature;
@@ -75,7 +73,7 @@ namespace Bitub.Xbim.Ifc.TRex
 
         public void DropAllAboveStage(int stage)
         {
-            foreach (var fKeyValue in cache)
+            foreach (var fKeyValue in _cache)
             {
                 foreach (var stageKey in fKeyValue.Value.Keys.Where(k => k > stage).ToArray())
                     fKeyValue.Value.Remove(stageKey);
