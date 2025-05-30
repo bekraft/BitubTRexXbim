@@ -48,7 +48,7 @@ namespace Bitub.Xbim.Ifc.Transform
         public IfcAxisAlignment AppliedAxisAlignment { get; private set; }
         public int[] SourceRootPlacementsLabels { get; private set; }
 
-        private XbimGeometryEngine _geometryEngine;
+        private IXbimManagedGeometryEngine _geometryEngine;
         private IIfcLocalPlacement _newRootPlacement;
 
         public ModelPlacementTransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor,
@@ -60,18 +60,13 @@ namespace Bitub.Xbim.Ifc.Transform
             AppliedAxisAlignment = new IfcAxisAlignment(axisAlignment);
         }
         
-        public XbimGeometryEngine GeometryEngine
+        public IXbimManagedGeometryEngine GeometryEngine
         {
             get 
             {      
                 if (null == _geometryEngine)
                 {
-                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        throw new NotSupportedException($"${nameof(ModelMergeTransformPackage)}) requires WinOS platform.");
-
-                    var geometryServices = XbimServices.Current.ServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
-                    var loggingFactory = XbimServices.Current.ServiceProvider.GetRequiredService<ILoggerFactory>();
-                    _geometryEngine = new XbimGeometryEngine(geometryServices, loggingFactory);
+                    _geometryEngine = XbimServices.Current.GetGeometryManagedEngine();
                 }
 
                 return _geometryEngine; 

@@ -25,7 +25,7 @@ namespace Bitub.Xbim.Ifc.Tesselate
     /// <summary>
     /// Tesselation context implementing Xbim shape triangulation via Open Cascade.
     /// </summary>
-    public sealed partial class XbimTesselationContext : ITesselationContext<ScenePreferences>
+    public sealed class XbimTesselationContext : ITesselationContext<ScenePreferences>
     {
         #region Internals
         private readonly ILogger logger;
@@ -64,6 +64,7 @@ namespace Bitub.Xbim.Ifc.Tesselate
                     progressing?.NotifyOnProgressChange();
                 };
                 
+                XbimOcctExtensions.EnsureGeometryServiceConfigured();
                 var context = new Xbim3DModelContext(model, "model", null, logger);                
                 context.CreateContext(progressDelegate, false);                
             }

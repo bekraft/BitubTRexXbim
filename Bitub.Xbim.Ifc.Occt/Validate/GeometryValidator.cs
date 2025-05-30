@@ -20,8 +20,8 @@ namespace Bitub.Xbim.Ifc.Validate
     public class GeometryValidator
     {
         #region Internals
-        private XbimGeometryEngine geometryEngine;
-        private ILogger logger;
+        private IXbimManagedGeometryEngine _geometryEngine;
+        private ILogger _logger;
         #endregion
 
         public GeometryValidator()
@@ -32,18 +32,12 @@ namespace Bitub.Xbim.Ifc.Validate
         {
             get
             {
-                if (null == geometryEngine)
+                if (null == _geometryEngine)
                 {
-                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        throw new NotSupportedException($"${nameof(GeometryValidator)}) requires WinOS platform.");
-
-                    var geometryServices = XbimServices.Current.ServiceProvider.GetRequiredService<IXbimGeometryServicesFactory>();
-                    var loggingFactory = XbimServices.Current.ServiceProvider.GetRequiredService<ILoggerFactory>();
-                    logger = loggingFactory.CreateLogger<GeometryValidator>();
-                    geometryEngine = new XbimGeometryEngine(geometryServices, loggingFactory);
+                    _geometryEngine = XbimServices.Current.GetGeometryManagedEngine();
                 }
 
-                return geometryEngine;
+                return _geometryEngine;
             }
         }
 
@@ -89,7 +83,7 @@ namespace Bitub.Xbim.Ifc.Validate
                 }
                 catch (Exception e)
                 {
-                    logger.LogError("Got exception '{0}' with call to '{1}({2})'", e.Message, methodInfo.Name, type.Name);
+                    _logger.LogError("Got exception '{0}' with call to '{1}({2})'", e.Message, methodInfo.Name, type.Name);
                     continue;
                 }
 
