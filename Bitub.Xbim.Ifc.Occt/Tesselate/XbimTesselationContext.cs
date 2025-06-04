@@ -10,7 +10,6 @@ using Bitub.Xbim.Ifc.Export;
 
 using Xbim.Common;
 using Xbim.Common.Geometry;
-using Xbim.ModelGeometry.Scene;
 
 using Xbim.Ifc4.Interfaces;
 
@@ -18,7 +17,7 @@ using Xbim.Common.XbimExtensions;
 using Xbim.Common.Metadata;
 
 using Microsoft.Extensions.Logging;
-
+using Xbim.Common.Configuration;
 
 namespace Bitub.Xbim.Ifc.Tesselate
 {
@@ -58,15 +57,15 @@ namespace Bitub.Xbim.Ifc.Tesselate
             if (forceUpdate || (model.GeometryStore?.IsEmpty ?? false))
             {
                 progressing?.NotifyProgressEstimateUpdate(100);
-                ReportProgressDelegate progressDelegate = (percent, userState) =>
+
+                void ProgressDelegate(int percent, object userState)
                 {
                     progressing?.State.UpdateDone(percent, userState.ToString());
                     progressing?.NotifyOnProgressChange();
-                };
-                
-                XbimOcctExtensions.EnsureGeometryServiceConfigured();
-                var context = new Xbim3DModelContext(model, "model", null, logger);                
-                context.CreateContext(progressDelegate, false);                
+                }
+
+                var context = XbimServices.Current.CreateGeometryModelContext(model, logger, 1 );
+                context.CreateContext(ProgressDelegate, false);                
             }
             return model.GeometryStore;
         }

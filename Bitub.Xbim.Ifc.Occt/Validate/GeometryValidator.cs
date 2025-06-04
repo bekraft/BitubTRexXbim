@@ -34,7 +34,7 @@ namespace Bitub.Xbim.Ifc.Validate
             {
                 if (null == _geometryEngine)
                 {
-                    _geometryEngine = XbimServices.Current.GetGeometryManagedEngine();
+                    _geometryEngine = XbimServices.Current.CreateGeometryManagedEngine();
                 }
 
                 return _geometryEngine;
