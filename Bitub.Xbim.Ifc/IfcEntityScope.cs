@@ -18,7 +18,7 @@ namespace Bitub.Xbim.Ifc
         private readonly IfcBuilder builder;
 
         public IfcEntityScope(IfcBuilder builder) 
-            : base(typeof(T), builder.ifcAssembly, new System.Reflection.Module[] { builder.ifcAssembly.factory.GetType().Module })
+            : base(typeof(T), builder.IfcAssembly, new [] { builder.IfcAssembly.Factory.GetType().Module })
         {
             this.builder = builder;
         }
@@ -35,33 +35,35 @@ namespace Bitub.Xbim.Ifc
             if (!typeof(E).IsAssignableFrom(t))
                 throw new ArgumentException($"Type '{t.Name}' has to be equal or more specific as '{typeof(E).Name}'");
 
-            var result = (E)builder.model.Instances.New(this[GetScopedQualifier(t)]);
+            var result = (E)builder.Model.Instances.New(this[GetScopedQualifier(t)]);
             mod?.Invoke(result);
             return result;
         }
 
         public E New<E>(Action<E> mod = null) where E : T
         {
-            E result = (E)builder.model.Instances.New(this[GetScopedQualifier(typeof(E))]);
+            E result = (E)builder.Model.Instances.New(this[GetScopedQualifier(typeof(E))]);
             mod?.Invoke(result);
             return result;
         }
 
         public T New(Qualifier qualifiedType)
         {
-            return (T)builder.model.Instances.New(this[qualifiedType]);
+            return (T)builder.Model.Instances.New(this[qualifiedType]);
         }
 
         public E NewOf<E>(object value) where E : IExpressValueType
         {
-            var valueType = Implementing<E>().First();
+            var typeList = Implementing<E>().ToList();
+            var valueType = typeList.First();
             var ctor = valueType.GetConstructor(new Type[] { value.GetType() });
             return (E)ctor.Invoke(new object[] { value });
         }
 
-        public E NewOf<E>(Action<E> mod = null) where E : T, IPersistEntity
+        public E NewOf<E>(Action<E>? mod = null) where E : T, IPersistEntity
         {
-            E result = (E)builder.model.Instances.New(Implementing<E>().First());
+            var typeList = Implementing<E>().ToList();
+            E result = (E)builder.Model.Instances.New(typeList.First());
             mod?.Invoke(result);            
             return result;
         }

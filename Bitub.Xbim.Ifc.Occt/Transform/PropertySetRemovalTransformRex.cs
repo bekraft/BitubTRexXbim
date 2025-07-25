@@ -122,7 +122,7 @@ namespace Bitub.Xbim.Ifc.Transform
     /// <summary>
     /// Remove entire IFC property sets by given black list names.
     /// </summary>
-    public class PropertySetRemovalTransform : ModelTransformTemplate<PropertySetRemovalPackage>
+    public class PropertySetRemovalTransformRex : ModelTransformTemplate<PropertySetRemovalPackage>
     {
         /// <summary>
         /// The logger.
@@ -160,9 +160,9 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// New property cut task request.
         /// </summary>
-        public PropertySetRemovalTransform(ILoggerFactory factory, params TransformActionResult[] logFilter) : base(logFilter)
+        public PropertySetRemovalTransformRex(ILoggerFactory factory, params TransformActionResult[] logFilter) : base(logFilter)
         {
-            Log = factory?.CreateLogger<PropertySetRemovalTransform>();
+            Log = factory?.CreateLogger<PropertySetRemovalTransformRex>();
         }
 
         protected override TransformActionType PassInstance(IPersistEntity instance, 

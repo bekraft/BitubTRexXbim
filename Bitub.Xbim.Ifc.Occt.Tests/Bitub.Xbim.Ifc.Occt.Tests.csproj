@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>Bitub.Xbim.Ifc.Occt.Tests</RootNamespace>
+    <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Occt.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.836-netcore" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.847-netcore" />
   </ItemGroup>
 
   <ItemGroup>

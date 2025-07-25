@@ -1,0 +1,260 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+using Bitub.Dto;
+using Bitub.Dto.Scene;
+using Bitub.Dto.Spatial;
+using Bitub.Xbim.Ifc.TRex;
+using Microsoft.Extensions.Logging;
+
+using Xbim.Common;
+using Xbim.Common.Metadata;
+using Xbim.Ifc;
+using Xbim.Ifc4.Interfaces;
+
+namespace Bitub.Xbim.Ifc.Transform;
+
+/// <summary>
+/// Map Conversion CRS preferences.
+/// </summary>
+/// <param name="VerticalDatum">Name by which the vertical datum is identified.</param>
+/// <param name="MapProjection">Name by which the map projection is identified.</param>
+/// <param name="MapZone">Name by which the map zone, relating to the MapProjection, is identified.</param>
+/// <param name="OffsetAndHeight">XYZ reference coordinates of the target map coordinate reference system.</param>
+/// <param name="MapRotation">UV reference vector</param>
+/// <param name="Scale">The scale between target and source unit</param>
+/// <param name="MapUnitName"></param>
+public record MapConversionCrsPrefs(
+    string Name,
+    string? Description,
+    string GeodeticDatum,
+    string? VerticalDatum, 
+    string MapProjection, 
+    string MapZone,
+    XYZ OffsetAndHeight,
+    UV MapRotation,
+    Double Scale,
+    IfcSIUnitName MapUnitName) { }
+
+
+/// <summary>
+/// Conversion transform preferences.
+/// </summary>
+/// <param name="UsePlacementOffsetAsTargetRef">Use shift of local root placement as map conversion target reference.</param>
+/// <param name="RepresentationContext">Filter by given list of contexts</param>
+public record MapConversionPrefs(
+    bool UsePlacementOffsetAsTargetRef,
+    Qualifier[] RepresentationContext) { }
+
+/// <summary>
+/// Map conversion transform package.
+/// </summary>
+public class MapConversionTransformPackage : TransformPackage
+{
+    private readonly List<IIfcGeometricRepresentationContext> _representationContexts = new ();
+    private readonly List<IIfcMapConversion> _mapConversions = new ();
+    private readonly List<IIfcProjectedCRS> _projectedCRS = new ();
+    private readonly Dictionary<XbimInstanceHandle, IPersistEntity> _unitsGlobalDict = new ();
+    private readonly Dictionary<IIfcProjectedCRS, IIfcNamedUnit> _unitsCrsDict = new ();
+    
+    internal MapConversionTransformPackage(IModel source, IModel target, CancelableProgressing cancelableProgressing)
+        : base(source, target, cancelableProgressing) 
+    { }
+    
+    public IReadOnlyCollection<IIfcGeometricRepresentationContext> RepresentationContexts => _representationContexts;
+    
+    public IReadOnlyCollection<IIfcMapConversion> MapConversions => _mapConversions;
+    
+    public IReadOnlyCollection<IIfcProjectedCRS> ProjectedCRS => _projectedCRS;
+
+    internal TransformActionType DispatchObject(IPersistEntity persistEntity)
+    {
+        switch (persistEntity)
+        {
+            case IIfcGeometricRepresentationContext context:
+                _representationContexts.Add(context);
+                return TransformActionType.CopyWithInverse;
+            case IIfcMapConversion mapConversion:
+                _mapConversions.Add(mapConversion);
+                return TransformActionType.Drop;
+            case IIfcProjectedCRS projectedCRS:
+                _projectedCRS.Add(projectedCRS);
+                return TransformActionType.Drop;
+            default:
+                return TransformActionType.Copy;
+        }
+    }
+
+    internal void TrackHostForNamedUnit(ExpressMetaProperty property, object hostObject)
+    {
+        if (hostObject is IPersistEntity persistEntity)
+        {
+            // Cross check assigned units
+            if (property.PropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcNamedUnit>())
+            {
+                if (property.TryGetValues<IIfcNamedUnit>(persistEntity, out var units))
+                {
+                    if (persistEntity is IIfcProjectedCRS projectedCRS)
+                        units?.ForEach(u => _unitsCrsDict.Add(projectedCRS, u));
+                    else
+                        units?.ForEach(u => _unitsGlobalDict.Add(new XbimInstanceHandle(u), persistEntity));
+                }
+            }
+        }
+    }
+
+    internal List<IIfcNamedUnit> CleanUpUnusedNamedUnits()
+    {
+        var keptUnits = new List<IIfcNamedUnit>();
+        foreach (var crsUnit in _unitsCrsDict)
+        {
+            if (!_unitsGlobalDict.TryGetValue(new XbimInstanceHandle(crsUnit.Value), out var entity))
+            {
+                Target.Delete(crsUnit.Value);
+            }
+            else
+            {
+                keptUnits.Add(crsUnit.Value);
+            }
+        }
+
+        return keptUnits;
+    }
+}
+
+/// <summary>
+/// Map Conversion Transform
+/// </summary>
+public class MapConversionTransform : ModelTransformTemplate<MapConversionTransformPackage>
+{
+    public sealed override ILogger Log { get; protected set; }
+    
+    public override string Name => "Map Conversion Transform";
+    
+    public MapConversionCrsPrefs CrsPrefs { get; set; }
+    
+    public MapConversionPrefs Prefs { get; set; }
+    
+    /// <summary>
+    /// New Map Conversion Transform.
+    /// </summary>
+    /// <param name="loggerFactory"></param>
+    public MapConversionTransform(ILoggerFactory loggerFactory)
+    {
+        Log = loggerFactory.CreateLogger(GetType());
+        _loggerFactory = loggerFactory;
+    }
+
+    protected override object? PropertyTransform(ExpressMetaProperty property, 
+        object hostObject, MapConversionTransformPackage package)
+    {
+        package.TrackHostForNamedUnit(property, hostObject);
+        return base.PropertyTransform(property, hostObject, package);
+    }
+
+    protected override TransformResult.Code DoPreprocessTransform(MapConversionTransformPackage package)
+    {
+        // Check if CRS prefs has been set
+        if (null == CrsPrefs)
+            throw new ArgumentNullException(nameof(CrsPrefs));
+        return base.DoPreprocessTransform(package);
+    }
+
+    protected override TransformActionType PassInstance(IPersistEntity instance, MapConversionTransformPackage package)
+    {
+        // Use package dispatcher
+        return package.DispatchObject(instance);
+    }
+
+    protected override TransformResult.Code DoPostTransform(MapConversionTransformPackage package)
+    {
+        var keptUnits = package.CleanUpUnusedNamedUnits();
+        if (keptUnits.Any()) 
+            Log.LogWarning("Keeping references named units: {}", string.Join(",", keptUnits.Select(u => u.EntityLabel)));
+
+        // Create target projected CRS
+        var projectedCRS = CreateProjectedCRS(CrsPrefs);
+        Log.LogDebug("Creating new projected CRS {}", projectedCRS.ToString());
+
+        // Iterate source representation contexts
+        var contexts = package.RepresentationContexts
+            .Where(c1 =>
+                Array.Exists(Prefs.RepresentationContext, c2 => 
+                    c1.ContextType.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)));
+        
+        foreach (var context in contexts)
+        {
+            var offsetAndHeight = CrsPrefs.OffsetAndHeight;
+            if (Prefs.UsePlacementOffsetAsTargetRef &&
+                CreateOffsetAndHeigthFromOffset(context, out var localOffsetAndHeight))
+            {
+                offsetAndHeight = localOffsetAndHeight;
+            }
+
+            var mapTransform = CreateMapConversion(offsetAndHeight, CrsPrefs.MapRotation, CrsPrefs.Scale, context, projectedCRS);
+            Log.LogDebug("Creating new map conversion {}", mapTransform.ToString());
+        }
+        
+        return base.DoPostTransform(package);
+    }
+
+    protected override MapConversionTransformPackage CreateTransformPackage(IModel aSource,
+        IModel aTarget,
+        CancelableProgressing progressMonitor)
+    {
+        _builder = IfcBuilder.WithModel(aTarget, _loggerFactory);
+        return new MapConversionTransformPackage(aSource, aTarget, progressMonitor);
+    }
+    
+    #region Private creator methods
+
+    private IfcBuilder _builder;
+    private readonly ILoggerFactory _loggerFactory;
+
+    // Create an offset and heigth XYZ & set current location to the local origin
+    private bool CreateOffsetAndHeigthFromOffset(IIfcGeometricRepresentationContext context, out XYZ offsetAndHeight)
+    {
+        if (context.WorldCoordinateSystem is IIfcAxis2Placement3D axis2Placement3D)
+        {
+            offsetAndHeight = axis2Placement3D.Location.ToXYZ();
+            axis2Placement3D.Location.SetXYZ(0, 0, 0);
+            Log.LogDebug("Resetting offset and height to {}", axis2Placement3D.Location);
+            return true;
+        }
+        offsetAndHeight = XYZ.Zero;
+        return false;
+    }
+    
+    // Creates a projected CRS
+    private IIfcProjectedCRS CreateProjectedCRS(MapConversionCrsPrefs prefs)
+    {
+        var entity = _builder.IfcEntityScope.NewOf<IIfcProjectedCRS>();
+        entity.Name = prefs.Name;
+        entity.Description = prefs.Description;
+        entity.GeodeticDatum = prefs.GeodeticDatum;
+        entity.MapZone = prefs.MapZone;
+        entity.MapProjection = prefs.MapProjection;
+        entity.VerticalDatum = prefs.VerticalDatum;
+        entity.MapUnit = _builder.NewSIUnit(IfcUnitEnum.LENGTHUNIT, prefs.MapUnitName);
+        return entity;
+    }
+
+    // Creates a map conversion from given source and target by given offset
+    private IIfcMapConversion CreateMapConversion(XYZ offsetAndHeigth, UV axisRotation, Double scale, 
+        IIfcCoordinateReferenceSystemSelect source, IIfcCoordinateReferenceSystem target)
+    {
+        var entity = _builder.IfcEntityScope.NewOf<IIfcMapConversion>();
+        entity.SourceCRS = source;
+        entity.TargetCRS = target;
+        entity.XAxisAbscissa = axisRotation.U;
+        entity.XAxisOrdinate = axisRotation.V;
+        entity.Eastings = offsetAndHeigth.X;
+        entity.Northings = offsetAndHeigth.Y;
+        entity.OrthogonalHeight = offsetAndHeigth.Z;
+        entity.Scale = scale;
+        return entity;
+    }
+    
+    #endregion
+}

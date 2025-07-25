@@ -129,11 +129,11 @@ namespace Bitub.Xbim.Ifc
             return relation;
         }
 
-        public static IfcOwnerHistory NewIfc4OwnerHistoryEntry(this IModel s, string version,
-            IfcPersonAndOrganization owningUser, IfcApplication owningApplication,
-            IfcChangeActionEnum change = IfcChangeActionEnum.ADDED)
+        public static T NewIfcOwnerHistoryEntry<T>(this IModel s, string version,
+            IIfcPersonAndOrganization owningUser, IIfcApplication owningApplication,
+            IfcChangeActionEnum change = IfcChangeActionEnum.ADDED) where T : IIfcOwnerHistory, IInstantiableEntity
         {
-            var newEntry = s.Instances.New<IfcOwnerHistory>();
+            var newEntry = s.Instances.New<T>();
 
             newEntry.ChangeAction = change;
             var dateTime = (IfcTimeStamp)DateTime.Now;

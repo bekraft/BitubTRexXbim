@@ -27,6 +27,11 @@ public static class XbimOcctExtensions
     /// Whether to use heuristic store.
     /// </summary>
     public static bool UseHeuristicStoreType { get; set; } = true;
+    
+    /// <summary>
+    /// A logger factory to use whenever Xbim services are initialized.
+    /// </summary>
+    public static ILoggerFactory LoggerFactory { get; set; }
 
     /// <summary>
     /// Sets the maximum thread count for geometry creation.
@@ -48,13 +53,12 @@ public static class XbimOcctExtensions
             {
                 conf.AddGeometryServices();
                 if (UseHeuristicStoreType)
-                {
                     conf.AddHeuristicModel();
-                }
                 else
-                {
                     conf.AddMemoryModel();
-                }
+               
+                if (LoggerFactory != null)
+                    conf.AddLoggerFactory(LoggerFactory);
             }));
         }
     }

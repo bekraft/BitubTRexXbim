@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 
 using Xbim.Common;
-
+using Xbim.Common.Metadata;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.Kernel;
 
@@ -169,23 +170,31 @@ namespace Bitub.Xbim.Ifc
             foreach (var relationProperty in templateType
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(
-                    property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
+                    property => typeof(IEnumerable).IsAssignableFrom(property.GetMethod?.ReturnType) && property.GetMethod.ReturnType.IsGenericType)
                 .Where(
-                    property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod.ReturnType.GenericTypeArguments[0])))
+                    property => typeof(IIfcRelationship).IsAssignableFrom(property.GetMethod?.ReturnType.GenericTypeArguments[0])))
             {   
                 // Scan through relation objects of type IEnumerable<? extends IIfcRelationship>
-                foreach (var relation in (relationProperty.GetValue(template) as IEnumerable))
+                var seq = relationProperty.GetValue(template) as IEnumerable;
+                if (null != seq)
                 {
-                    var t1 = relation.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).Select(p => p.PropertyType).ToArray();
-                    foreach (var invRelationProperty in relation.GetType()
-                        .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(property => typeof(IItemSet).IsAssignableFrom(property.PropertyType) && property.PropertyType.IsGenericType)
-                        .Where(property => property.PropertyType.GetGenericArguments()[0].IsAssignableFrom(targetType)))
+                    foreach (var relation in seq)
                     {
-                        var itemSet = invRelationProperty.GetValue(relation);
-                        itemSet.GetType().GetMethod("Add").Invoke(itemSet, new object[] { target });
+                        var t1 = relation.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                            .Select(p => p.PropertyType).ToArray();
+                        foreach (var invRelationProperty in relation.GetType()
+                                     .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                     .Where(property =>
+                                         typeof(IItemSet).IsAssignableFrom(property.PropertyType) &&
+                                         property.PropertyType.IsGenericType)
+                                     .Where(property =>
+                                         property.PropertyType.GetGenericArguments()[0].IsAssignableFrom(targetType)))
+                        {
+                            var itemSet = invRelationProperty.GetValue(relation);
+                            itemSet?.GetType().GetMethod("Add")?.Invoke(itemSet, new object[] { target });
+                        }
                     }
-                }                
+                }
             }
             return target;
         }
@@ -195,12 +204,12 @@ namespace Bitub.Xbim.Ifc
         /// </summary>
         /// <typeparam name="T">The type of lower base property type.</typeparam>
         /// <typeparam name="TParam">The relation type</typeparam>
-        /// <param name="t">The host type</param>
-        /// <param name="relationName">The relation name</param>
+        /// <param name="type">The host type</param>
+        /// <param name="propertyName">The relation name</param>
         /// <returns>Reflected property info.</returns>
-        public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<T,TParam>(this Type t, string propertyName)
+        public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<T,TParam>(this Type type, string propertyName)
         {
-            return t.GetInterfaces()
+            return type.GetInterfaces()
                 .SelectMany(t => t.GetProperties())
                 .Where(p => p.Name == propertyName && typeof(T).IsAssignableFrom(p.PropertyType))
                 .Where(p => p.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam))));
@@ -213,7 +222,7 @@ namespace Bitub.Xbim.Ifc
         /// <param name="t">The host type</param>
         /// <param name="relationName">The relation name</param>
         /// <returns>Reflected property info.</returns>
-        public static PropertyInfo GetLowerConstraintRelationType<TParam>(this Type t, string relationName)
+        public static PropertyInfo? GetLowerConstraintRelationType<TParam>(this Type t, string relationName)
         {
             return t.GetLowerConstraintGenericProperty<IItemSet, TParam>(relationName).FirstOrDefault();
         }
@@ -241,9 +250,9 @@ namespace Bitub.Xbim.Ifc
         /// <returns>True, if there's a relation as a super generic type of given type</returns>
         public static bool HasLowerConstraintRelationTypeEquivalent<TParam>(this PropertyInfo propertyInfo)
         {
-            return propertyInfo.DeclaringType
+            return propertyInfo.DeclaringType?
                 .GetLowerConstraintGenericProperty<IItemSet, TParam>(propertyInfo.Name)
-                .Any();
+                .Any() ?? false;
         }
 
         /// <summary>
@@ -257,10 +266,8 @@ namespace Bitub.Xbim.Ifc
         public static bool AddRelationsByLowerConstraint<TParam>(this IPersistEntity hostInstance, string relationName, IEnumerable<TParam> instances)
         {
             var propertyInfo = hostInstance.GetType().GetLowerConstraintRelationType<TParam>(relationName);
-            if (null == propertyInfo)
-                return false;
 
-            var items = propertyInfo.GetValue(hostInstance);
+            var items = propertyInfo?.GetValue(hostInstance);
             var addRange = items?.GetType().GetMethod("AddRange");
             if (null == items || null == addRange)
                 return false;
@@ -268,7 +275,86 @@ namespace Bitub.Xbim.Ifc
             addRange.Invoke(items, new object[] { instances.Cast<TParam>().ToList() });
             return true;
         }
+        
+        /// <summary>
+        /// Get property value from relationship.
+        /// </summary>
+        /// <param name="metaProperty">The EXPRESS property</param>
+        /// <param name="instance">The object instance</param>
+        /// <param name="value">The out value if found</param>
+        /// <typeparam name="TParam">Value type</typeparam>
+        /// <returns>An object of value type</returns>
+        /// <exception cref="NotSupportedException"></exception>
+        public static bool TryGetSingleValue<TParam>(this ExpressMetaProperty metaProperty, object instance, out TParam? value)
+        {
+            value = default;
+            if (IsLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
+            {
+                value = (TParam?)metaProperty.PropertyInfo.GetValue(instance);
+                return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get property value as an enumerable from relationship.
+        /// </summary>
+        /// <param name="metaProperty">The EXPRESS property</param>
+        /// <param name="instance">The object instance</param>
+        /// <param name="values">The out values argument, EMPTY if not found</param>
+        /// <typeparam name="TParam">The generic inner type of enumerable</typeparam>
+        /// <returns></returns>
+        public static bool TryGetMultiValue<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam>? values)
+        {
+            values = Array.Empty<TParam>();
+            if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+            {
+                values = metaProperty.PropertyInfo.GetValue(instance) as IEnumerable<TParam>;
+                return true;
+            }
+            return false;
+        }
+        
+        /// <summary>
+        /// Get the values from given property, insensible to single or multi valued relations.
+        /// </summary>
+        /// <param name="metaProperty">The EXPRESS property</param>
+        /// <param name="instance">The object instance</param>
+        /// <param name="values">The out values argument, EMPTY if not found</param>
+        /// <typeparam name="TParam"></typeparam>
+        /// <returns></returns>
+        public static bool TryGetValues<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam?>? values)
+        {
+            values = Array.Empty<TParam?>();
+            if (IsLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
+            {
+                values = Array.AsReadOnly(new []{ (TParam?)metaProperty.PropertyInfo.GetValue(instance) });
+            } else if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+            {
+                values = metaProperty.PropertyInfo.GetValue(instance) as IEnumerable<TParam>;
+                return true;
+            }
+            return false;
+        }
+        
+        /// <summary>
+        /// Set the property value to relationship.
+        /// </summary>
+        /// <param name="metaProperty">The EXPRESS property</param>
+        /// <param name="instance">The object instance</param>
+        /// <param name="value">The value to be set</param>
+        /// <typeparam name="TParam">Value type</typeparam>
+        /// <exception cref="NotSupportedException"></exception>
+        public static void SetSingleValue<TParam>(this ExpressMetaProperty metaProperty, object instance, TParam? value)
+        {
+            if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+                metaProperty.PropertyInfo.SetValue(instance, value);
+            else
+                throw new NotSupportedException($"Property MUST support {typeof(TParam)}");
+        }
 
         #endregion
     }
+
+    
 }

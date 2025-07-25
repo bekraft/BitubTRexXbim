@@ -488,7 +488,7 @@ namespace Bitub.Xbim.Ifc.Transform
 
             package.Builder.Transactively(m =>
             {
-                assembly = package.Builder.ifcEntityScope.NewOf<IIfcElementAssembly>(e =>
+                assembly = package.Builder.IfcEntityScope.NewOf<IIfcElementAssembly>(e =>
                 {
                     e.Name = p.Name;
                     e.GlobalId = p.GlobalId;
@@ -512,7 +512,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 IIfcProduct newProduct = null;
                 package.Builder.Transactively(m =>
                 {
-                    newProduct = package.Builder.ifcEntityScope.New<IIfcProduct>(p.GetType(), e =>
+                    newProduct = package.Builder.IfcEntityScope.New<IIfcProduct>(p.GetType(), e =>
                     {
                         e.Name = package.NameRefactorFunction?.Invoke(p.Name, idx) ?? p.Name;
                         e.GlobalId = IfcGloballyUniqueId.ConvertToBase64(System.Guid.NewGuid());
@@ -538,7 +538,7 @@ namespace Bitub.Xbim.Ifc.Transform
                     IIfcProductRepresentation newRepresentation = null;
                     package.Builder.Transactively(m =>
                     {
-                        newRepresentation = package.Builder.ifcEntityScope.New<IIfcProductRepresentation>(p.Representation.GetType(), e =>
+                        newRepresentation = package.Builder.IfcEntityScope.New<IIfcProductRepresentation>(p.Representation.GetType(), e =>
                         {
                             e.Name = p.Representation.Name;
                             e.Representations.Add(r);
@@ -599,7 +599,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 var target = Copy(item.MappingTarget, package, false);
                 var origin = Copy(item.MappingSource.MappingOrigin, package, false);
 
-                var representationMap = package.Builder.ifcEntityScope.NewOf<IIfcRepresentationMap>(e =>
+                var representationMap = package.Builder.IfcEntityScope.NewOf<IIfcRepresentationMap>(e =>
                 {
                     e.MappedRepresentation = newRepresentation;
                     e.MappingOrigin = origin;
@@ -616,7 +616,7 @@ namespace Bitub.Xbim.Ifc.Transform
                     package.RepresentationMapDisassambly[keyHandle] = handles.Concat(new[] { new XbimInstanceHandle(representationMap) }).ToArray();
                 }
 
-                return package.Builder.ifcEntityScope.NewOf<IIfcMappedItem>(e =>
+                return package.Builder.IfcEntityScope.NewOf<IIfcMappedItem>(e =>
                 {
                     e.MappingSource = representationMap;
                     e.MappingTarget = target;

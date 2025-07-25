@@ -56,30 +56,21 @@ namespace Bitub.Xbim.Ifc.Transform
     /// </summary>
     public class TransformPackage : IDisposable
     {
-        private List<TransformLogEntry> logEntry = new List<TransformLogEntry>();
+        private List<TransformLogEntry> _logEntry = new ();
 
-        public IEnumerable<TransformLogEntry> Log { get => logEntry.ToArray(); }
+        public IEnumerable<TransformLogEntry> Log { get => _logEntry.ToArray(); }
 
         public XbimInstanceHandleMap Map { get; private set; }
 
         public ISet<TransformActionResult> LogFilter { get; } = new HashSet<TransformActionResult>();
 
-        public IModel Target 
-        { 
-            get => Map?.ToModel; 
-        }
+        public IModel Target => Map?.ToModel;
 
-        public IModel Source 
-        { 
-            get => Map?.FromModel; 
-        }
-        
+        public IModel Source => Map?.FromModel;
+
         public CancelableProgressing ProgressMonitor { get; protected set; }
 
-        public bool IsCanceledOrBroken 
-        {
-            get => (null != ProgressMonitor) && (ProgressMonitor.State.IsCanceled || ProgressMonitor.State.IsBroken);
-        }
+        public bool IsCanceledOrBroken => (null != ProgressMonitor) && (ProgressMonitor.State.IsCanceled || ProgressMonitor.State.IsBroken);
 
         public bool LogAction(int sourceEntityLabel, TransformActionResult action)
         {
@@ -91,7 +82,7 @@ namespace Bitub.Xbim.Ifc.Transform
             if (!LogFilter.Contains(action))
                 return false;
 
-            logEntry.Add(new TransformLogEntry(sourceHandle, action));
+            _logEntry.Add(new TransformLogEntry(sourceHandle, action));
             return true;
         }
 
@@ -100,10 +91,10 @@ namespace Bitub.Xbim.Ifc.Transform
             LogFilter = new HashSet<TransformActionResult>(logFilter);
         }
 
-        protected internal TransformPackage(TransformPackage other, CancelableProgressing progressMonitor)
+        protected TransformPackage(TransformPackage other, CancelableProgressing progressMonitor)
         {
             LogFilter = new HashSet<TransformActionResult>(other.LogFilter);
-            logEntry = new List<TransformLogEntry>(other.logEntry);
+            _logEntry = new List<TransformLogEntry>(other._logEntry);
             Map = other.Map;
             ProgressMonitor = progressMonitor;
         }
@@ -114,7 +105,7 @@ namespace Bitub.Xbim.Ifc.Transform
             ProgressMonitor = progressMonitor;
         }
 
-        protected internal TransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor)
+        protected TransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor)
         {
             Map = new XbimInstanceHandleMap(aSource, aTarget);
             ProgressMonitor = progressMonitor;
@@ -122,7 +113,7 @@ namespace Bitub.Xbim.Ifc.Transform
 
         public void Dispose()
         {
-            logEntry.Clear();
+            _logEntry.Clear();
             Map = null;
         }
     }

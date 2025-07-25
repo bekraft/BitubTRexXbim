@@ -232,7 +232,8 @@ namespace Bitub.Xbim.Ifc
             return shapeRepresentation;
         }
 
-        public static IfcShapeRepresentation NewIfc2x3ShapeRepresentation(this IModel s, IfcProduct product, IfcGeometricRepresentationContext context = null)
+        public static IfcShapeRepresentation NewIfc2x3ShapeRepresentation(this IModel s, IfcProduct product, 
+            IfcGeometricRepresentationContext? context = null)
         {
             var productDefinitionShape = product.Representation;
             if (null == productDefinitionShape)
@@ -244,12 +245,13 @@ namespace Bitub.Xbim.Ifc
             productDefinitionShape.Representations.Add(shapeRepresentation);
 
             var project = s.Instances.OfType<IfcProject>().FirstOrDefault();
-            shapeRepresentation.ContextOfItems = context ?? project.ModelContext;
+            shapeRepresentation.ContextOfItems = context ?? project?.ModelContext;
 
             return shapeRepresentation;
         }
 
-        public static IfcPropertySet NewIfc2x3PropertySet(this IModel s, string name, string description = null, IEnumerable<IfcProperty> properties = null)
+        public static IfcPropertySet NewIfc2x3PropertySet(this IModel s, string name, 
+            string? description = null, IEnumerable<IfcProperty>? properties = null)
         {
             var set = s.Instances.New<IfcPropertySet>(x =>
             {
@@ -257,8 +259,9 @@ namespace Bitub.Xbim.Ifc
                 x.Description = description;
             });
 
-            foreach (var p in properties)
-                set.HasProperties.Add(p);
+            if (properties != null)
+                foreach (var p in properties)
+                    set.HasProperties.Add(p);
 
             return set;
         }

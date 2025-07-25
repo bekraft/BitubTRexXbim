@@ -24,17 +24,17 @@ namespace Bitub.Xbim.Ifc
     /// </summary>
     public sealed class Ifc2x3Builder : IfcBuilder
     {
-        internal Ifc2x3Builder(IModel model, ILoggerFactory loggerFactory = null)
+        internal Ifc2x3Builder(IModel model, ILoggerFactory? loggerFactory = null)
             : base(model, loggerFactory)
         { }
 
         protected override IIfcProject InitNewProject(string projectName)
         {
-            IfcProject project = model.Instances.New<IfcProject>();
+            IfcProject project = Model.Instances.New<IfcProject>();
             project.Name = projectName;
             ChangeOrNewLengthUnit(IfcSIUnitName.METRE);
             if (null == project.ModelContext)
-                project.RepresentationContexts.Add(model.NewIfc2x3GeometricContext("Body", "Model"));
+                project.RepresentationContexts.Add(Model.NewIfc2x3GeometricContext("Body", "Model"));
             return project;
         }
 
@@ -45,22 +45,25 @@ namespace Bitub.Xbim.Ifc
 
         private IfcOwnerHistory NewOwnerHistoryEntry(string version, IfcChangeActionEnum change)
         {
-            IfcOwnerHistory newVersion = model.NewIfc2x3OwnerHistoryEntry(version, OwningUser as IfcPersonAndOrganization, OwningApplication as IfcApplication, change);
+            IfcOwnerHistory newVersion = Model.NewIfc2x3OwnerHistoryEntry(version, 
+                OwningUser as IfcPersonAndOrganization, 
+                OwningApplication as IfcApplication, 
+                change);
             return newVersion;
         }
 
         private IfcSIUnit ChangeOrNewLengthUnit(IfcSIUnitName name, IfcSIPrefix? prefix = null)
         {
-            var project = model.Instances.OfType<IfcProject>().First();
+            var project = Model.Instances.OfType<IfcProject>().First();
             var assigment = project.UnitsInContext;
             if (null == assigment)
-                assigment = model.NewIfc2x3UnitAssignment(IfcUnitEnum.LENGTHUNIT, name, prefix);
+                assigment = Model.NewIfc2x3UnitAssignment(IfcUnitEnum.LENGTHUNIT, name, prefix);
 
             // Test for existing
             var unit = assigment.Units.Where(u => (u as IfcSIUnit)?.UnitType == IfcUnitEnum.LENGTHUNIT).FirstOrDefault() as IfcSIUnit;
             if (null == unit)
             {
-                unit = model.Instances.New<IfcSIUnit>(u => { u.UnitType = IfcUnitEnum.LENGTHUNIT; });
+                unit = Model.Instances.New<IfcSIUnit>(u => { u.UnitType = IfcUnitEnum.LENGTHUNIT; });
                 assigment.Units.Add(unit);
             }
 
