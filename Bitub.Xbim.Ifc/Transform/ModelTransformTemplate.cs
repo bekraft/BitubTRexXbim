@@ -57,9 +57,9 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
     /// <summary>
     /// The editor credentials of change. If null, Xbim will use internal user identification.
     /// </summary>
-    public XbimEditorCredentials EditorCredentials { get; set; }
+    public XbimEditorCredentials? EditorCredentials { get; set; }
 
-    public abstract ILogger Log { get; protected set; }
+    public abstract ILogger? Log { get; protected set; }
 
     /// <summary>
     /// Actions to be logged by transformation process.
@@ -94,7 +94,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
                 if (PassInstance(entity, package) == TransformActionType.Drop)
                     return null;
             }
-            else if (value is IEnumerable items && (property?.PropertyInfo.IsLowerConstraintRelationType<IPersistEntity>() ?? false))
+            else if (value is IEnumerable items && (property?.PropertyInfo.IsLowerConstraintPropertyType<IPersistEntity>() ?? false))
             {
                 var entities = (IEnumerable<IPersistEntity>)items;
                 return EmptyToNull(entities.Where(e => PassInstance(e, package) != TransformActionType.Drop));
@@ -106,22 +106,22 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
 
     /// <summary>
     /// Whether to include an instance or not in transformation queue. Any dropped instance won't be injected into
-    /// the new model.
+    /// the new model. The order of calls to this function is not related to the order of occurrence in model. The method may
+    /// be called multiple times, if references are existing. So any call should return consistent action types.
     /// </summary>
     /// <param name="instance">An instance.</param>
     /// <param name="package">The task's work package</param>
     /// <returns>True, if to include into the transformation</returns>
     protected abstract TransformActionType PassInstance(IPersistEntity instance, T package);
 
-    protected abstract T CreateTransformPackage(IModel aSource, IModel aTarget, 
-        CancelableProgressing progressMonitor);
+    protected abstract T CreateTransformPackage(IModel aSource, IModel aTarget, CancelableProgressing? progressMonitor);
 
     protected virtual TransformResult.Code DoPreprocessTransform(T package)
     {
         return TransformResult.Code.Finished;
     }
 
-    protected IEnumerable<E> EmptyToNull<E>(IEnumerable<E> elements)
+    protected IEnumerable<E>? EmptyToNull<E>(IEnumerable<E> elements)
     {            
         if (elements.Any())
             return new ExpressEnumerableDelegate<E>(elements);
@@ -134,7 +134,10 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
         package.LogAction(new XbimInstanceHandle(instance), TransformActionResult.Copied);
         try
         {
-            return package.Target.InsertCopy(instance, package.Map, (p, o) => PropertyTransform(p, o, package), withInverse, false);
+            return package.Target.InsertCopy(instance, 
+                package.Map, 
+                (p, o) => PropertyTransform(p, o, package), withInverse, 
+                false);
         }
         catch(Exception e)
         {
@@ -196,7 +199,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
             throw new NotSupportedException($"Unsupported / unknown type {model.GetType()}");
     }
 
-    private IfcStore CreateTargetModel(IModel sourcePattern, CancelableProgressing progress)
+    private IfcStore CreateTargetModel(IModel sourcePattern, CancelableProgressing? progress)
     {
         var storeType = TargetStoreType ?? DetectStorageType(sourcePattern);
 
@@ -216,7 +219,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
         return target;
     }
 
-    protected Func<TransformResult> FastForward(IModel source, CancelableProgressing progressMonitor)
+    protected Func<TransformResult> FastForward(IModel source, CancelableProgressing? progressMonitor)
     {
         if (!progressMonitor?.State.IsAlive ?? false)
             throw new NotSupportedException($"Progress monitor already terminated.");
@@ -229,16 +232,16 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
         };
     }
 
-    private TransformResult CreateResultFromCode(TransformResult.Code code, CancelableProgressing cancelableProgressing)
+    private TransformResult CreateResultFromCode(TransformResult.Code code, T package, CancelableProgressing? cancelableProgressing)
     {
         if (cancelableProgressing?.State.IsAboutCancelling ?? false)
             cancelableProgressing.State.MarkCanceled();
         if (cancelableProgressing?.State.HasErrors ?? false)
             cancelableProgressing.State.MarkBroken();
-        return new TransformResult(code);
+        return new TransformResult(code, package);
     }
 
-    private Func<TransformResult> PrepareInternally(IModel aSource, CancelableProgressing progressMonitor)
+    private Func<TransformResult> PrepareInternally(IModel aSource, CancelableProgressing? progressMonitor)
     {
         if (!progressMonitor?.State.IsAlive ?? false)
             throw new NotSupportedException($"Progress monitor already terminated.");
@@ -250,24 +253,24 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
 
             using (ITransaction txStore = target.BeginTransaction(Name))
             {
+                T package = CreateTransformPackage(aSource, target, progressMonitor);
+                
                 try
                 {
-                    T package = CreateTransformPackage(aSource, target, progressMonitor);
-
                     TransformResult.Code code;
                     progressMonitor?.NotifyOnProgressChange($"Preparing '{Name}' ...");
                     if (TransformResult.Code.Finished != (code = DoPreprocessTransform(package)))
-                        return CreateResultFromCode(code, progressMonitor);
+                        return CreateResultFromCode(code, package, progressMonitor);
                     progressMonitor?.NotifyOnProgressChange(0, $"Preparation done.");
 
                     progressMonitor?.NotifyOnProgressChange($"Running '{Name}' ...");
                     if (TransformResult.Code.Finished != (code = DoTransform(package)))
-                        return CreateResultFromCode(code, progressMonitor);
+                        return CreateResultFromCode(code, package, progressMonitor);
                     progressMonitor?.NotifyOnProgressChange(0, $"Transformation done.");
 
                     progressMonitor?.NotifyOnProgressChange($"Post processing '{Name}' ...");
                     if (TransformResult.Code.Finished != (code = DoPostTransform(package)))
-                        return CreateResultFromCode(code, progressMonitor);
+                        return CreateResultFromCode(code, package, progressMonitor);
                     progressMonitor?.NotifyOnProgressChange(0, $"Post-processing done.");
 
                     txStore.Commit();
@@ -277,7 +280,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
                 {
                     progressMonitor?.State.MarkBroken();
                     txStore.RollBack();
-                    return new TransformResult(TransformResult.Code.ExitWithError, e);
+                    return new TransformResult(TransformResult.Code.ExitWithError, package);
                 }
                 finally
                 {

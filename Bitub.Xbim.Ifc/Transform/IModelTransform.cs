@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Bitub.Xbim.Ifc.Transform;
 
-public class TransformResult : TransformPackage
+public sealed class TransformResult : TransformPackage
 {
     public enum Code
     {
@@ -26,28 +26,29 @@ public class TransformResult : TransformPackage
     public Code ResultCode
     {
         get;
-        protected internal set;
+        internal set;
     }
 
-    public string ResultMessage 
+    public string? ResultMessage 
     { 
         get; 
-        protected internal set; 
+        internal set; 
     }
 
-    public Exception Cause 
+    public Exception? Cause 
     { 
         get; 
-        protected internal set;         
+        internal set;         
     }
 
-    protected internal TransformResult(Code r, TransformPackage package, CancelableProgressing progressMonitor) 
+    internal TransformResult(Code r, TransformPackage package, CancelableProgressing? progressMonitor) 
         : base(package, progressMonitor)
     {
         ResultCode = r;
     }
 
-    protected internal TransformResult(Code r, Exception exception = null) : base()
+    internal TransformResult(Code r, TransformPackage package, Exception? exception = null) 
+        : base(package, null)
     {
         ResultCode = r;
         Cause = exception;
@@ -62,7 +63,7 @@ public interface IModelTransform
     /// <summary>
     /// The associated logger instance.
     /// </summary>
-    ILogger Log { get; }
+    ILogger? Log { get; }
 
     /// <summary>
     /// A (unique) name.
@@ -77,7 +78,7 @@ public interface IModelTransform
     /// <summary>
     /// The editor credentials of change. If null, Xbim will use internal user identification.
     /// </summary>
-    public XbimEditorCredentials EditorCredentials { get; set; }
+    public XbimEditorCredentials? EditorCredentials { get; set; }
 
     /// <summary>
     /// Actions to be logged by transformation process.

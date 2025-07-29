@@ -17,11 +17,20 @@ namespace Bitub.Xbim.Ifc.Transform
 {
     public sealed class ModelMergeTransformPackage : TransformPackage
     {
-        private IDictionary<IModel, XbimPlacementTree> _placements = new Dictionary<IModel, XbimPlacementTree>();
-        private IDictionary<XbimInstanceHandle, XbimMatrix3D> _tInverted = new Dictionary<XbimInstanceHandle, XbimMatrix3D>();
+        #region Privates members
+
+        private readonly IDictionary<IModel, XbimPlacementTree> _placements = new Dictionary<IModel, XbimPlacementTree>();
+        private readonly IDictionary<XbimInstanceHandle, XbimMatrix3D> _tInverted = new Dictionary<XbimInstanceHandle, XbimMatrix3D>();
         private IXbimManagedGeometryEngine _geometryEngine;
+
+        #endregion
+
+        internal ModelMergeTransformPackage(IModel source, IModel target, CancelableProgressing progressMonitor) 
+            : base (source, target, progressMonitor)
+        {
+        }
         
-        internal IXbimManagedGeometryEngine Engine
+        private IXbimManagedGeometryEngine Engine
         {
             get 
             {      
@@ -34,7 +43,7 @@ namespace Bitub.Xbim.Ifc.Transform
             }
         }
 
-        internal XbimMatrix3D PlacementOf(IIfcProduct p)
+        private XbimMatrix3D PlacementOf(IIfcProduct p)
         {
             XbimPlacementTree tree;
             if (!_placements.TryGetValue(p.Model, out tree))

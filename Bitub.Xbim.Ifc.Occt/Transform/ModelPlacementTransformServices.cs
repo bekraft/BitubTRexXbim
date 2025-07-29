@@ -176,7 +176,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// The logger.
         /// </summary>
-        public override ILogger Log { get; protected set; }
+        public override ILogger? Log { get; protected set; }
 
         public override string Name { get => "Model Placement"; }
 
@@ -203,7 +203,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// </summary>
         /// <param name="loggerFactory">Logger factory</param>
         /// <param name="logFilter">The events to log</param>
-        public ModelPlacementTransformServices(ILoggerFactory loggerFactory, params TransformActionResult[] logFilter) : base(logFilter)
+        public ModelPlacementTransformServices(ILoggerFactory? loggerFactory, params TransformActionResult[] logFilter) : base(logFilter)
         {
             Log = loggerFactory?.CreateLogger<ModelPlacementTransformServices>();
         }

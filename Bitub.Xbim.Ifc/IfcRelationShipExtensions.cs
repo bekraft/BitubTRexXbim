@@ -6,9 +6,11 @@ using System.Linq;
 using System.Reflection;
 
 using Xbim.Common;
+using Xbim.Common.Collections;
 using Xbim.Common.Metadata;
 using Xbim.Ifc4.Interfaces;
 using Xbim.Ifc4.Kernel;
+using Xbim.Ifc4x3.MeasureResource;
 
 namespace Bitub.Xbim.Ifc
 {
@@ -202,17 +204,17 @@ namespace Bitub.Xbim.Ifc
         /// <summary>
         /// Finds a relation typed by lower constraint <c>TParam</c> which implements <see cref="IItemSet"/>.
         /// </summary>
-        /// <typeparam name="T">The type of lower base property type.</typeparam>
+        /// <typeparam name="TContainer">The type of lower base property type.</typeparam>
         /// <typeparam name="TParam">The relation type</typeparam>
         /// <param name="type">The host type</param>
         /// <param name="propertyName">The relation name</param>
         /// <returns>Reflected property info.</returns>
-        public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<T,TParam>(this Type type, string propertyName)
+        public static IEnumerable<PropertyInfo> GetLowerConstraintGenericProperty<TContainer,TParam>(this Type type, string propertyName)
         {
             return type.GetInterfaces()
                 .SelectMany(t => t.GetProperties())
-                .Where(p => p.Name == propertyName && typeof(T).IsAssignableFrom(p.PropertyType))
-                .Where(p => p.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam))));
+                .Where(p => p.Name == propertyName && typeof(TContainer).IsAssignableFrom(p.PropertyType))
+                .Where(p => p.PropertyType.GetGenericArguments().All(t => typeof(TParam).IsAssignableFrom(t)));
         }
 
         /// <summary>
@@ -232,14 +234,24 @@ namespace Bitub.Xbim.Ifc
         /// If the property redirects to a simple relation <c>TParam</c> denotes the expected base type.
         /// If the property redirects to a n-ary relation <c>TParam</c> denotes the expected generic parameter base type.
         /// </summary>
-        /// <typeparam name="TParam">The generic argument of relation</typeparam>
+        /// <typeparam name="TParam">The generic argument of relation or property</typeparam>
         /// <param name="propertyInfo">The property</param>
         /// <returns>True, if relation is a super generic type of given type</returns>
-        public static bool IsLowerConstraintRelationType<TParam>(this PropertyInfo propertyInfo)
+        public static bool IsLowerConstraintPropertyType<TParam>(this PropertyInfo propertyInfo)
         {
             return typeof(TParam).IsAssignableFrom(propertyInfo.PropertyType) 
-                || (typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType)
-                    && propertyInfo.PropertyType.GetGenericArguments().All(t => t.IsAssignableFrom(typeof(TParam))));
+                || ((typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType) 
+                    || typeof(IOptionalItemSet).IsAssignableFrom(propertyInfo.PropertyType)) 
+                        && propertyInfo.PropertyType.GetGenericArguments().All(t => typeof(TParam).IsAssignableFrom(t)));
+        }
+
+        // Usages prüfen von IsLowerConstraintPropertyType
+        public static bool HasLowerConstraintRelationTypeEquivalent1<TParam>(this PropertyInfo propertyInfo)
+        {
+            return IsLowerConstraintPropertyType<TParam>(propertyInfo)
+                || ((typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType) 
+                        || typeof(IOptionalItemSet).IsAssignableFrom(propertyInfo.PropertyType)) 
+                            && propertyInfo.PropertyType.GetGenericArguments().All(t => typeof(TParam).IsAssignableFrom(t)));
         }
 
         /// <summary>
@@ -288,7 +300,7 @@ namespace Bitub.Xbim.Ifc
         public static bool TryGetSingleValue<TParam>(this ExpressMetaProperty metaProperty, object instance, out TParam? value)
         {
             value = default;
-            if (IsLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
+            if (IsLowerConstraintPropertyType<TParam>(metaProperty.PropertyInfo))
             {
                 value = (TParam?)metaProperty.PropertyInfo.GetValue(instance);
                 return true;
@@ -323,16 +335,26 @@ namespace Bitub.Xbim.Ifc
         /// <param name="values">The out values argument, EMPTY if not found</param>
         /// <typeparam name="TParam"></typeparam>
         /// <returns></returns>
-        public static bool TryGetValues<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam?>? values)
+        public static bool TryGetValues<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam>? values)
         {
-            values = Array.Empty<TParam?>();
-            if (IsLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
+            values = Array.Empty<TParam>();
+            if (IsLowerConstraintPropertyType<TParam>(metaProperty.PropertyInfo))
             {
-                values = Array.AsReadOnly(new []{ (TParam?)metaProperty.PropertyInfo.GetValue(instance) });
-            } else if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+                values = Array.AsReadOnly(new []{ (TParam)metaProperty.PropertyInfo.GetValue(instance)! });
+            } 
+            else if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
             {
-                values = metaProperty.PropertyInfo.GetValue(instance) as IEnumerable<TParam>;
-                return true;
+                if (metaProperty.PropertyInfo.GetValue(instance) is IList itemSet)
+                {
+                    // Wrap item set into list
+                    var list = new List<TParam>();
+                    foreach (var item in itemSet)
+                    {
+                        list.Add((TParam)item);
+                    }
+                    values = list;
+                    return true;
+                }
             }
             return false;
         }

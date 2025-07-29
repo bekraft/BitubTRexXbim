@@ -32,6 +32,9 @@
     <EmbeddedResource Include="..\Tests\Resources\Ifc4-MapConversion-Pure.ifc">
       <LogicalName>Ifc4-MapConversion-Pure.ifc</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="..\Tests\Resources\Ifc4-MapConversion-Transformed.ifc">
+      <LogicalName>Ifc4-MapConversion-Transformed.ifc</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 
 using Xbim.Common;
@@ -36,18 +35,13 @@ namespace Bitub.Xbim.Ifc.Transform
     /// </summary>
     public sealed class TransformLogEntry
     {
-        public readonly XbimInstanceHandle handle;
-        public readonly TransformActionResult performed;
+        public readonly XbimInstanceHandle Handle;
+        public readonly TransformActionResult Performed;
 
         internal TransformLogEntry(XbimInstanceHandle handle, TransformActionResult result)
         {
-            this.handle = handle;
-            this.performed = result;
-        }
-
-        internal TransformLogEntry(TransformActionResult result)
-        {
-            performed = result;
+            Handle = handle;
+            Performed = result;
         }
     }
 
@@ -56,19 +50,19 @@ namespace Bitub.Xbim.Ifc.Transform
     /// </summary>
     public class TransformPackage : IDisposable
     {
-        private List<TransformLogEntry> _logEntry = new ();
+        private readonly List<TransformLogEntry> _logEntry = new ();
 
-        public IEnumerable<TransformLogEntry> Log { get => _logEntry.ToArray(); }
+        public IEnumerable<TransformLogEntry> Log => _logEntry.ToArray();
 
-        public XbimInstanceHandleMap Map { get; private set; }
+        public readonly XbimInstanceHandleMap Map;
 
-        public ISet<TransformActionResult> LogFilter { get; } = new HashSet<TransformActionResult>();
+        public ISet<TransformActionResult> LogFilter { get; }
 
-        public IModel Target => Map?.ToModel;
+        public IModel Target => Map.ToModel;
 
-        public IModel Source => Map?.FromModel;
+        public IModel Source => Map.FromModel;
 
-        public CancelableProgressing ProgressMonitor { get; protected set; }
+        public CancelableProgressing? ProgressMonitor { get; private set; }
 
         public bool IsCanceledOrBroken => (null != ProgressMonitor) && (ProgressMonitor.State.IsCanceled || ProgressMonitor.State.IsBroken);
 
@@ -86,35 +80,30 @@ namespace Bitub.Xbim.Ifc.Transform
             return true;
         }
 
-        protected TransformPackage(params TransformActionResult[] logFilter)
-        {
-            LogFilter = new HashSet<TransformActionResult>(logFilter);
-        }
-
-        protected TransformPackage(TransformPackage other, CancelableProgressing progressMonitor)
+        protected TransformPackage(TransformPackage other, CancelableProgressing? progressMonitor)
         {
             LogFilter = new HashSet<TransformActionResult>(other.LogFilter);
-            _logEntry = new List<TransformLogEntry>(other._logEntry);
             Map = other.Map;
             ProgressMonitor = progressMonitor;
+            
+            // Private
+            _logEntry = new List<TransformLogEntry>(other._logEntry);
         }
-
-        protected internal TransformPackage(XbimInstanceHandleMap map, CancelableProgressing progressMonitor)
-        {
-            Map = map;
-            ProgressMonitor = progressMonitor;
-        }
-
-        protected TransformPackage(IModel aSource, IModel aTarget, CancelableProgressing progressMonitor)
+        
+        protected TransformPackage(IModel aSource, IModel aTarget, CancelableProgressing? progressMonitor, params TransformActionResult[] logFilter)
         {
             Map = new XbimInstanceHandleMap(aSource, aTarget);
+            LogFilter = new HashSet<TransformActionResult>(logFilter);
             ProgressMonitor = progressMonitor;
         }
 
         public void Dispose()
         {
+            Map.Clear();
+            ProgressMonitor = null;
+            
+            // Private
             _logEntry.Clear();
-            Map = null;
         }
     }
 }
