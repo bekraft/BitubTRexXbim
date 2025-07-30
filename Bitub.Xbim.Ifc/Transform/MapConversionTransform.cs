@@ -56,8 +56,8 @@ public class MapConversionTransformPackage : TransformPackage
     private readonly List<XbimInstanceHandle> _representationContexts = new ();
     private readonly List<XbimInstanceHandle> _mapConversions = new ();
     private readonly List<XbimInstanceHandle> _projectedCRS = new ();
-    private readonly Dictionary<XbimInstanceHandle, IPersistEntity> _unitsVsHostGlobalDict = new ();
-    private readonly Dictionary<XbimInstanceHandle, IIfcUnit> _unitsVsNamedUnitDict = new ();
+    private readonly Dictionary<XbimInstanceHandle, IPersistEntity> _referencedUnits = new ();
+    private readonly HashSet<XbimInstanceHandle> _units = new ();
     #endregion
 
     internal readonly IfcBuilder Builder;
@@ -109,17 +109,18 @@ public class MapConversionTransformPackage : TransformPackage
     {
         if (hostObject is IPersistEntity persistEntity)
         {
-            // Cross check assigned units
-            if (property.PropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcUnit>())
+            // Track all units
+            if (persistEntity is IIfcUnit unit)
             {
-                var r = property.PropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcUnit>();
+                _units.Add(new XbimInstanceHandle(unit));
+            }
+            
+            // Cross check assigned units
+            if (property.PropertyInfo.HasLowerConstraintRelationType<IIfcUnit>())
+            {
                 if (property.TryGetValues<IIfcUnit>(persistEntity, out var units))
                 {
-                    var u = property.PropertyInfo.IsLowerConstraintPropertyType<IIfcUnit>();
-                    if (persistEntity is IIfcProjectedCRS projectedCRS)
-                        units?.ForEach(u => _unitsVsNamedUnitDict.Add(new XbimInstanceHandle(projectedCRS), u));
-                    else
-                        units?.ForEach(u => _unitsVsHostGlobalDict.Add(new XbimInstanceHandle(u), persistEntity));
+                    units?.ForEach(u => _referencedUnits.Add(new XbimInstanceHandle(u), persistEntity));
                 }
             }
         }
@@ -128,18 +129,19 @@ public class MapConversionTransformPackage : TransformPackage
     internal List<IIfcUnit> CleanUpUnusedNamedUnits()
     {
         var keptUnits = new List<IIfcUnit>();
-        foreach (var crsUnit in _unitsVsNamedUnitDict)
+        foreach (var crsUnit in _units)
         {
-            if (!_unitsVsHostGlobalDict.TryGetValue(new XbimInstanceHandle(crsUnit.Value), out var entity))
+            var eUnit = (IIfcUnit)crsUnit.GetEntity();
+            if (!_referencedUnits.TryGetValue(crsUnit, out var eHostEntity))
             {
                 // Unit not referenced anywhere
-                Target.Delete(crsUnit.Value);
-                LogAction(new XbimInstanceHandle(crsUnit.Value), TransformActionResult.Skipped);
+                Target.Delete(eUnit);
+                LogAction(crsUnit, TransformActionResult.Skipped);
             }
             else
             {
                 // Otherwise keep unit entity
-                keptUnits.Add(crsUnit.Value);
+                keptUnits.Add(eUnit);
             }
         }
 
@@ -206,31 +208,30 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
 
         // Create target projected CRS
         var projectedCRS = CreateProjectedCRS(CrsPrefs, package);
-        Log?.LogDebug("Creating new projected CRS {}", projectedCRS.ToString());
-        package.LogAction(new XbimInstanceHandle(projectedCRS), TransformActionResult.Added);
-        package.LogAction(new XbimInstanceHandle(projectedCRS.MapUnit), TransformActionResult.Added);
 
         // Iterate source representation contexts
-        var contexts = package.RepresentationContexts
+        var sourceContexts = package.RepresentationContexts
             .Where(c1 =>
                 Array.Exists(Prefs.RepresentationContext, c2 => 
                     c1.ContextType.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)));
         
-        foreach (var context in contexts)
+        foreach (var sourceContext in sourceContexts)
         {
-            var offsetAndHeight = CrsPrefs.OffsetAndHeight;
-            if (Prefs.UsePlacementOffsetAsTargetRef &&
-                CreateOffsetAndHeigthFromOffset(context, out var localOffsetAndHeight))
+            if (package.Map.TryGetValue(new XbimInstanceHandle(sourceContext), out var targetContext))
             {
-                offsetAndHeight = localOffsetAndHeight;
-            }
+                var offsetAndHeight = CrsPrefs.OffsetAndHeight;
+                var eCrs = (IIfcGeometricRepresentationContext)targetContext.GetEntity();
 
-            if (package.Map.TryGetValue(new XbimInstanceHandle(context), out var targetContext))
-            {
-                var sourceCRS = (IIfcGeometricRepresentationContext)targetContext.Model.Instances[targetContext.EntityLabel];
-                var mapTransform = CreateMapConversion(offsetAndHeight, CrsPrefs.MapRotation, CrsPrefs.Scale, sourceCRS, projectedCRS, package);
-                Log?.LogDebug("Creating new map conversion {}", mapTransform.ToString());
-                package.LogAction(new XbimInstanceHandle(mapTransform), TransformActionResult.Added);
+                // If local offset should be considered, adapt offset and reset local offset
+                if (Prefs.UsePlacementOffsetAsTargetRef &&
+                    CreateOffsetAndHeigthFromOffset(eCrs, package, out var localOffsetAndHeight))
+                {
+                    offsetAndHeight = offsetAndHeight.Add(localOffsetAndHeight);
+                }
+
+                CreateMapConversion(offsetAndHeight, 
+                    CrsPrefs.MapRotation, CrsPrefs.Scale, eCrs,
+                    projectedCRS, package);
             }
         }
         
@@ -249,13 +250,15 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
     private readonly ILoggerFactory? _loggerFactory;
 
     // Create an offset and heigth XYZ & set current location to the local origin
-    private bool CreateOffsetAndHeigthFromOffset(IIfcGeometricRepresentationContext context, out XYZ offsetAndHeight)
+    private bool CreateOffsetAndHeigthFromOffset(IIfcGeometricRepresentationContext context, 
+        MapConversionTransformPackage package, out XYZ offsetAndHeight)
     {
         if (context.WorldCoordinateSystem is IIfcAxis2Placement3D axis2Placement3D)
         {
             offsetAndHeight = axis2Placement3D.Location.ToXYZ();
             axis2Placement3D.Location.SetXYZ(0, 0, 0);
             Log?.LogDebug("Resetting offset and height to {}", axis2Placement3D.Location);
+            package.LogAction(new XbimInstanceHandle(context), TransformActionResult.Modified);
             return true;
         }
         offsetAndHeight = XYZ.Zero;
@@ -273,6 +276,11 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.MapProjection = prefs.MapProjection;
         entity.VerticalDatum = prefs.VerticalDatum;
         entity.MapUnit = package.Builder.NewSIUnit(IfcUnitEnum.LENGTHUNIT, prefs.MapUnitName);
+        
+        Log?.LogDebug("Creating new projected CRS {}", entity.ToString());
+        package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);
+        package.LogAction(new XbimInstanceHandle(entity.MapUnit), TransformActionResult.Added);
+
         return entity;
     }
 
@@ -289,6 +297,10 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.Northings = offsetAndHeigth.Y;
         entity.OrthogonalHeight = offsetAndHeigth.Z;
         entity.Scale = scale;
+        
+        package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);
+        Log?.LogDebug("Creating new map conversion {}", entity.ToString());
+        
         return entity;
     }
     

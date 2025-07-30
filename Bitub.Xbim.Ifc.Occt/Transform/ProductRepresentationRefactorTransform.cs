@@ -300,7 +300,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 }
                 else if (value is IEnumerable instances)
                 {
-                    if (property.PropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcProduct>())
+                    if (property.PropertyInfo.HasLowerConstraintRelationType<IIfcProduct>())
                     {
                         // or enumerable of product (relations), cast to null if empty
                         var products = instances
@@ -318,7 +318,7 @@ namespace Bitub.Xbim.Ifc.Transform
 
                         return EmptyToNull(instances.OfType<IPersist>().Where(e => !products.Contains(e)));
                     }
-                    else if (property.PropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcRepresentationMap>()
+                    else if (property.PropertyInfo.HasLowerConstraintRelationType<IIfcRepresentationMap>()
                         && package.Strategy.HasFlag(ProductRefactorStrategy.DecomposeMappedRepresentations))
                     {
                         var maps = instances
@@ -429,7 +429,7 @@ namespace Bitub.Xbim.Ifc.Transform
                             });
                         }
                     }
-                    else if (hostPropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcProduct>())
+                    else if (hostPropertyInfo.HasLowerConstraintRelationType<IIfcProduct>())
                     {
                         if (!targetHostHandle.GetEntity().AddRelationsByLowerConstraint(
                             hostPropertyInfo.Name,
@@ -456,7 +456,7 @@ namespace Bitub.Xbim.Ifc.Transform
                                 targetHostHandle.EntityLabel, targetHostHandle.EntityExpressType.Name, hostPropertyInfo.Name);
                         }
                     }
-                    else if (hostPropertyInfo.HasLowerConstraintRelationTypeEquivalent<IIfcRepresentationMap>())
+                    else if (hostPropertyInfo.HasLowerConstraintRelationType<IIfcRepresentationMap>())
                     {
                         if (!targetHostHandle.GetEntity().AddRelationsByLowerConstraint(
                             hostPropertyInfo.Name,

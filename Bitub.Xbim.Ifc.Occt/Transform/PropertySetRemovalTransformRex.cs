@@ -234,20 +234,14 @@ namespace Bitub.Xbim.Ifc.Transform
                     {   // If no one left, dump a warning since relation is now an orphan
                         var targetObject = package.Map[new XbimInstanceHandle(rDefProps)];
                         Log?.LogWarning($"Entity IfcRelDefinesByProperties (#{rDefProps.EntityLabel} => #{targetObject.EntityLabel}) became invalid on transfer.");
-                        return propDefinition;
+                        return null;
                     }
                     else
                     {
                         if (propDefinition.Count() > 1)
                         {
                             // Only IFC4+, if more than one use a set
-#if Is_XbimDev
                             return new IfcPropertySetDefinitionSet(propDefinition.ToList());
-#else
-                            return new IfcPropertySetDefinitionSet(propDefinition
-                                .Cast<IfcPropertySetDefinition>()
-                                .ToList());
-#endif
                         }
                         else
                         {
@@ -285,11 +279,6 @@ namespace Bitub.Xbim.Ifc.Transform
                     // Filter for valid property sets
                     var whiteList = setOfSet.PropertySetDefinitions
                         .Where(package.PassesNameFilter)
-#if Is_XbimDev
-                        .OfType<IIfcPropertySetDefinition>()
-#else
-                        .OfType<IfcPropertySetDefinition>()
-#endif
                         .ToList();
                     var newRel = package.Target.NewIfcRelDefinesByProperties(new IfcPropertySetDefinitionSet(whiteList));
 

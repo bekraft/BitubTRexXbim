@@ -230,23 +230,26 @@ namespace Bitub.Xbim.Ifc
         }
 
         /// <summary>
-        /// Determines whether the given property is a sub (generic) type of given <c>TParam</c>.
-        /// If the property redirects to a simple relation <c>TParam</c> denotes the expected base type.
-        /// If the property redirects to a n-ary relation <c>TParam</c> denotes the expected generic parameter base type.
+        /// Determines whether the given property is a sub type of given <c>TParam</c>.
         /// </summary>
         /// <typeparam name="TParam">The generic argument of relation or property</typeparam>
         /// <param name="propertyInfo">The property</param>
         /// <returns>True, if relation is a super generic type of given type</returns>
         public static bool IsLowerConstraintPropertyType<TParam>(this PropertyInfo propertyInfo)
         {
-            return typeof(TParam).IsAssignableFrom(propertyInfo.PropertyType) 
-                || ((typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType) 
-                    || typeof(IOptionalItemSet).IsAssignableFrom(propertyInfo.PropertyType)) 
-                        && propertyInfo.PropertyType.GetGenericArguments().All(t => typeof(TParam).IsAssignableFrom(t)));
+            return typeof(TParam).IsAssignableFrom(propertyInfo.PropertyType);
         }
 
-        // Usages prüfen von IsLowerConstraintPropertyType
-        public static bool HasLowerConstraintRelationTypeEquivalent1<TParam>(this PropertyInfo propertyInfo)
+        /// <summary>
+        /// Determines whether there is an equivalently named property as a super generic type of given <c>TParam</c>.
+        /// Additionally, to <see cref="IsLowerConstraintPropertyType{TParam}"/>:
+        /// If the property redirects to a simple relation <c>TParam</c> denotes the expected base type.
+        /// If the property redirects to a n-ary relation <c>TParam</c> denotes the expected generic parameter base type.
+        /// </summary>
+        /// <typeparam name="TParam">The generic argument of relation</typeparam>
+        /// <param name="propertyInfo">The property</param>
+        /// <returns>True, if there's a relation as a super generic type of given type</returns>
+        public static bool HasLowerConstraintRelationType<TParam>(this PropertyInfo propertyInfo)
         {
             return IsLowerConstraintPropertyType<TParam>(propertyInfo)
                 || ((typeof(IItemSet).IsAssignableFrom(propertyInfo.PropertyType) 
@@ -254,13 +257,8 @@ namespace Bitub.Xbim.Ifc
                             && propertyInfo.PropertyType.GetGenericArguments().All(t => typeof(TParam).IsAssignableFrom(t)));
         }
 
-        /// <summary>
-        /// Determines whether there is an equivalently named property as a super generic type of given <c>TParam</c>
-        /// </summary>
-        /// <typeparam name="TParam">The generic argument of relation</typeparam>
-        /// <param name="propertyInfo">The property</param>
-        /// <returns>True, if there's a relation as a super generic type of given type</returns>
-        public static bool HasLowerConstraintRelationTypeEquivalent<TParam>(this PropertyInfo propertyInfo)
+        
+        public static bool HasLowerConstraintRelationType1<TParam>(this PropertyInfo propertyInfo)
         {
             return propertyInfo.DeclaringType?
                 .GetLowerConstraintGenericProperty<IItemSet, TParam>(propertyInfo.Name)
@@ -319,7 +317,7 @@ namespace Bitub.Xbim.Ifc
         public static bool TryGetMultiValue<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam>? values)
         {
             values = Array.Empty<TParam>();
-            if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+            if (HasLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
             {
                 values = metaProperty.PropertyInfo.GetValue(instance) as IEnumerable<TParam>;
                 return true;
@@ -342,7 +340,7 @@ namespace Bitub.Xbim.Ifc
             {
                 values = Array.AsReadOnly(new []{ (TParam)metaProperty.PropertyInfo.GetValue(instance)! });
             } 
-            else if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+            else if (HasLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
             {
                 if (metaProperty.PropertyInfo.GetValue(instance) is IList itemSet)
                 {
@@ -369,7 +367,7 @@ namespace Bitub.Xbim.Ifc
         /// <exception cref="NotSupportedException"></exception>
         public static void SetSingleValue<TParam>(this ExpressMetaProperty metaProperty, object instance, TParam? value)
         {
-            if (HasLowerConstraintRelationTypeEquivalent<TParam>(metaProperty.PropertyInfo))
+            if (HasLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
                 metaProperty.PropertyInfo.SetValue(instance, value);
             else
                 throw new NotSupportedException($"Property MUST support {typeof(TParam)}");

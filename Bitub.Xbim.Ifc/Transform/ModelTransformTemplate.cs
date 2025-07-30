@@ -92,11 +92,13 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
             if (value is IPersistEntity entity)
             {
                 if (PassInstance(entity, package) == TransformActionType.Drop)
+                    // Remove reference if dropped
                     return null;
             }
-            else if (value is IEnumerable items && (property?.PropertyInfo.IsLowerConstraintPropertyType<IPersistEntity>() ?? false))
+            else if (value is IEnumerable items && (property?.PropertyInfo.HasLowerConstraintRelationType<IPersistEntity>() ?? false))
             {
                 var entities = (IEnumerable<IPersistEntity>)items;
+                // Remove references if dropped
                 return EmptyToNull(entities.Where(e => PassInstance(e, package) != TransformActionType.Drop));
             }
 
@@ -280,7 +282,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
                 {
                     progressMonitor?.State.MarkBroken();
                     txStore.RollBack();
-                    return new TransformResult(TransformResult.Code.ExitWithError, package);
+                    return new TransformResult(TransformResult.Code.ExitWithError, package, e);
                 }
                 finally
                 {
