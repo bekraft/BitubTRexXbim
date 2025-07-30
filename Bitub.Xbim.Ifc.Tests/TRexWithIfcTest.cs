@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests
 {
     [TestFixture]
-    public class IfcModelBuildingTests : TestBase<IfcModelBuildingTests>
+    public class TRexWithIfcTest : TRexTest<TRexWithIfcTest>
     {
         [Test]
         public void BuildingIFC2x3()
@@ -22,10 +22,10 @@ namespace Bitub.Xbim.Ifc.Tests
             var globalPlacement = builder.NewLocalPlacement(new XbimVector3D());
             Assert.IsNotNull(builder.NewProduct<IIfcWallStandardCase>(globalPlacement));
 
-            Assert.AreEqual(4, builder.model.Instances.OfType<IIfcProduct>().Count());
-            Assert.AreEqual(1, builder.model.Instances.OfType<IIfcLocalPlacement>().Count());
-            Assert.AreEqual(1, builder.model.Instances.OfType<IIfcRelContainedInSpatialStructure>().Count());
-            Assert.AreEqual(3, builder.model.Instances.OfType<IIfcRelAggregates>().Count());
+            Assert.AreEqual(4, builder.Model.Instances.OfType<IIfcProduct>().Count());
+            Assert.AreEqual(1, builder.Model.Instances.OfType<IIfcLocalPlacement>().Count());
+            Assert.AreEqual(1, builder.Model.Instances.OfType<IIfcRelContainedInSpatialStructure>().Count());
+            Assert.AreEqual(3, builder.Model.Instances.OfType<IIfcRelAggregates>().Count());
         }
 
         [Test]
@@ -39,10 +39,10 @@ namespace Bitub.Xbim.Ifc.Tests
             var globalPlacement = builder.NewLocalPlacement(new XbimVector3D());
             Assert.IsNotNull(builder.NewProduct<IIfcWallStandardCase>(globalPlacement));
 
-            Assert.AreEqual(4, builder.model.Instances.OfType<IIfcProduct>().Count());
-            Assert.AreEqual(1, builder.model.Instances.OfType<IIfcLocalPlacement>().Count());
-            Assert.AreEqual(1, builder.model.Instances.OfType<IIfcRelContainedInSpatialStructure>().Count());
-            Assert.AreEqual(3, builder.model.Instances.OfType<IIfcRelAggregates>().Count());
+            Assert.AreEqual(4, builder.Model.Instances.OfType<IIfcProduct>().Count());
+            Assert.AreEqual(1, builder.Model.Instances.OfType<IIfcLocalPlacement>().Count());
+            Assert.AreEqual(1, builder.Model.Instances.OfType<IIfcRelContainedInSpatialStructure>().Count());
+            Assert.AreEqual(3, builder.Model.Instances.OfType<IIfcRelAggregates>().Count());
         }
 
         [Test]
@@ -59,9 +59,9 @@ namespace Bitub.Xbim.Ifc.Tests
 
             Assert.IsTrue(fixture1.ContainedInStructure.Count() == 1);
 
-            builder.Transactively(m =>
+            builder.Transactive(m =>
             {
-                var fixture2 = builder.ifcEntityScope.New<IIfcWallStandardCase>(fixture1.GetType(), e =>
+                var fixture2 = builder.IfcEntityScope.New<IIfcWallStandardCase>(fixture1.GetType(), e =>
                 {
                     e.ObjectPlacement = globalPlacement;
                 });

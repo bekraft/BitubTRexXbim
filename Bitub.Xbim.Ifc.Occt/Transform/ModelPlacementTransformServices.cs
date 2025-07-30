@@ -8,10 +8,8 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc4.Interfaces;
 
 using Bitub.Dto;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xbim.Common.Configuration;
-using Xbim.Geometry.Engine.Interop;
 using Xbim.ModelGeometry.Scene;
 
 namespace Bitub.Xbim.Ifc.Transform
@@ -173,12 +171,12 @@ namespace Bitub.Xbim.Ifc.Transform
     /// <summary>
     /// IFC placement transformation request.
     /// </summary>
-    public sealed class ModelPlacementTransform : ModelTransformTemplate<ModelPlacementTransformPackage>
+    public sealed class ModelPlacementTransformServices : ModelTransformTemplate<ModelPlacementTransformPackage>
     {
         /// <summary>
         /// The logger.
         /// </summary>
-        public override ILogger Log { get; protected set; }
+        public override ILogger? Log { get; protected set; }
 
         public override string Name { get => "Model Placement"; }
 
@@ -205,9 +203,9 @@ namespace Bitub.Xbim.Ifc.Transform
         /// </summary>
         /// <param name="loggerFactory">Logger factory</param>
         /// <param name="logFilter">The events to log</param>
-        public ModelPlacementTransform(ILoggerFactory loggerFactory, params TransformActionResult[] logFilter) : base(logFilter)
+        public ModelPlacementTransformServices(ILoggerFactory? loggerFactory, params TransformActionResult[] logFilter) : base(logFilter)
         {
-            Log = loggerFactory?.CreateLogger<ModelPlacementTransform>();
+            Log = loggerFactory?.CreateLogger<ModelPlacementTransformServices>();
         }
 
         protected override ModelPlacementTransformPackage CreateTransformPackage(IModel aSource, IModel aTarget,

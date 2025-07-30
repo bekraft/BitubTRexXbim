@@ -7,50 +7,49 @@ using Xbim.Common.Metadata;
 
 using Xbim.Common.Step21;
 
-namespace Bitub.Xbim.Ifc
+namespace Bitub.Xbim.Ifc;
+
+public sealed class IfcAssemblyScope : AssemblyScope 
 {
-    public class IfcAssemblyScope : AssemblyScope 
+    public static readonly IfcAssemblyScope Ifc2x3 = FromFactoryType<global::Xbim.Ifc2x3.EntityFactoryIfc2x3>(XbimSchemaVersion.Ifc2X3);
+    public static readonly IfcAssemblyScope Ifc4 = FromFactoryType<global::Xbim.Ifc4.EntityFactoryIfc4>(XbimSchemaVersion.Ifc4);
+    public static readonly IfcAssemblyScope Ifc4x3 = FromFactoryType<global::Xbim.Ifc4x3.EntityFactoryIfc4x3Add2>(XbimSchemaVersion.Ifc4x3);
+
+    public static readonly IDictionary<XbimSchemaVersion, IfcAssemblyScope> SchemaAssemblyScope;
+
+    public readonly IEntityFactory Factory;
+    public readonly ExpressMetaData Metadata;
+    public readonly Qualifier SchemaQualifier;
+
+    static IfcAssemblyScope()
     {
-        public static readonly IfcAssemblyScope Ifc2x3 = IfcAssemblyScope.FromFactoryType<global::Xbim.Ifc2x3.EntityFactoryIfc2x3>(XbimSchemaVersion.Ifc2X3);
-        public static readonly IfcAssemblyScope Ifc4 = IfcAssemblyScope.FromFactoryType<global::Xbim.Ifc4.EntityFactoryIfc4>(XbimSchemaVersion.Ifc4);
-        public static readonly IfcAssemblyScope Ifc4x1 = IfcAssemblyScope.FromFactoryType<global::Xbim.Ifc4.EntityFactoryIfc4x1>(XbimSchemaVersion.Ifc4x1);
+       SchemaAssemblyScope = new Dictionary<XbimSchemaVersion, IfcAssemblyScope>() {
+           { XbimSchemaVersion.Ifc2X3, Ifc2x3 },
+           { XbimSchemaVersion.Ifc4, Ifc4 },
+           { XbimSchemaVersion.Ifc4x3, Ifc4x3 }
+       };
+    }
 
-        public static readonly IDictionary<XbimSchemaVersion, IfcAssemblyScope> SchemaAssemblyScope;
+    public static IfcAssemblyScope FromFactoryType<TFactory>(XbimSchemaVersion schemaVersion) where TFactory : IEntityFactory, new()
+    {
+        return new IfcAssemblyScope(new TFactory(), schemaVersion.ToString().ToQualifier());
+    }
 
-        public readonly IEntityFactory factory;
-        public readonly ExpressMetaData metadata;
-        public readonly Qualifier schemaQualifier;
+    private IfcAssemblyScope(IEntityFactory entityFactory, Qualifier schema)
+        : base(entityFactory.GetType().Assembly)
+    {
+        Factory = entityFactory;
+        Metadata = ExpressMetaData.GetMetadata(entityFactory);
+        SchemaQualifier = schema;
+    }
 
-        static IfcAssemblyScope()
-        {
-           SchemaAssemblyScope = new Dictionary<XbimSchemaVersion, IfcAssemblyScope>() {
-               { XbimSchemaVersion.Ifc2X3, Ifc2x3 },
-               { XbimSchemaVersion.Ifc4, Ifc4 },
-               { XbimSchemaVersion.Ifc4x1, Ifc4x1 }
-           };
-        }
+    public bool IsIfcEntityType(Type t)
+    {
+        return Metadata.ExpressType(t) != null;
+    }
 
-        public static IfcAssemblyScope FromFactoryType<TFactory>(XbimSchemaVersion schemaVersion) where TFactory : IEntityFactory, new()
-        {
-            return new IfcAssemblyScope(new TFactory(), schemaVersion.ToString().ToQualifier());
-        }
-
-        private IfcAssemblyScope(IEntityFactory entityFactory, Qualifier schema)
-            : base(entityFactory.GetType().Assembly)
-        {
-            factory = entityFactory;
-            metadata = ExpressMetaData.GetMetadata(entityFactory.GetType().Module);
-            schemaQualifier = schema;
-        }
-
-        public bool IsIfcEntityType(Type t)
-        {
-            return metadata.ExpressType(t) != null;
-        }
-
-        public override Qualifier GetModuleQualifer(Module module)
-        {
-            return schemaQualifier;
-        }
+    public override Qualifier GetModuleQualifer(Module module)
+    {
+        return SchemaQualifier;
     }
 }

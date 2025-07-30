@@ -9,6 +9,7 @@
     <IsPackable>true</IsPackable>
     <Platforms>x64</Platforms>
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup>
@@ -24,11 +25,11 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.836-netcore" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.847-netcore" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.836-netcore" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.847-netcore" />
   </ItemGroup>
   
 </Project>
