@@ -11,7 +11,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   
-  <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">
+  <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(Configuration)' != 'Test'">
     <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
     <PackageReference Include="Xbim.Common" Version="6.0.548" />    
     <PackageReference Include="Xbim.Ifc" Version="6.0.548" />
@@ -21,7 +21,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' == 'XbimDev'"> 
+  <ItemGroup Condition="'$(Configuration)' == 'XbimDev' Or '$(Configuration)' == 'Test'"> 
     <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
     <PackageReference Include="Xbim.Common" Version="6.0.546-develop" />
     <PackageReference Include="Xbim.Ifc" Version="6.0.546-develop" />
@@ -32,11 +32,11 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IsWindows)' == 'true' And '$(Configuration)' != 'XbimDev'">
+  <ItemGroup Condition="'$(IsWindows)' == 'true' And '$(Configuration)' != 'XbimDev' And '$(Configuration)' != 'Test'">
     <PackageReference Include="Xbim.IO.Esent" Version="6.0.548" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(IsWindows)' == 'true' And '$(Configuration)' == 'XbimDev'">
+  <ItemGroup Condition="'$(IsWindows)' == 'true' And ('$(Configuration)' == 'XbimDev' Or '$(Configuration)' == 'Test')">
     <PackageReference Include="Xbim.IO.Esent" Version="6.0.546-develop" />
   </ItemGroup>
 

@@ -41,30 +41,26 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
                 EditorCredentials = EditorCredentials
             };
 
-            CancelableProgressing cp;
-            using (var result = await request.Run(source, cp = NewProgressMonitor()))
-            {
-                if (null != result.Cause)
-                    Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+            CancelableProgressing cp = NewProgressMonitor(true);
+            using var result = await request.Run(source, cp);
+            
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            Assert.That(result.Target.Instances
+                .OfType<IIfcPropertySet>()
+                .Count(s => s.Name == "AllplanAttributes"),  Is.EqualTo(0));
 
-                Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                Assert.AreEqual(0, result.Target.Instances
-                    .OfType<IIfcPropertySet>()
-                    .Count(s => s.Name == "AllplanAttributes"));
+            var propertySets = result.Target.Instances
+                .OfType<IIfcPropertySet>()
+                .Where(s => s.Name == "AllplanAttributes Copy")
+                .ToArray();
 
-                var pset = result.Target.Instances
-                    .OfType<IIfcPropertySet>()
-                    .Where(s => s.Name == "AllplanAttributes Copy")
-                    .ToArray();
+            Assert.That(propertySets.Length, Is.EqualTo(4));
+            Assert.That(propertySets.All(p => p.Properties<IIfcProperty>().Count() == 3), Is.True);
 
-                Assert.AreEqual(4, pset.Length);
-                Assert.IsTrue(pset.All(p => p.Properties<IIfcProperty>().Count() == 3));
+            var stampAfter = result.Target.ToSchemeValidator();
+            Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                var stampAfter = result.Target.ToSchemeValidator();
-                Assert.IsTrue(stampAfter.IsCompliantToSchema);
-
-                Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-            }
+            Assert.That(cp.State.State.HasFlag(ProgressTokenState.IsTerminated), Is.True);
         }
     }
 
@@ -87,31 +83,26 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
                 EditorCredentials = EditorCredentials
             };
 
-            CancelableProgressing cp;
-            using (var result = await request.Run(source, cp = NewProgressMonitor()))
-            {
-                if (null != result.Cause)
-                    Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+            CancelableProgressing cp = NewProgressMonitor(true);
+            using var result = await request.Run(source, cp);
+            
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            Assert.That(result.Target.Instances
+                .OfType<IIfcPropertySet>()
+                .Count(s => s.Name == "AllplanAttributes"),  Is.EqualTo(0));
 
-                Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
+            var propertySets = result.Target.Instances
+                .OfType<IIfcPropertySet>()
+                .Where(s => s.Name == "AllplanAttributes Copy")
+                .ToArray();
 
-                Assert.AreEqual(0, result.Target.Instances
-                    .OfType<IIfcPropertySet>()
-                    .Count(s => s.Name == "AllplanAttributes"));
+            Assert.That(propertySets.Length, Is.EqualTo(4));
+            Assert.That(propertySets.All(p => p.Properties<IIfcProperty>().Count() == 3), Is.True);
 
-                var pset = result.Target.Instances
-                    .OfType<IIfcPropertySet>()
-                    .Where(s => s.Name == "AllplanAttributes Copy")
-                    .ToArray();
+            var stampAfter = result.Target.ToSchemeValidator();
+            Assert.IsTrue(stampAfter.IsCompliantToSchema);
 
-                Assert.AreEqual(4, pset.Length);
-                Assert.IsTrue(pset.All(p => p.Properties<IIfcProperty>().Count() == 3));                    
-
-                var stampAfter = result.Target.ToSchemeValidator();
-
-                Assert.IsTrue(stampAfter.IsCompliantToSchema);
-                Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-            }
+            Assert.That(cp.State.State.HasFlag(ProgressTokenState.IsTerminated), Is.True);
         }
     }
 
@@ -134,27 +125,23 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
                 EditorCredentials = EditorCredentials
             };
 
-            CancelableProgressing cp;
-            using (var result = await request.Run(source, cp = NewProgressMonitor()))
-            {
-                if (null != result.Cause)
-                    Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
+            CancelableProgressing cp = NewProgressMonitor(true);
+            using var result = await request.Run(source, cp);
+            
+            var propertySets = result.Target.Instances
+                .OfType<IIfcPropertySet>()
+                .Select(s => s.Name.ToString())
+                .Distinct()
+                .ToArray();
 
-                var psetsRemaining = result.Target.Instances
-                    .OfType<IIfcPropertySet>()
-                    .Select(s => s.Name.ToString())
-                    .Distinct()
-                    .ToArray();
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            Assert.That(propertySets.Length, Is.EqualTo(1));
+            Assert.That(string.Equals("Pset_SpaceCommon", propertySets[0], StringComparison.OrdinalIgnoreCase), Is.True);
 
-                Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                Assert.AreEqual(1, psetsRemaining.Length);
-                Assert.IsTrue(string.Equals("Pset_SpaceCommon", psetsRemaining[0], StringComparison.OrdinalIgnoreCase));
+            var stampAfter = result.Target.ToSchemeValidator();
 
-                var stampAfter = result.Target.ToSchemeValidator();
-
-                Assert.IsTrue(stampAfter.IsCompliantToSchema);
-                Assert.IsTrue(cp.State.State.HasFlag(ProgressTokenState.IsTerminated));
-            }
+            Assert.That(stampAfter.IsCompliantToSchema, Is.True);
+            Assert.That(cp.State.State.HasFlag(ProgressTokenState.IsTerminated), Is.True);
         }
     }
 }

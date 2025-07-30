@@ -18,11 +18,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
+  <ItemGroup Condition="'$(IsWindows)' == 'true'">
     <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.847-netcore" />
   </ItemGroup>
 

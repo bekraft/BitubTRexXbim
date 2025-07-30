@@ -7,6 +7,7 @@ using Bitub.Dto.Spatial;
 using NUnit.Framework;
 
 using Bitub.Xbim.Ifc.Transform;
+using Bitub.Xbim.Ifc.Validate;
 using Xbim.Ifc4.Interfaces;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform;
@@ -54,6 +55,9 @@ public class MapConversionTransformTests : TRexTest<MapConversionTransform>
         Assert.That(log.Count(e => e.Performed == TransformActionResult.Added), Is.EqualTo(3));
         Assert.That(result.Target.Instances.OfType<IIfcProjectedCRS>().Count, Is.EqualTo(1));
         Assert.That(result.Target.Instances.OfType<IIfcMapConversion>().Count, Is.EqualTo(1));
+        
+        var validator = result.Target.ToSchemeValidator();
+        Assert.IsTrue(validator.IsCompliantToSchema);
     }
     
     [Test]
@@ -72,5 +76,8 @@ public class MapConversionTransformTests : TRexTest<MapConversionTransform>
         Assert.That(log.Count(e => e.Performed == TransformActionResult.Skipped), Is.EqualTo(3));
         Assert.That(result.Target.Instances.OfType<IIfcProjectedCRS>().Count, Is.EqualTo(1));
         Assert.That(result.Target.Instances.OfType<IIfcMapConversion>().Count, Is.EqualTo(1));
+        
+        var validator = result.Target.ToSchemeValidator();
+        Assert.IsTrue(validator.IsCompliantToSchema);
     }
 }

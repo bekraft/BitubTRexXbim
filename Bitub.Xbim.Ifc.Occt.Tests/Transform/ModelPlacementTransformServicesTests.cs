@@ -7,15 +7,11 @@ using Xbim.IO;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validate;
 
-using Bitub.Dto;
 using Bitub.Dto.Spatial;
 
 using NUnit.Framework;
 
-using Microsoft.Extensions.Logging;
-
 namespace Bitub.Xbim.Ifc.Tests.Transform;
-
 
 [TestFixture]
 public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest<ModelPlacementTransformServicesTests>
@@ -63,22 +59,12 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
                 EditorCredentials = EditorCredentials
             };
 
-            using (var cp = new CancelableProgressing(true))
-            {
-                cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                using (var result = await request.Run(source, cp))
-                {
-                    if (null != result.Cause)
-                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                    //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                    // TODO Specific tests
-
-                    var stampAfter = result.Target.ToSchemeValidator();
-                    //Assert.AreEqual(stampBefore, stampAfter);
-                }
-            }
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 
@@ -102,27 +88,18 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
                 TargetStoreType = XbimStoreType.InMemoryModel,
                 EditorCredentials = EditorCredentials
             };
-
-            using (var cp = new CancelableProgressing(true))
-            {
-                cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                using (var result = await request.Run(source, cp))
-                {
-                    if (null != result.Cause)
-                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                    var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
-                    Assert.IsNotNull(rootPlacement.PlacesObject);
-                    Assert.IsTrue(rootPlacement.PlacesObject.Any(), "Root has objects");
-
-                    //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                    // TODO Specific tests
-
-                    var stampAfter = result.Target.ToSchemeValidator();
-                    //Assert.AreEqual(stampBefore, stampAfter);
-                }
-            }
+            
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            
+            var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().FirstOrDefault(i => i.PlacementRelTo == null);
+            Assert.IsNotNull(rootPlacement?.PlacesObject);
+            Assert.That(rootPlacement.PlacesObject.Any(), Is.True, "Root has objects");
+            
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 
@@ -147,31 +124,17 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
                 EditorCredentials = EditorCredentials
             };
 
-            using (var cp = new CancelableProgressing(true))
-            {
-                cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                using (var result = await request.Run(source, cp))
-                {
-                    if (null != result.Cause)
-                        Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                    var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
-                    Assert.IsNotNull(rootPlacement.PlacesObject);
-                    Assert.IsFalse(rootPlacement.PlacesObject.Any(), "Root has no objects");
-
-                    //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                    // TODO Specific tests
-
-                    var stampAfter = result.Target.ToSchemeValidator();
-                    //Assert.AreEqual(stampBefore, stampAfter);
-                }
-            }
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            
+            var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().FirstOrDefault(i => i.PlacementRelTo == null);
+            Assert.IsNotNull(rootPlacement?.PlacesObject);
+            Assert.That(rootPlacement.PlacesObject.Any(), Is.False, "Root has objects");
+            
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
-    }
-
-    public void Report(ProgressStateToken value)
-    {
-        Logger.LogDebug($"State {value.State}: Percentage = {value.Percentage}; State object = {value.StateObject}");
     }
 }

@@ -7,6 +7,7 @@ using Bitub.Dto.Spatial;
 using NUnit.Framework;
 
 using Bitub.Xbim.Ifc.Transform;
+using Bitub.Xbim.Ifc.Validate;
 using Xbim.Ifc4.Interfaces;
 
 namespace Bitub.Xbim.Ifc.Tests.Transform;
@@ -61,6 +62,9 @@ public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransfo
         Assert.That(mapConversion.Eastings.Value, Is.EqualTo(458657.30).Within(0.25));
         Assert.That(mapConversion.Northings.Value, Is.EqualTo(5438232.25).Within(0.25));
         Assert.That(mapConversion.OrthogonalHeight.Value, Is.EqualTo(113.5).Within(1e-1));
+        
+        var validator = result.Target.ToSchemeValidator();
+        Assert.IsTrue(validator.IsCompliantToSchema);
     }
     
     [Test]
@@ -85,5 +89,8 @@ public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransfo
         Assert.That(mapConversion.Eastings.Value, Is.EqualTo(458657.30).Within(0.25));
         Assert.That(mapConversion.Northings.Value, Is.EqualTo(5438232.25).Within(0.25));
         Assert.That(mapConversion.OrthogonalHeight.Value, Is.EqualTo(113.5).Within(1e-1));
+        
+        var validator = result.Target.ToSchemeValidator();
+        Assert.IsTrue(validator.IsCompliantToSchema);
     }
 }

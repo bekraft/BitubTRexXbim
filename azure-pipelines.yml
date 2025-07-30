@@ -18,8 +18,8 @@ variables:
   solution: '**/*.sln'
   buildPlatform: 'x64'
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-    buildConfiguration: 'XbimDev'
-    buildQualifier: '-XbimDev'
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
   ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
     buildQualifier: ''

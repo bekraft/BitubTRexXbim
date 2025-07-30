@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests
 {
     [TestFixture]
-    public class TRexWithIfcTest : TRexTest<TRexWithIfcTest>
+    public class IfcBuilderTests : TRexTest<IfcBuilderTests>
     {
         [Test]
         public void BuildingIFC2x3()
