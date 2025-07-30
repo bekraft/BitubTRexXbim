@@ -86,10 +86,11 @@ public abstract class TRexTest<T>
             if (null != a.Axis)
                 Assert.IsTrue(a.Axis.ToXbimVector3D().IsEqual(new XbimVector3D(0, 0, 1), Precision), "Axis fails" );
             if (null != a.RefDirection)
-                Assert.IsTrue(a.Axis.ToXbimVector3D().IsEqual(new XbimVector3D(1, 0, 0), Precision), "RefDirection fails");
-            if (a.Location is IIfcCartesianPoint p)
+                Assert.IsTrue(a.RefDirection.ToXbimVector3D().IsEqual(new XbimVector3D(1, 0, 0), Precision), "RefDirection fails");
+            if (a.Location is { } p)
             {
-                Assert.IsTrue(p?.ToXbimVector3D().IsEqual(XbimVector3D.Zero, Precision), "Location fails");
+                Assert.That(p.Coordinates.Count, Is.EqualTo(3), "No 3d");
+                Assert.That(p.ToXbimVector3D().IsEqual(XbimVector3D.Zero, Precision), Is.True, "Location fails");
             }
             else
             {
@@ -108,14 +109,24 @@ public abstract class TRexTest<T>
             ReadEmbeddedFileStream(resourceName), StorageType.Ifc, XbimModelType.MemoryModel);
     }
 
+    protected void SaveResultTarget(TransformResult result)
+    {
+        var store = result.Source as IfcStore;
+        if (null != store && !result.IsCanceledOrBroken)
+        {
+            var fileNameWithoutExtension = store.FileName.Substring(0, store.FileName.LastIndexOf('.'));
+            result.Target.SaveAsIfc(new FileStream($"{fileNameWithoutExtension}_Result.ifc", FileMode.Create));
+        }
+    }
+
     protected Stream ReadEmbeddedFileStream(string resourceName)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var resourceNames = assembly.GetManifestResourceNames();
-        if (!resourceNames.Contains(resourceName))
+        var assembly = Assembly.GetAssembly(GetType());
+        var resourceNames = assembly?.GetManifestResourceNames();
+        if (!resourceNames?.Contains(resourceName) ?? false)
             throw new ArgumentException($"Resource '{resourceName}' not found in assembly '{assembly.GetName().Name}'");
-        
-        return assembly.GetManifestResourceStream(resourceName);
+
+        return assembly?.GetManifestResourceStream(resourceName) ?? Stream.Null;
     }
 
     protected string ReadUtf8TextFrom(string resourceName)

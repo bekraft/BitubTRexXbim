@@ -32,7 +32,7 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
                 .OfType<IIfcPropertySet>()
                 .Count(s => s.Name == "AllplanAttributes"));
 
-            var request = new PropertySetRemovalTransformRex(LoggerFactory)
+            var request = new PropertySetRemovalTransform(LoggerFactory)
             {
                 ExludePropertySetByName = new string[] { "AllplanAttributes" },
                 IsNameMatchingCaseSensitive = false,
@@ -76,7 +76,7 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
             var stampBefore = source.ToSchemeValidator();
             Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-            var request = new PropertySetRemovalTransformRex(LoggerFactory)
+            var request = new PropertySetRemovalTransform(LoggerFactory)
             {
                 ExludePropertySetByName = new string[] { "AllplanAttributes" },
                 IncludePropertySetByName = new string[] { "AllplanAttributes", "AllplanAttributes Copy" },
@@ -123,7 +123,7 @@ public class PropertySetRemovalTransformServicesTests : TRexWithGeometryServices
             var stampBefore = source.ToSchemeValidator();
             Assert.IsTrue(stampBefore.IsCompliantToSchema);
 
-            var request = new PropertySetRemovalTransformRex(LoggerFactory)
+            var request = new PropertySetRemovalTransform(LoggerFactory)
             {
                 ExludePropertySetByName = new string[] { "Other" },
                 IncludePropertySetByName = new string[] { "Pset_SpaceCommon", "Other" },

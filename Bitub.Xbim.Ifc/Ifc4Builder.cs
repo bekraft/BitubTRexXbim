@@ -35,20 +35,6 @@ public sealed class Ifc4Builder : IfcBuilder
         return project;
     }
 
-    protected override IIfcOwnerHistory NewOwnerHistoryEntry(string comment)
-    {
-        return NewOwnerHistoryEntry(comment, IfcChangeActionEnum.ADDED);
-    }
-
-    private IfcOwnerHistory NewOwnerHistoryEntry(string version, IfcChangeActionEnum change)
-    {
-        IfcOwnerHistory newVersion = Model.NewIfcOwnerHistoryEntry<IfcOwnerHistory>(version, 
-            OwningUser as IfcPersonAndOrganization, 
-            OwningApplication as IfcApplication, 
-            change);            
-        return newVersion;
-    }
-
     private IfcSIUnit ChangeOrNewLengthUnit(IfcSIUnitName name, IfcSIPrefix? prefix = null)
     {
         var project = Model.Instances.OfType<IfcProject>().First();
@@ -71,15 +57,15 @@ public sealed class Ifc4Builder : IfcBuilder
 
     public IfcShapeRepresentation NewGeometricRepresentation(IfcProduct product, 
                                                              IfcGeometricRepresentationItem representationItem,
-                                                             IfcStyleAssignmentSelect style = null,
+                                                             IfcStyleAssignmentSelect? style = null,
                                                              string representationContext = "Model",
                                                              string representationContextId = "Body")
     {
         if (Model != product.Model || Model != representationItem.Model)
             throw new ArgumentException("Model mismatch");
 
-        IfcShapeRepresentation shapeRepresentation = null;
-        Transactively(s =>
+        IfcShapeRepresentation? shapeRepresentation = null;
+        Transactive(s =>
         {
             var productDefinitionShape = product.Representation;
             if (null == productDefinitionShape)

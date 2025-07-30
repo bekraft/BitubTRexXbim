@@ -64,6 +64,7 @@ public abstract class IfcBuilder
         // Principle properties
         _log = loggerFactory?.CreateLogger(GetType());
         _schema = model.SchemaVersion.ToString().ToQualifier();
+        
         IfcAssembly = IfcAssemblyScope.SchemaAssemblyScope[model.SchemaVersion];
         Model = model;
 
@@ -72,8 +73,8 @@ public abstract class IfcBuilder
 
         OwningUser = Model.Instances.OfType<IIfcPersonAndOrganization>().FirstOrDefault();
         OwningApplication = Model.Instances.OfType<IIfcApplication>().FirstOrDefault();
-
-        Transactively(m1 =>
+        
+        Transactive(m1 =>
         {
             if (m1 is not IfcStore s) return;
             OwningUser ??= s.DefaultOwningUser;
@@ -81,30 +82,31 @@ public abstract class IfcBuilder
         });            
     }
 
-    protected void NewContainer(IIfcObjectDefinition container)
+    private void NewContainer(IIfcObjectDefinition container)
     {
         var scope = CurrentScope;
         InstanceScopeStack.Push(container);
         Model.NewDecomposes(scope).RelatedObjects.Add(container);
     }
 
-    protected abstract IIfcProject InitNewProject(string projectName);
-
     /// <summary>
-    /// New adding owner history (versioning) entry. Needs be specific to the IFC version since some enums are specific.
+    /// Inits a new project specific to implementing IFC version.
     /// </summary>
-    /// <param name="comment">A textual comment</param>
-    /// <returns></returns>
-    protected abstract IIfcOwnerHistory NewOwnerHistoryEntry(string comment);
+    /// <param name="projectName">The project name</param>
+    /// <returns>A valid template project</returns>
+    protected abstract IIfcProject InitNewProject(string projectName);
 
     #endregion
 
+    /// <summary>
+    /// Returns the current schema version of IFC builder instance.
+    /// </summary>
     public Qualifier Schema => new Qualifier(_schema);
 
     /// <summary>
     /// Current owner history entry.
     /// </summary>
-    public IIfcOwnerHistory OwnerHistoryTag { get; protected set; }
+    public IIfcOwnerHistory? OwnerHistoryTag { get; set; }
 
     /// <summary>
     /// New builder wrapping a new in-memory IFC model.
@@ -149,14 +151,14 @@ public abstract class IfcBuilder
     /// <param name="loggerFactory">Optional logger factory</param>
     /// <returns>A builder wrapping a pre-filled model.</returns>
     public static IfcBuilder WithNewProject(string projectName, XbimEditorCredentials c,
-        XbimSchemaVersion version = XbimSchemaVersion.Ifc4, ILoggerFactory loggerFactory = null)
+        XbimSchemaVersion version = XbimSchemaVersion.Ifc4, ILoggerFactory? loggerFactory = null)
     {
         var builder = WithCredentials(c, version, loggerFactory);
         // Initialization
-        builder.Transactively(s =>
+        builder.Transactive(s =>
         {
             var project = builder.InitNewProject(projectName);
-            builder.OwnerHistoryTag = builder.NewOwnerHistoryEntry("Initial contribution");
+            builder.OwnerHistoryTag = builder.NewOwnerHistoryEntry(IfcChangeActionEnum.ADDED);
             project.OwnerHistory = builder.OwnerHistoryTag;
             builder.InstanceScopeStack.Push(project);
         });
@@ -166,45 +168,31 @@ public abstract class IfcBuilder
     /// <summary>
     /// Current known user.
     /// </summary>
-    public IIfcPersonAndOrganization? OwningUser { get; protected set; }
+    public IIfcPersonAndOrganization? OwningUser { get; set; }
 
     /// <summary>
     /// Current known application.
     /// </summary>
-    public IIfcApplication? OwningApplication { get; protected set; }
-
-    public IEnumerable<IIfcPersonAndOrganization> NewAuthorEngagement(AuthorData author)
+    public IIfcApplication? OwningApplication { get; set; }
+    
+    /// <summary>
+    /// New adding owner history (versioning) entry. 
+    /// </summary>
+    /// <returns>A new owner history entry</returns>
+    public IIfcOwnerHistory NewOwnerHistoryEntry(IfcChangeActionEnum changeAction)
     {
-        IIfcPersonAndOrganization[] personAndOrganizations = null;
-        Transactively(m => {
-            var person = IfcEntityScope.NewOf<IIfcPerson>(e =>
-            {
-                e.FamilyName = author.Name;
-                e.GivenName = author.GivenName;                   
-            });
-            personAndOrganizations = author.Organisations?.Select(o => IfcEntityScope.NewOf<IIfcPersonAndOrganization>(e1 =>
-            {
-                e1.ThePerson = person;
-                e1.TheOrganization = IfcEntityScope.NewOf<IIfcOrganization>(e2 =>
-                {
-                    e2.Name = o.Name;
-                    e2.Identification = o.Id;
-                    e2.Description = o.Description;                        
-                    e2.Addresses.AddRange(o.Addresses.Select(a => IfcEntityScope.NewOf<IIfcAddress>(e3 =>
-                    {
-                        e3.Purpose = a.Type;
-                        e3.Description = a.Address;
-                    })));
-                });
-            })).ToArray();
-        });
-        return personAndOrganizations;
+        var ownerHistory = IfcEntityScope.NewOf<IIfcOwnerHistory>();
+        ownerHistory.OwningUser = OwningUser;
+        ownerHistory.OwningApplication = OwningApplication;
+        ownerHistory.ChangeAction = changeAction;
+        ownerHistory.CreationDate = DateTime.Now;
+        return ownerHistory;
     }
 
     public IIfcApplication NewApplicationData(ApplicationData application)
     {
-        IIfcApplication app = null;
-        Transactively(m =>
+        IIfcApplication? app = null;
+        Transactive(m =>
         {
             app = IfcEntityScope.NewOf<IIfcApplication>(e =>
             {
@@ -213,7 +201,7 @@ public abstract class IfcBuilder
                 e.Version = application.Version;
             });
         });
-        return app;
+        return app!;
     }
 
     /// <summary>
@@ -224,7 +212,7 @@ public abstract class IfcBuilder
     /// <summary>
     /// Current top placement in model hierarchy.
     /// </summary>
-    public IIfcObjectPlacement CurrentPlacement => InstanceScopeStack
+    public IIfcObjectPlacement? CurrentPlacement => InstanceScopeStack
         .OfType<IIfcProduct>()
         .FirstOrDefault(p => p.ObjectPlacement != null)?
         .ObjectPlacement;
@@ -232,12 +220,12 @@ public abstract class IfcBuilder
     /// <summary>
     /// Returns a collection of concrete product types (which might be an IfcElement)
     /// </summary>
-    public IEnumerable<Type> InstanstiableProducts => IfcEntityScope.Implementing<IIfcProduct>();
+    public IEnumerable<Type> InstantiableProducts => IfcEntityScope.Implementing<IIfcProduct>();
 
     /// <summary>
     /// Returns a subset of IfcProduct which is conforming to IfcElement
     /// </summary>
-    public IEnumerable<Type> InstanstiableElements => IfcEntityScope.Implementing<IIfcElement>();
+    public IEnumerable<Type> InstantiableElements => IfcEntityScope.Implementing<IIfcElement>();
 
     public string TransactionContext => $"Modification ${DateTime.Now}";
 
@@ -273,7 +261,7 @@ public abstract class IfcBuilder
     /// Wraps an IfcStore modification into a transaction context.
     /// </summary>
     /// <param name="action">The modification</param>
-    public void Transactively(Action<IModel> action)
+    public void Transactive(Action<IModel> action)
     {
         if (null != Model.CurrentTransaction)
         {
@@ -303,8 +291,8 @@ public abstract class IfcBuilder
     /// <returns>A local placement reference</returns>
     public IIfcLocalPlacement NewLocalPlacement(XbimVector3D refPosition, bool scaleUp = false)
     {
-        IIfcLocalPlacement placement = null;
-        Transactively(s =>
+        IIfcLocalPlacement? placement = null;
+        Transactive(s =>
         {
             var product = CurrentScope as IIfcProduct;
             var relPlacement = CurrentPlacement;
@@ -321,7 +309,8 @@ public abstract class IfcBuilder
                 }
                 else
                 {
-                    _log.LogWarning($"#{product.EntityLabel} has already a placement #{product.ObjectPlacement.EntityLabel}");
+                    _log?.LogWarning("Entity {Label} has already a placement by label {placement}.", 
+                        product.EntityLabel, product.ObjectPlacement.EntityLabel);
                 }
             }
             else
@@ -329,29 +318,29 @@ public abstract class IfcBuilder
                 throw new OperationCanceledException("No IfcProduct as head of current hierarchy");
             }
         });
-        return placement;
+        return placement!;
     }
 
-    public E New<E>(Action<E> modifier = null) where E : IPersistEntity
+    public E New<E>(Action<E>? modifier = null) where E : IPersistEntity
     {
         return New<E>(typeof(E), modifier);
     }
 
-    public E New<E>(Type t, Action<E> modifier = null) where E : IPersistEntity
+    public E New<E>(Type t, Action<E>? modifier = null) where E : IPersistEntity
     {
-        E entity = default(E);
-        Transactively(s =>
+        E? entity = default(E);
+        Transactive(s =>
         {
             entity = (E)IfcEntityScope.New<E>(t);
             modifier?.Invoke(entity);
         });
-        return entity;
+        return entity!;
     }
 
-    public IIfcSite NewSite(string siteName = null)
+    public IIfcSite NewSite(string? siteName = null)
     {
-        IIfcSite site = null;
-        Transactively(s =>
+        IIfcSite? site = null;
+        Transactive(s =>
         {
             site = IfcEntityScope.NewOf<IIfcSite>();
             site.OwnerHistory = OwnerHistoryTag;
@@ -360,13 +349,13 @@ public abstract class IfcBuilder
             NewContainer(site);
         });
 
-        return site;
+        return site!;
     }
 
-    public IIfcBuilding NewBuilding(string buildingName = null)
+    public IIfcBuilding NewBuilding(string? buildingName = null)
     {
-        IIfcBuilding building = null;
-        Transactively(s =>
+        IIfcBuilding? building = null;
+        Transactive(s =>
         {
             building = IfcEntityScope.NewOf<IIfcBuilding>();
             building.OwnerHistory = OwnerHistoryTag;
@@ -375,13 +364,13 @@ public abstract class IfcBuilder
             NewContainer(building);
         });
 
-        return building;
+        return building!;
     }
 
-    public IIfcBuildingStorey NewStorey(string name = null, double elevation = 0)
+    public IIfcBuildingStorey NewStorey(string? name = null, double elevation = 0)
     {
-        IIfcBuildingStorey storey = null;
-        Transactively(s =>
+        IIfcBuildingStorey? storey = null;
+        Transactive(s =>
         {
             storey = IfcEntityScope.NewOf<IIfcBuildingStorey>();
             storey.Name = name;
@@ -391,7 +380,7 @@ public abstract class IfcBuilder
             NewContainer(storey);
         });
 
-        return storey;
+        return storey!;
     }
 
     private void InitProduct(IIfcProduct product)
@@ -416,17 +405,17 @@ public abstract class IfcBuilder
     /// <param name="placement">A placement</param>
     /// <param name="name">An optional name</param>
     /// <returns>New stored product</returns>
-    public P NewProduct<P>(IIfcLocalPlacement placement = null, string name = null) where P : IIfcProduct
+    public P NewProduct<P>(IIfcLocalPlacement? placement = null, string? name = null) where P : IIfcProduct
     {
-        P product = default(P);
-        Transactively(s =>
+        P? product = default(P);
+        Transactive(s =>
         {
             product = IfcEntityScope.NewOf<P>();
             product.Name = name;
             product.ObjectPlacement = placement;
             InitProduct(product);
         });
-        return product;
+        return product!;
     }
 
     /// <summary>
@@ -436,13 +425,13 @@ public abstract class IfcBuilder
     /// <param name="placement">A placement</param>
     /// <param name="name">An optional name</param>
     /// <returns>New stored product</returns>
-    public IIfcProduct NewProduct(Qualifier productName, IIfcLocalPlacement placement = null, string name = null)
+    public IIfcProduct NewProduct(Qualifier productName, IIfcLocalPlacement? placement = null, string? name = null)
     {
-        IIfcProduct product = null;
+        IIfcProduct? product = null;
         if (!_schema.IsSuperQualifierOf(productName))
             throw new ArgumentException($"Wrong schema version of pName. Store is a {Model.SchemaVersion}");
 
-        Transactively(s =>
+        Transactive(s =>
         {
             product = IfcEntityScope.New(productName) as IIfcProduct;
             if (null == product)
@@ -453,7 +442,7 @@ public abstract class IfcBuilder
             InitProduct(product);
         });
         
-        return product;
+        return product!;
     }
 
     /// <summary>
@@ -472,7 +461,7 @@ public abstract class IfcBuilder
     /// Drop current product scope.
     /// </summary>
     /// <returns>Dropped container or null, if there's no.</returns>
-    public IIfcObjectDefinition DropCurrentScope()
+    public IIfcObjectDefinition? DropCurrentScope()
     {
         if (InstanceScopeStack.Count > 1)
             return InstanceScopeStack.Pop();
@@ -480,16 +469,16 @@ public abstract class IfcBuilder
             return null;
     }
 
-    public P NewProperty<P>(string propertyName, string description = null) where P : IIfcProperty
+    public P NewProperty<P>(string propertyName, string? description = null) where P : IIfcProperty
     {
-        P property = default(P);
-        Transactively(s =>
+        P? property = default(P);
+        Transactive(s =>
         {
             property = IfcEntityScope.NewOf<P>();
             property.Name = propertyName;
             property.Description = description;
         });
-        return property;
+        return property!;
     }
 
     public T NewValueType<T>(object value) where T : IIfcValue
@@ -501,14 +490,14 @@ public abstract class IfcBuilder
         string? description = null, IIfcProduct? initialProduct = null)
     {
         IIfcRelDefinesByProperties? pSetRel = null;
-        Transactively(s =>
+        Transactive(s =>
         {
             var set = s.NewIfcPropertySet(propertySetName, description);
             pSetRel = s.NewIfcRelDefinesByProperties(set);
             if(null != initialProduct)
                 pSetRel.RelatedObjects.Add(initialProduct);
         });
-        return pSetRel;
+        return pSetRel!;
     }
 
     public IIfcNamedUnit NewSIUnit(IIfcSIUnit unit)

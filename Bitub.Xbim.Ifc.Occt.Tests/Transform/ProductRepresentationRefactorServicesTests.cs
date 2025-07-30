@@ -61,18 +61,26 @@ public class ProductRepresentationRefactorServicesTests : TRexWithGeometryServic
                 EditorCredentials = EditorCredentials
             };
 
-            Assert.AreEqual(1, source.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, false,"Body")));
-            Assert.AreEqual(4, source.Instances.OfType<IIfcBuildingElementProxy>().Count());
+            Assert.AreEqual(1, source.Instances
+                .OfType<IIfcBuildingElementProxy>()
+                .Count(p => IsMultiRepresentation(p, false,"Body")));
+            Assert.AreEqual(4, source.Instances
+                .OfType<IIfcBuildingElementProxy>()
+                .Count());
 
             var result = await transform.Run(source, NewProgressMonitor(true));
+            
+            SaveResultTarget(result);
+            
+            Assert.AreEqual(0, result.Target.Instances
+                .OfType<IIfcBuildingElementProxy>()
+                .Count(p => IsMultiRepresentation(p, false, "Body")));
+            Assert.AreEqual(17, result.Target.Instances
+                .OfType<IIfcBuildingElementProxy>()
+                .Count());
 
-            Assert.AreEqual(0, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, false, "Body")));
-            Assert.AreEqual(17, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
-
-            var stampAfter = result.Target.ToSchemeValidator();
-            Assert.IsTrue(stampAfter.IsCompliantToSchema);
-
-            //result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-1.ifc", FileMode.Create));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 
@@ -98,14 +106,14 @@ public class ProductRepresentationRefactorServicesTests : TRexWithGeometryServic
             Assert.AreEqual(1, source.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
             var result = await transform.Run(source, NewProgressMonitor(true));
+            
+            SaveResultTarget(result);
 
             Assert.AreEqual(0, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, true, "Body")));
             Assert.AreEqual(2, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
-            var stampAfter = result.Target.ToSchemeValidator();
-            Assert.IsTrue(stampAfter.IsCompliantToSchema);
-
-            //result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-1.ifc", FileMode.Create));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 
@@ -129,14 +137,14 @@ public class ProductRepresentationRefactorServicesTests : TRexWithGeometryServic
             Assert.AreEqual(1, source.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
             var result = await transform.Run(source, NewProgressMonitor(true));
+            
+            SaveResultTarget(result);
 
             Assert.AreEqual(1, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, true, "Body")));
             Assert.AreEqual(1, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
-            var stampAfter = result.Target.ToSchemeValidator();
-            Assert.IsTrue(stampAfter.IsCompliantToSchema);
-
-            //result.Target.SaveAsIfc(new FileStream("mapped-shape-with-transformation-2.ifc", FileMode.Create));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 
@@ -160,16 +168,16 @@ public class ProductRepresentationRefactorServicesTests : TRexWithGeometryServic
             Assert.AreEqual(4, source.Instances.OfType<IIfcBuildingElementProxy>().Count());
 
             var result = await transform.Run(source, NewProgressMonitor(true));
+            
+            SaveResultTarget(result);
 
             Assert.AreEqual(0, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count(p => IsMultiRepresentation(p, false, "Body")));
             Assert.AreEqual(17, result.Target.Instances.OfType<IIfcBuildingElementProxy>().Count());
             Assert.AreEqual(1, result.Target.Instances.OfType<IIfcElementAssembly>().Count());
             Assert.AreEqual(14, result.Target.Instances.OfType<IIfcElementAssembly>().First().IsDecomposedBy.SelectMany(r => r.RelatedObjects).Count());
 
-            var stampAfter = result.Target.ToSchemeValidator();
-            Assert.IsTrue(stampAfter.IsCompliantToSchema);
-
-            //result.Target.SaveAsIfc(new FileStream("Ifc4-MultipleBodiesPerProduct-2.ifc", FileMode.Create));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 }

@@ -9,7 +9,7 @@ using Xbim.Common.Step21;
 
 namespace Bitub.Xbim.Ifc;
 
-public class IfcAssemblyScope : AssemblyScope 
+public sealed class IfcAssemblyScope : AssemblyScope 
 {
     public static readonly IfcAssemblyScope Ifc2x3 = FromFactoryType<global::Xbim.Ifc2x3.EntityFactoryIfc2x3>(XbimSchemaVersion.Ifc2X3);
     public static readonly IfcAssemblyScope Ifc4 = FromFactoryType<global::Xbim.Ifc4.EntityFactoryIfc4>(XbimSchemaVersion.Ifc4);

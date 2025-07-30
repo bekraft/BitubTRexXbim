@@ -129,7 +129,7 @@ namespace Bitub.Xbim.Ifc
             return relation;
         }
 
-        public static T NewIfcOwnerHistoryEntry<T>(this IModel s, string version,
+        public static T NewIfcOwnerHistoryEntry<T>(this IModel s,
             IIfcPersonAndOrganization owningUser, IIfcApplication owningApplication,
             IfcChangeActionEnum change = IfcChangeActionEnum.ADDED) where T : IIfcOwnerHistory, IInstantiableEntity
         {
@@ -144,7 +144,7 @@ namespace Bitub.Xbim.Ifc
             return newEntry;
         }
 
-        public static T NewIfc4Product<T>(this IModel s, IfcObjectDefinition container = null, string name = null) where T : IInstantiableEntity, IIfcProduct
+        public static T NewIfc4Product<T>(this IModel s, IfcObjectDefinition container, string? name = null) where T : IInstantiableEntity, IIfcProduct
         {
             var product = s.Instances.New<T>(p => p.Name = name);
 

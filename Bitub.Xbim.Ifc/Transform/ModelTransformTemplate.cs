@@ -148,7 +148,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
         }
     }
 
-    protected virtual IPersistEntity DelegateCopy(IPersistEntity instance, T package)
+    protected virtual IPersistEntity? DelegateCopy(IPersistEntity instance, T package)
     {
         return Copy(instance, package, true);
     }

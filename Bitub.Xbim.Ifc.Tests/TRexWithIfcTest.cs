@@ -59,7 +59,7 @@ namespace Bitub.Xbim.Ifc.Tests
 
             Assert.IsTrue(fixture1.ContainedInStructure.Count() == 1);
 
-            builder.Transactively(m =>
+            builder.Transactive(m =>
             {
                 var fixture2 = builder.IfcEntityScope.New<IIfcWallStandardCase>(fixture1.GetType(), e =>
                 {
