@@ -30,8 +30,8 @@ variables:
     buildConfiguration: 'XbimDev'
     buildQualifier: '-XbimDev'
   ${{ else }}:
-    buildConfiguration: 'Debug'
-    buildQualifier: '-Debug'
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
 
 steps:
 - checkout: self

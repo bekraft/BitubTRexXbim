@@ -47,7 +47,7 @@ public abstract class TRexTest<T>
     {
         XbimServices.Current.ConfigureServices(opt =>
             opt.AddXbimToolkit(conf =>
-                conf.AddMemoryModel()
+                conf.AddMemoryModel().AddLoggerFactory(LoggerFactory)
             ));
     }
 
