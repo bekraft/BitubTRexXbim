@@ -14,7 +14,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests.Transform;
 
 [TestFixture]
-public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest<ModelPlacementTransformServicesTests>
+public class ModelPlacementTransformTests : TRexWithGeometryServicesTest<ModelPlacementTransformTests>
 {
     [Test]
     public void AxisAlignmentSerializationTest()
@@ -50,7 +50,7 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
             Assert.IsNotNull(testConfig.SourceReferenceAxis);
             Assert.IsNotNull(testConfig.TargetReferenceAxis);
 
-            var request = new ModelPlacementTransformServices(LoggerFactory)                
+            var request = new ModelPlacementTransform(LoggerFactory)                
             {
                 AxisAlignment = testConfig,
                 PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
@@ -80,7 +80,7 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
             Assert.IsNotNull(testConfig.SourceReferenceAxis);
             Assert.IsNotNull(testConfig.TargetReferenceAxis);
 
-            var request = new ModelPlacementTransformServices(LoggerFactory)
+            var request = new ModelPlacementTransform(LoggerFactory)
             {
                 AxisAlignment = testConfig,
                 PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
@@ -115,7 +115,7 @@ public class ModelPlacementTransformServicesTests : TRexWithGeometryServicesTest
             Assert.IsNotNull(testConfig.SourceReferenceAxis);
             Assert.IsNotNull(testConfig.TargetReferenceAxis);
 
-            var request = new ModelPlacementTransformServices(LoggerFactory)
+            var request = new ModelPlacementTransform(LoggerFactory)
             {
                 AxisAlignment = testConfig,
                 PlacementStrategy = ModelPlacementStrategy.NewRootPlacement,

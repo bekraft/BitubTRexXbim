@@ -45,7 +45,7 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <summary>
         /// The logger.
         /// </summary>
-        public override ILogger Log { get; protected set; }
+        public override ILogger? Log { get; protected set; }
 
         public override string Name { get => "Property Removal"; }
 

@@ -45,23 +45,13 @@ public sealed class PropertySetRemovalPackage : TransformPackage
     /// </summary>
     public IEnumerable<IIfcRelDefinesByProperties> ModifiedRelDefinesProperties => relDefinesByProperties.ToImmutableList();
 
-    internal PropertySetRemovalPackage(IModel source, IModel target, CancelableProgressing progressMonitor,
+    internal PropertySetRemovalPackage(IModel source, IModel target, CancelableProgressing? progressMonitor,
         bool ignoreCase, FilterRuleStrategyType strategy) : base(source, target, progressMonitor)
     {
         var comparer = ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
         ExcludeName = new HashSet<string>(comparer);
         IncludeExclusivelyName = new HashSet<string>(comparer);
         removalStrategy = strategy;
-    }
-
-    public bool HasNameConflicts(ILogger logger = null)
-    {
-        var conflicts = ExcludeName
-            .Where(n => IncludeExclusivelyName.Contains(n));
-        if (null != logger)
-            conflicts.ForEach(n => logger.LogWarning("Property set '{0}' is marked for removal and inclusion.", n));
-
-        return conflicts.Any();        
     }
 
     /// <summary>
@@ -124,7 +114,7 @@ public class PropertySetRemovalTransform : ModelTransformTemplate<PropertySetRem
     /// <summary>
     /// The logger.
     /// </summary>
-    public sealed override ILogger Log { get; protected set; }
+    public sealed override ILogger? Log { get; protected set; }
 
     /// <summary>
     /// Name is "Property Set Removal"
@@ -140,24 +130,24 @@ public class PropertySetRemovalTransform : ModelTransformTemplate<PropertySetRem
     /// Whether to remove property sets marked for keeping if they mentioned also for removal.
     /// Will keep property set by default.
     /// </summary>
-    public FilterRuleStrategyType FilterRuleStrategy { get; set; } = FilterRuleStrategyType.IncludeBeforeExclude;
+    public FilterRuleStrategyType FilterRuleStrategy { get; init; } = FilterRuleStrategyType.IncludeBeforeExclude;
 
     /// <summary>
     /// Black list of property set names. 
     /// If <see cref="IsNameMatchingCaseSensitive"/> set to <c>true</c>, case sensitive matches are applied.
     /// </summary>
-    public string[] ExludePropertySetByName { get; set; } = new string[] { };
+    public string[] ExludePropertySetByName { get; set; } = { };
 
     /// <summary>
     /// White list of property set names.
     /// If <see cref="IsNameMatchingCaseSensitive"/> set to <c>true</c>, case sensitive matches are applied.
     /// </summary>
-    public string[] IncludePropertySetByName { get; set; } = new string[] { };
+    public string[] IncludePropertySetByName { get; set; } = { };
 
     /// <summary>
     /// New property cut task request.
     /// </summary>
-    public PropertySetRemovalTransform(ILoggerFactory factory, params TransformActionResult[] logFilter) : base(logFilter)
+    public PropertySetRemovalTransform(ILoggerFactory? factory, params TransformActionResult[] logFilter) : base(logFilter)
     {
         Log = factory?.CreateLogger<PropertySetRemovalTransform>();
     }
