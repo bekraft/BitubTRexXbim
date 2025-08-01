@@ -2,13 +2,8 @@
   <PropertyGroup>
     <Title>Bitub.Xbim.Ifc</Title>
     <Description>Ifc Common Adapter Library using Xbim</Description>
-    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
-    <LangVersion>10</LangVersion>  
     <IsPackable>true</IsPackable>
-    <Platforms>x64</Platforms>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-    <Nullable>enable</Nullable>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(Configuration)' != 'Test'">

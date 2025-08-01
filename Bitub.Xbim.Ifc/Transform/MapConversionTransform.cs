@@ -29,13 +29,39 @@ public record MapConversionCrsPrefs(
     string Name,
     string? Description,
     string GeodeticDatum,
-    string? VerticalDatum, 
-    string MapProjection, 
-    string MapZone,
+    string? VerticalDatum,
+    string? MapProjection,
+    string? MapZone,
     XYZ OffsetAndHeight,
     UV MapRotation,
     Double? Scale,
-    IfcSIUnitName MapUnitName) { }
+    IfcSIUnitName MapUnitName)
+{
+    public MapConversionCrsPrefs MergeNonNullTo(
+        string? name,
+        string? description,
+        string? geodeticDatum,
+        string? verticalDatum,
+        string? mapProjection,
+        string? mapZone,
+        XYZ? offsetAndHeight,
+        UV? mapRotation,
+        Double? scale,
+        IfcSIUnitName? mapUnitName)
+    {
+        return new MapConversionCrsPrefs(
+            name ?? Name, 
+            description ?? Description, 
+            geodeticDatum ?? GeodeticDatum, 
+            verticalDatum ?? VerticalDatum,  
+            mapProjection ?? MapProjection, 
+            mapZone ?? MapZone, 
+            offsetAndHeight ?? OffsetAndHeight, 
+            mapRotation ?? MapRotation, 
+            scale ?? Scale, 
+            mapUnitName ?? MapUnitName);
+    }
+}
 
 
 /// <summary>
@@ -45,7 +71,18 @@ public record MapConversionCrsPrefs(
 /// <param name="RepresentationContext">Filter by given list of contexts</param>
 public record MapConversionPrefs(
     bool UsePlacementOffsetAsTargetRef,
-    Qualifier[] RepresentationContext) { }
+    Qualifier[] RepresentationContext)
+{
+    public MapConversionPrefs MergeNonNullTo(
+        bool? usePlacementOffsetAsTargetRef,
+        Qualifier[]? representationContext)
+    {
+        return new MapConversionPrefs(
+            usePlacementOffsetAsTargetRef ?? UsePlacementOffsetAsTargetRef,
+            representationContext ?? RepresentationContext
+        );
+    }
+}
 
 /// <summary>
 /// Map conversion transform package.

@@ -4,9 +4,6 @@
     <RootNamespace>Bitub.Xbim.Ifc.Tests</RootNamespace>
     <AssemblyName>Bitub.Xbim.Ifc.Occt.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
-    <Platforms>x64</Platforms>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
