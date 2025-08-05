@@ -1,7 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
     <BuildMajor>1</BuildMajor>
     <BuildMinor>1</BuildMinor>
 

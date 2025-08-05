@@ -24,7 +24,7 @@ namespace Bitub.Xbim.Ifc.Transform;
 /// <param name="OffsetAndHeight">XYZ reference coordinates of the target map coordinate reference system.</param>
 /// <param name="MapRotation">UV reference vector</param>
 /// <param name="Scale">The scale between target and source unit</param>
-/// <param name="MapUnitName"></param>
+/// <param name="MapUnitScale">The scale of the map unit as IFC SI prefix</param>
 public record MapConversionCrsPrefs(
     string Name,
     string? Description,
@@ -35,7 +35,7 @@ public record MapConversionCrsPrefs(
     XYZ OffsetAndHeight,
     UV MapRotation,
     Double? Scale,
-    IfcSIUnitName MapUnitName)
+    IfcSIPrefix? MapUnitScale)
 {
     public MapConversionCrsPrefs MergeNonNullTo(
         string? name,
@@ -47,7 +47,7 @@ public record MapConversionCrsPrefs(
         XYZ? offsetAndHeight,
         UV? mapRotation,
         Double? scale,
-        IfcSIUnitName? mapUnitName)
+        IfcSIPrefix? mapUnitScale)
     {
         return new MapConversionCrsPrefs(
             name ?? Name, 
@@ -59,7 +59,7 @@ public record MapConversionCrsPrefs(
             offsetAndHeight ?? OffsetAndHeight, 
             mapRotation ?? MapRotation, 
             scale ?? Scale, 
-            mapUnitName ?? MapUnitName);
+            mapUnitScale ?? MapUnitScale);
     }
 }
 
@@ -312,7 +312,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.MapZone = prefs.MapZone;
         entity.MapProjection = prefs.MapProjection;
         entity.VerticalDatum = prefs.VerticalDatum;
-        entity.MapUnit = package.Builder.NewSIUnit(IfcUnitEnum.LENGTHUNIT, prefs.MapUnitName);
+        entity.MapUnit = package.Builder.NewSIUnit(IfcUnitEnum.LENGTHUNIT, IfcSIUnitName.METRE, prefs.MapUnitScale);
         
         Log?.LogDebug("Creating new projected CRS {}", entity.ToString());
         package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);

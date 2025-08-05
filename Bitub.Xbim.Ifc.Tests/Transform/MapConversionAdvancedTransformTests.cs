@@ -27,7 +27,7 @@ public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransfo
             VerticalDatum: null,
             MapProjection: "UTM",
             "UTM32",
-            MapUnitName: IfcSIUnitName.METRE,
+            MapUnitScale: null,
             OffsetAndHeight: new XYZ(0, 0, 113.5),
             MapRotation: new UV() { U = 0, V = 0 },
             Scale: null
