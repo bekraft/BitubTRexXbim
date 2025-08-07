@@ -241,7 +241,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
     {
         var keptUnits = package.CleanUpUnusedNamedUnits();
         if (keptUnits.Any()) 
-            Log?.LogWarning("Keeping references named units: {}", string.Join(",", keptUnits.Select(u => u.EntityLabel)));
+            Log?.LogWarning("Keeping references named units: {Units}", string.Join(",", keptUnits.Select(u => u.EntityLabel)));
 
         // Create target projected CRS
         var projectedCRS = CreateProjectedCRS(CrsPrefs, package);
@@ -250,7 +250,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         var sourceContexts = package.RepresentationContexts
             .Where(c1 =>
                 Array.Exists(Prefs.RepresentationContext, c2 => 
-                    c1.ContextType.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)));
+                    c1.ContextIdentifier.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)));
         
         foreach (var sourceContext in sourceContexts)
         {
@@ -294,7 +294,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         {
             offsetAndHeight = axis2Placement3D.Location.ToXYZ();
             axis2Placement3D.Location.SetXYZ(0, 0, 0);
-            Log?.LogDebug("Resetting offset and height to {}", axis2Placement3D.Location);
+            Log?.LogDebug("Resetting offset and height to {Location}", axis2Placement3D.Location);
             package.LogAction(new XbimInstanceHandle(context), TransformActionResult.Modified);
             return true;
         }
@@ -314,7 +314,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.VerticalDatum = prefs.VerticalDatum;
         entity.MapUnit = package.Builder.NewSIUnit(IfcUnitEnum.LENGTHUNIT, IfcSIUnitName.METRE, prefs.MapUnitScale);
         
-        Log?.LogDebug("Creating new projected CRS {}", entity.ToString());
+        Log?.LogDebug("Creating new projected CRS {Entity}", entity.ToString());
         package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);
         package.LogAction(new XbimInstanceHandle(entity.MapUnit), TransformActionResult.Added);
 
@@ -336,7 +336,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.Scale = scale;
         
         package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);
-        Log?.LogDebug("Creating new map conversion {}", entity.ToString());
+        Log?.LogDebug("Creating new map conversion {Entity}", entity.ToString());
         
         return entity;
     }
