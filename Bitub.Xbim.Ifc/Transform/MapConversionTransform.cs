@@ -37,6 +37,20 @@ public record MapConversionCrsPrefs(
     Double? Scale,
     IfcSIPrefix? MapUnitScale)
 {
+    /// <summary>
+    /// Merge non-null arguments into existing preferences and return a new record.
+    /// </summary>
+    /// <param name="name">A primary name</param>
+    /// <param name="description">A description</param>
+    /// <param name="verticalDatum">Name by which the vertical datum is identified.</param>
+    /// <param name="geodeticDatum">A geodetic CRS identifier or code</param>
+    /// <param name="mapProjection">Name by which the map projection is identified.</param>
+    /// <param name="mapZone">Name by which the map zone, relating to the MapProjection, is identified.</param>
+    /// <param name="offsetAndHeight">XYZ reference coordinates of the target map coordinate reference system.</param>
+    /// <param name="mapRotation">UV reference vector</param>
+    /// <param name="scale">The scale between target and source unit</param>
+    /// <param name="mapUnitScale">The scale of the map unit as IFC SI prefix</param>
+    /// <returns>A new record</returns>
     public MapConversionCrsPrefs MergeNonNullTo(
         string? name,
         string? description,
@@ -68,18 +82,29 @@ public record MapConversionCrsPrefs(
 /// Conversion transform preferences.
 /// </summary>
 /// <param name="UsePlacementOffsetAsTargetRef">Use shift of local root placement as map conversion target reference.</param>
-/// <param name="RepresentationContext">Filter by given list of contexts</param>
+/// <param name="ContextIdentifers">Filter by given list of context identifiers</param>
+/// <param name="ContextTypes">Filter by given list of context types</param>
 public record MapConversionPrefs(
     bool UsePlacementOffsetAsTargetRef,
-    Qualifier[] RepresentationContext)
+    Qualifier[] ContextIdentifers,
+    Qualifier[] ContextTypes)
 {
+    /// <summary>
+    /// Merge non-null arguments into existing preferences and return a new record.
+    /// </summary>
+    /// <param name="usePlacementOffsetAsTargetRef">Use shift of local root placement as map conversion target reference.</param>
+    /// <param name="contextIdentifiers">Filter by given list of context identifiers</param>
+    /// <param name="contextTypes">Filter by given list of context types</param>
+    /// <returns>A new record</returns>
     public MapConversionPrefs MergeNonNullTo(
         bool? usePlacementOffsetAsTargetRef,
-        Qualifier[]? representationContext)
+        Qualifier[]? contextIdentifiers,
+        Qualifier[]? contextTypes)
     {
         return new MapConversionPrefs(
             usePlacementOffsetAsTargetRef ?? UsePlacementOffsetAsTargetRef,
-            representationContext ?? RepresentationContext
+            contextIdentifiers ?? ContextIdentifers,
+            contextTypes ?? ContextTypes
         );
     }
 }
@@ -246,11 +271,13 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         // Create target projected CRS
         var projectedCRS = CreateProjectedCRS(CrsPrefs, package);
 
-        // Iterate source representation contexts
+        // Iterate source representation contexts, filter where identifiers and types have a match
         var sourceContexts = package.RepresentationContexts
             .Where(c1 =>
-                Array.Exists(Prefs.RepresentationContext, c2 => 
-                    c1.ContextIdentifier.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)));
+                (Prefs.ContextIdentifers.Length == 0 || Array.Exists(Prefs.ContextIdentifers, c2 => 
+                    c1.ContextIdentifier.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase)))
+                && (Prefs.ContextTypes.Length == 0 || Array.Exists(Prefs.ContextTypes, c2 => 
+                        c1.ContextType.ToString().ToQualifier().IsEqualTo(c2, StringComparison.InvariantCultureIgnoreCase))));
         
         foreach (var sourceContext in sourceContexts)
         {

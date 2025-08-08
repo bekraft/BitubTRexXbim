@@ -35,7 +35,8 @@ public class MapConversionTransformTests : TRexTest<MapConversionTransform>
         );
         var prefs = new MapConversionPrefs(
             UsePlacementOffsetAsTargetRef: false,
-            RepresentationContext: new[] { "Model".ToQualifier() }
+            ContextIdentifers: [],
+            ContextTypes: [ "Model".ToQualifier() ]
         );
 
         _mapTransformFixture = new MapConversionTransform(crsPrefs, prefs, LoggerFactory,Enum.GetValues<TransformActionResult>());

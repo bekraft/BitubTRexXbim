@@ -15,7 +15,7 @@ namespace Bitub.Xbim.Ifc.Tests.Transform;
 [TestFixture]
 public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransform>
 {
-    private MapConversionTransform _mapTransformFixture;
+    private MapConversionTransform? _mapTransformFixture;
 
     [SetUp]
     public void Setup()
@@ -34,7 +34,8 @@ public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransfo
         );
         var prefs = new MapConversionPrefs(
             UsePlacementOffsetAsTargetRef: true,
-            RepresentationContext: new[] { "Model".ToQualifier() }
+            ContextIdentifers: [],
+            ContextTypes: ["Model".ToQualifier()]
         );
 
         _mapTransformFixture = new MapConversionTransform(crsPrefs, prefs, LoggerFactory,Enum.GetValues<TransformActionResult>());
