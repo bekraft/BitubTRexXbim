@@ -1,7 +1,5 @@
 ﻿<Project>
   <PropertyGroup>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
     <BuildMajor>1</BuildMajor>
     <BuildMinor>1</BuildMinor>
 
@@ -17,7 +15,12 @@
   
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 
+    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <BuildConfiguration>$(Configuration)</BuildConfiguration>
+    <LangVersion>12</LangVersion>
+    <Platforms>x64</Platforms>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
@@ -33,14 +36,10 @@
   <PropertyGroup Condition="'$(Platform)' == 'x64'">
     <DefineConstants>$(DefineConstants);Is_x64</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <DefineConstants>$(DefineConstants);Is_XbimDev</DefineConstants>
-  </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
-    <BuildQualifier></BuildQualifier>
+    <BuildQualifier/>
     <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 

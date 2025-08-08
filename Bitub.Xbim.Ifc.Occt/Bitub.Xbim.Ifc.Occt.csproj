@@ -3,32 +3,20 @@
   <PropertyGroup>
     <Title>Bitub.Xbim.Ifc.Occt</Title>
     <Description>Ifc Occt Interop Adapter Library using Xbim</Description>
-    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
-    <LangVersion>10</LangVersion>
     <IsPackable>true</IsPackable>
-    <Platforms>x64</Platforms>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
   </PropertyGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Bitub.Xbim.Ifc\Bitub.Xbim.Ifc.csproj" />
   </ItemGroup>
   
-  <ItemGroup Condition="'$(Configuration)' != 'XbimDev'">  
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="5.1.437" />
+  <ItemGroup>
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.847-netcore" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(Configuration)' != 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="5.1.437" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.836-netcore" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(Configuration)' == 'XbimDev' And '$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.836-netcore" />
+  <ItemGroup Condition="'$(IsWindows)' == 'true'">
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.847-netcore" />
   </ItemGroup>
   
 </Project>

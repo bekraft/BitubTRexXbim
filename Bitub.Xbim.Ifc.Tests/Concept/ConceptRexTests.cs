@@ -13,7 +13,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests
 {
     [TestFixture]
-    public class ConceptTests : TestBase<ConceptTests>
+    public class ConceptRexTests : TRexTest<ConceptRexTests>
     {
         protected CanonicalFilter existsWallFilter;
         protected CanonicalFilter subOrEquivWallFilter;

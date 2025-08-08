@@ -52,13 +52,13 @@ namespace Bitub.Xbim.Ifc.TRex
 
         public FeatureStageCollector IncludeIfcElement(params IfcAssemblyScope[] ifcAssemblies)
         {
-            IncludeIfcTypes(ifcAssemblies.Select(a => a.schemaQualifier.Append("IfcElement").ToClassifier()));
+            IncludeIfcTypes(ifcAssemblies.Select(a => a.SchemaQualifier.Append("IfcElement").ToClassifier()));
             return this;
         }
 
         public FeatureStageCollector IncludeIfcProduct(params IfcAssemblyScope[] ifcAssemblies)
         {
-            IncludeIfcTypes(ifcAssemblies.Select(a => a.schemaQualifier.Append("IfcProduct").ToClassifier()));
+            IncludeIfcTypes(ifcAssemblies.Select(a => a.SchemaQualifier.Append("IfcProduct").ToClassifier()));
             return this;
         }
 

@@ -30,8 +30,8 @@ variables:
     buildConfiguration: 'XbimDev'
     buildQualifier: '-XbimDev'
   ${{ else }}:
-    buildConfiguration: 'Debug'
-    buildQualifier: '-Debug'
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
 
 steps:
 - checkout: self
@@ -64,7 +64,7 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'build'
+    command: 'pack'
     projects: '**/*/*.csproj'
     arguments: '-c $(buildConfiguration) -a $(buildPlatform) -p:Build=$(buildSecond) -p:BuildRelease=$(buildDate) -p:BuildQualifier=$(buildQualifier)'
     

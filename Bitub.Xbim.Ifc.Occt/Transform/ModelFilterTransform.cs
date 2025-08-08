@@ -141,11 +141,11 @@ namespace Bitub.Xbim.Ifc.Transform
             bool isFollowing = true;
             if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRepresentation))
             {
-                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcProductRepresentation>();
+                isFollowing &= !propertyInfo.IsLowerConstraintPropertyType<IIfcProductRepresentation>();
             }
             if (!RelationalStrategy.HasFlag(ModelFilterStrategy.WithIfcRelDefinesByType))
             {
-                isFollowing &= !propertyInfo.IsLowerConstraintRelationType<IIfcRelDefinesByType>();
+                isFollowing &= !propertyInfo.IsLowerConstraintPropertyType<IIfcRelDefinesByType>();
             }
             return isFollowing;
         }

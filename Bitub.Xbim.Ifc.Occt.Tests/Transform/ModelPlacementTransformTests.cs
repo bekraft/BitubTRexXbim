@@ -7,171 +7,134 @@ using Xbim.IO;
 using Bitub.Xbim.Ifc.Transform;
 using Bitub.Xbim.Ifc.Validate;
 
-using Bitub.Dto;
 using Bitub.Dto.Spatial;
-using Bitub.Xbim.Ifc.Tests;
+
 using NUnit.Framework;
 
-using Microsoft.Extensions.Logging;
+namespace Bitub.Xbim.Ifc.Tests.Transform;
 
-namespace Bitub.Xbim.Ifc.Occt.Tests.Transform
+[TestFixture]
+public class ModelPlacementTransformTests : TRexWithGeometryServicesTest<ModelPlacementTransformTests>
 {
-    [TestFixture]
-    public class ModelPlacementTransformTests : GeometryTestBase<ModelPlacementTransformTests>
+    [Test]
+    public void AxisAlignmentSerializationTest()
     {
-        [Test]
-        public void AxisAlignmentSerializationTest()
+        var axis1 = new IfcAxisAlignment()
         {
-            var axis1 = new IfcAxisAlignment()
+            SourceReferenceAxis = new IfcAlignReferenceAxis(new XYZ(), new XYZ { X = 1 }),
+            TargetReferenceAxis = new IfcAlignReferenceAxis(new XYZ(), new XYZ { Y = 1 })
+        };
+
+        axis1.SaveToFile("TestAxisAlignment.xml");
+
+        var axis2 = IfcAxisAlignment.LoadFromFile("TestAxisAlignment.xml");
+
+        Assert.IsNotNull(axis2);
+        Assert.IsNotNull(axis2.SourceReferenceAxis);
+        Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, Precision));
+        Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, Precision));
+        Assert.IsNotNull(axis2.TargetReferenceAxis);
+        Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, Precision));
+        Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, Precision));
+    }
+
+    [Test]
+    public async Task OffsetShiftAndRotateTest1()
+    {
+        using (var source = ReadIfcModel("Ifc4-RotatedStorey-Slab.ifc"))
+        {
+            var stampBefore = source.ToSchemeValidator();
+
+            var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis1.xml"));
+            Assert.IsNotNull(testConfig);
+            Assert.IsNotNull(testConfig.SourceReferenceAxis);
+            Assert.IsNotNull(testConfig.TargetReferenceAxis);
+
+            var request = new ModelPlacementTransform(LoggerFactory)                
             {
-                SourceReferenceAxis = new IfcAlignReferenceAxis(new XYZ(), new XYZ { X = 1 }),
-                TargetReferenceAxis = new IfcAlignReferenceAxis(new XYZ(), new XYZ { Y = 1 })
+                AxisAlignment = testConfig,
+                PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
+                // Common config
+                TargetStoreType = XbimStoreType.InMemoryModel,
+                EditorCredentials = EditorCredentials
             };
 
-            axis1.SaveToFile("TestAxisAlignment.xml");
-
-            var axis2 = IfcAxisAlignment.LoadFromFile("TestAxisAlignment.xml");
-
-            Assert.IsNotNull(axis2);
-            Assert.IsNotNull(axis2.SourceReferenceAxis);
-            Assert.IsTrue(axis2.SourceReferenceAxis.Offset.IsAlmostEqualTo(axis1.SourceReferenceAxis.Offset, Precision));
-            Assert.IsTrue(axis2.SourceReferenceAxis.Target.IsAlmostEqualTo(axis1.SourceReferenceAxis.Target, Precision));
-            Assert.IsNotNull(axis2.TargetReferenceAxis);
-            Assert.IsTrue(axis2.TargetReferenceAxis.Offset.IsAlmostEqualTo(axis1.TargetReferenceAxis.Offset, Precision));
-            Assert.IsTrue(axis2.TargetReferenceAxis.Target.IsAlmostEqualTo(axis1.TargetReferenceAxis.Target, Precision));
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
+    }
 
-        [Test]
-        public async Task OffsetShiftAndRotateTest1()
+    [Test]
+    public async Task OffsetShiftAndRotateTest2_Change()
+    {
+        using (var source = ReadIfcModel("Ifc4-SampleHouse.ifc"))
         {
-            using (var source = ReadIfc4Model("Ifc4-RotatedStorey-Slab.ifc"))
+            var stampBefore = source.ToSchemeValidator();
+
+            var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
+            Assert.IsNotNull(testConfig);
+            Assert.IsNotNull(testConfig.SourceReferenceAxis);
+            Assert.IsNotNull(testConfig.TargetReferenceAxis);
+
+            var request = new ModelPlacementTransform(LoggerFactory)
             {
-                var stampBefore = source.ToSchemeValidator();
-
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis1.xml"));
-                Assert.IsNotNull(testConfig);
-                Assert.IsNotNull(testConfig.SourceReferenceAxis);
-                Assert.IsNotNull(testConfig.TargetReferenceAxis);
-
-                var request = new ModelPlacementTransform(LoggerFactory)                
-                {
-                    AxisAlignment = testConfig,
-                    PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
-                    // Common config
-                    TargetStoreType = XbimStoreType.InMemoryModel,
-                    EditorCredentials = EditorCredentials
-                };
-
-                using (var cp = new CancelableProgressing(true))
-                {
-                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                    using (var result = await request.Run(source, cp))
-                    {
-                        if (null != result.Cause)
-                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                        //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                        // TODO Specific tests
-
-                        var stampAfter = result.Target.ToSchemeValidator();
-                        //Assert.AreEqual(stampBefore, stampAfter);
-                    }
-                }
-            }
+                AxisAlignment = testConfig,
+                PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
+                // Common config
+                TargetStoreType = XbimStoreType.InMemoryModel,
+                EditorCredentials = EditorCredentials
+            };
+            
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            
+            var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().FirstOrDefault(i => i.PlacementRelTo == null);
+            Assert.IsNotNull(rootPlacement?.PlacesObject);
+            Assert.That(rootPlacement.PlacesObject.Any(), Is.True, "Root has objects");
+            
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
+    }
 
-        [Test]
-        public async Task OffsetShiftAndRotateTest2_Change()
+    [Test]
+    public async Task OffsetShiftAndRotateTest2_New()
+    {
+        using (var source = ReadIfcModel("Ifc4-SampleHouse.ifc"))
         {
-            using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
+            var stampBefore = source.ToSchemeValidator();
+
+            var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
+            Assert.IsNotNull(testConfig);
+            Assert.IsNotNull(testConfig.SourceReferenceAxis);
+            Assert.IsNotNull(testConfig.TargetReferenceAxis);
+
+            var request = new ModelPlacementTransform(LoggerFactory)
             {
-                var stampBefore = source.ToSchemeValidator();
+                AxisAlignment = testConfig,
+                PlacementStrategy = ModelPlacementStrategy.NewRootPlacement,
+                // Common config
+                TargetStoreType = XbimStoreType.InMemoryModel,
+                EditorCredentials = EditorCredentials
+            };
 
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
-                Assert.IsNotNull(testConfig);
-                Assert.IsNotNull(testConfig.SourceReferenceAxis);
-                Assert.IsNotNull(testConfig.TargetReferenceAxis);
-
-                var request = new ModelPlacementTransform(LoggerFactory)
-                {
-                    AxisAlignment = testConfig,
-                    PlacementStrategy = ModelPlacementStrategy.ChangeRootPlacements,
-                    // Common config
-                    TargetStoreType = XbimStoreType.InMemoryModel,
-                    EditorCredentials = EditorCredentials
-                };
-
-                using (var cp = new CancelableProgressing(true))
-                {
-                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                    using (var result = await request.Run(source, cp))
-                    {
-                        if (null != result.Cause)
-                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                        var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
-                        Assert.IsNotNull(rootPlacement.PlacesObject);
-                        Assert.IsTrue(rootPlacement.PlacesObject.Any(), "Root has objects");
-
-                        //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                        // TODO Specific tests
-
-                        var stampAfter = result.Target.ToSchemeValidator();
-                        //Assert.AreEqual(stampBefore, stampAfter);
-                    }
-                }
-            }
-        }
-
-        [Test]
-        public async Task OffsetShiftAndRotateTest2_New()
-        {
-            using (var source = ReadIfc4Model("Ifc4-SampleHouse.ifc"))
-            {
-                var stampBefore = source.ToSchemeValidator();
-
-                var testConfig = IfcAxisAlignment.Load(ReadEmbeddedFileStream("AlignmentAxis2.xml"));
-                Assert.IsNotNull(testConfig);
-                Assert.IsNotNull(testConfig.SourceReferenceAxis);
-                Assert.IsNotNull(testConfig.TargetReferenceAxis);
-
-                var request = new ModelPlacementTransform(LoggerFactory)
-                {
-                    AxisAlignment = testConfig,
-                    PlacementStrategy = ModelPlacementStrategy.NewRootPlacement,
-                    // Common config
-                    TargetStoreType = XbimStoreType.InMemoryModel,
-                    EditorCredentials = EditorCredentials
-                };
-
-                using (var cp = new CancelableProgressing(true))
-                {
-                    cp.OnProgressChange += (s, o) => Logger.LogDebug($"State {o.State}: Percentage = {o.Percentage}; State object = {o.StateObject}");
-
-                    using (var result = await request.Run(source, cp))
-                    {
-                        if (null != result.Cause)
-                            Logger?.LogError("Exception: {0}, {1}, {2}", result.Cause, result.Cause.Message, result.Cause.StackTrace);
-
-                        var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().Where(i => i.PlacementRelTo == null).FirstOrDefault();
-                        Assert.IsNotNull(rootPlacement.PlacesObject);
-                        Assert.IsFalse(rootPlacement.PlacesObject.Any(), "Root has no objects");
-
-                        //Assert.AreEqual(TransformResult.Code.Finished, result.ResultCode);
-                        // TODO Specific tests
-
-                        var stampAfter = result.Target.ToSchemeValidator();
-                        //Assert.AreEqual(stampBefore, stampAfter);
-                    }
-                }
-            }
-        }
-
-        public void Report(ProgressStateToken value)
-        {
-            Logger.LogDebug($"State {value.State}: Percentage = {value.Percentage}; State object = {value.StateObject}");
+            var result = await request.Run(source, NewProgressMonitor(true));
+            
+            Assert.IsNotNull(result);
+            Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
+            
+            var rootPlacement = result.Target.Instances.OfType<IIfcLocalPlacement>().FirstOrDefault(i => i.PlacementRelTo == null);
+            Assert.IsNotNull(rootPlacement?.PlacesObject);
+            Assert.That(rootPlacement.PlacesObject.Any(), Is.False, "Root has objects");
+            
+            var validator = result.Target.ToSchemeValidator();
+            Assert.IsTrue(validator.IsCompliantToSchema);
         }
     }
 }

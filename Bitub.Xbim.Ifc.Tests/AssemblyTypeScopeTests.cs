@@ -15,7 +15,7 @@ using NUnit.Framework;
 namespace Bitub.Xbim.Ifc.Tests
 {
     [TestFixture]
-    public class AssemblyTypeScopeTests : TestBase<AssemblyTypeScopeTests>
+    public class AssemblyTypeScopeTests : TRexTest<AssemblyTypeScopeTests>
     {
         [Test]
         public void Ifc4IfcWallTest()
@@ -35,7 +35,7 @@ namespace Bitub.Xbim.Ifc.Tests
         {
             var ifc2x3 = IfcAssemblyScope.Ifc2x3;
             var wallScope = ifc2x3.GetScopeOf<IIfcWall>();
-            var wallExpressTypes = ifc2x3.metadata.ExpressTypesImplementing(typeof(IIfcWall));
+            var wallExpressTypes = ifc2x3.Metadata.ExpressTypesImplementing(typeof(IIfcWall));
 
             Assert.AreEqual(wallScope.Types.Count(), wallExpressTypes.Count());
             var fromScope = wallScope.TypeQualifiers.ToArray();

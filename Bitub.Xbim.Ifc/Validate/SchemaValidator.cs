@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-
+using Microsoft.Extensions.Logging;
 using Xbim.Common;
 using Xbim.Common.Enumerations;
 using Xbim.Common.ExpressValidation;
@@ -13,6 +13,11 @@ namespace Bitub.Xbim.Ifc.Validate
     /// </summary>
     public class SchemaValidator
     {
+        private SchemaValidator(ILookup<XbimSchemaVersion, ValidationResult> schemaResultLookup)
+        {
+            SchemaResultLookup = schemaResultLookup;
+        }
+
         /// <summary>
         /// Create a new scheme validator of given sequence of instances.
         /// </summary>
@@ -27,28 +32,27 @@ namespace Bitub.Xbim.Ifc.Validate
                 ValidateLevel = validationFlags
             };
 
-            return new SchemaValidator
-            {
-                SchemaResultLookup = instances
+            return new SchemaValidator(
+                instances
                     .SelectMany(instance => validator.Validate(instance).Select(result => (instance.Model.SchemaVersion, result)))
                     .ToLookup(g => g.SchemaVersion, g => g.result)
-            };
+            );
         }
 
         /// <summary>
         /// According schema.
         /// </summary>
-        public IEnumerable<XbimSchemaVersion> SchemaVersion { get => SchemaResultLookup.Select(g => g.Key); }
+        public IEnumerable<XbimSchemaVersion> SchemaVersion => SchemaResultLookup.Select(g => g.Key);
 
         /// <summary>
         /// Validation results by schemata.
         /// </summary>
-        public ILookup<XbimSchemaVersion, ValidationResult> SchemaResultLookup { get; private set; }
+        public ILookup<XbimSchemaVersion, ValidationResult> SchemaResultLookup { get; init; }
 
         /// <summary>
         /// Current results of this stamp.
         /// </summary>
-        public IEnumerable<ValidationResult> Results { get => SchemaResultLookup.SelectMany(g => g);  }
+        public IEnumerable<ValidationResult> Results => SchemaResultLookup.SelectMany(g => g);
 
         /// <summary>
         /// Results per persitent entity.
@@ -100,21 +104,32 @@ namespace Bitub.Xbim.Ifc.Validate
         /// <summary>
         /// Returns all compliance failures by schema version.
         /// </summary>
-        public ILookup<XbimSchemaVersion, ValidationResult> SchemaComplianceFailures
-        {
-            get => SchemaResultLookup
+        public ILookup<XbimSchemaVersion, ValidationResult> SchemaComplianceFailures =>
+            SchemaResultLookup
                 .SelectMany(g => g.Where(IsComplianceFailure).Select(result => (g.Key, result)))
                 .ToLookup(g => g.Key, g => g.result);
-        }
 
         /// <summary>
         /// Returns all constraint failures by schema version.
         /// </summary>
-        public ILookup<XbimSchemaVersion, ValidationResult> SchemaConstraintFailures
-        {
-            get => SchemaResultLookup
+        public ILookup<XbimSchemaVersion, ValidationResult> SchemaConstraintFailures =>
+            SchemaResultLookup
                 .SelectMany(g => g.Where(IsConstraintFailure).Select(result => (g.Key, result)))
                 .ToLookup(g => g.Key, g => g.result);
+
+        /// <summary>
+        /// Dump results to log at given level.
+        /// </summary>
+        /// <param name="logger">The logger</param>
+        /// <param name="level">The level</param>
+        /// <param name="filter">An optional filter</param>
+        public void DumpResultsToLog(ILogger logger, LogLevel level, ValidationFlags filter = ValidationFlags.All)
+        {
+            foreach (var result in Unfold(filter))
+            {
+                logger.Log(level, "Validation issue: Type {Type}, IssueType ({ResultType}), Message '{Message}'",
+                    IsComplianceFailure(result) ? "SCHEMA" : "CONSTRAINT", result.IssueType, result.Message);
+            }
         }
     }
 }
