@@ -53,7 +53,7 @@ public class MapConversionAdvancedTransformTests : TRexTest<MapConversionTransfo
         Assert.That(result.ResultCode, Is.EqualTo(TransformResult.Code.Finished));
 
         var log = result.Log.ToList();
-        Assert.That(log.Count, Is.EqualTo(40));
+        Assert.That(log.Count, Is.EqualTo(83));
         Assert.That(log.Count(e => e.Performed == TransformActionResult.Added), Is.EqualTo(3));
         Assert.That(log.Count(e => e.Performed == TransformActionResult.Modified), Is.EqualTo(1));
         Assert.That(result.Target.Instances.OfType<IIfcProjectedCRS>().Count, Is.EqualTo(1));

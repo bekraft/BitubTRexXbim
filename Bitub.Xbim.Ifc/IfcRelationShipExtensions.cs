@@ -300,8 +300,11 @@ namespace Bitub.Xbim.Ifc
             value = default;
             if (IsLowerConstraintPropertyType<TParam>(metaProperty.PropertyInfo))
             {
-                value = (TParam?)metaProperty.PropertyInfo.GetValue(instance);
-                return true;
+                if (metaProperty.PropertyInfo.GetValue(instance) is TParam param)
+                {
+                    value = param;
+                    return true;
+                }
             }
             return false;
         }
@@ -316,11 +319,11 @@ namespace Bitub.Xbim.Ifc
         /// <returns></returns>
         public static bool TryGetMultiValue<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam>? values)
         {
-            values = Array.Empty<TParam>();
+            values = Array.AsReadOnly<TParam>([]);
             if (HasLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
             {
                 values = metaProperty.PropertyInfo.GetValue(instance) as IEnumerable<TParam>;
-                return true;
+                return null != values;
             }
             return false;
         }
@@ -335,10 +338,14 @@ namespace Bitub.Xbim.Ifc
         /// <returns></returns>
         public static bool TryGetValues<TParam>(this ExpressMetaProperty metaProperty, object instance, out IEnumerable<TParam>? values)
         {
-            values = Array.Empty<TParam>();
+            values = Array.AsReadOnly<TParam>([]);
             if (IsLowerConstraintPropertyType<TParam>(metaProperty.PropertyInfo))
             {
-                values = Array.AsReadOnly(new []{ (TParam)metaProperty.PropertyInfo.GetValue(instance)! });
+                if (metaProperty.PropertyInfo.GetValue(instance) is TParam param)
+                {
+                    values = Array.AsReadOnly([ param ]);
+                    return true;
+                }
             } 
             else if (HasLowerConstraintRelationType<TParam>(metaProperty.PropertyInfo))
             {
@@ -350,7 +357,7 @@ namespace Bitub.Xbim.Ifc
                     {
                         list.Add((TParam)item);
                     }
-                    values = list;
+                    values = list.AsReadOnly();
                     return true;
                 }
             }

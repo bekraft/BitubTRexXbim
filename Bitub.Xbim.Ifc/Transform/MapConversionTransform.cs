@@ -182,7 +182,7 @@ public class MapConversionTransformPackage : TransformPackage
             {
                 if (property.TryGetValues<IIfcUnit>(persistEntity, out var units))
                 {
-                    units?.ForEach(u => _referencedUnits.Add(new XbimInstanceHandle(u), persistEntity));
+                    units?.ForEach(u => _referencedUnits.TryAdd(new XbimInstanceHandle(u), persistEntity));
                 }
             }
         }
@@ -349,7 +349,7 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
     }
 
     // Creates a map conversion from given source and target by given offset
-    private IIfcMapConversion CreateMapConversion(XYZ offsetAndHeigth, UV axisRotation, Double? scale, 
+    private IIfcMapConversion CreateMapConversion(XYZ offsetAndHeight, UV axisRotation, Double? scale, 
         IIfcCoordinateReferenceSystemSelect source, IIfcCoordinateReferenceSystem target, MapConversionTransformPackage package)
     {
         var entity = package.Builder.IfcEntityScope.NewOf<IIfcMapConversion>();
@@ -357,9 +357,9 @@ public class MapConversionTransform : ModelTransformTemplate<MapConversionTransf
         entity.TargetCRS = target;
         entity.XAxisAbscissa = axisRotation.U;
         entity.XAxisOrdinate = axisRotation.V;
-        entity.Eastings = offsetAndHeigth.X;
-        entity.Northings = offsetAndHeigth.Y;
-        entity.OrthogonalHeight = offsetAndHeigth.Z;
+        entity.Eastings = offsetAndHeight.X;
+        entity.Northings = offsetAndHeight.Y;
+        entity.OrthogonalHeight = offsetAndHeight.Z;
         entity.Scale = scale;
         
         package.LogAction(new XbimInstanceHandle(entity), TransformActionResult.Added);
