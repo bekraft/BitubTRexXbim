@@ -155,12 +155,13 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
 
     private TransformResult.Code DoTransform(T package)
     {
+        using var cache = package.Source.BeginInverseCaching();
         foreach (var instance in package.Source.Instances)
         {
             if (package.ProgressMonitor?.State.IsAboutCancelling ?? false)
                 return TransformResult.Code.Canceled;
 
-            switch(PassInstance(instance, package))
+            switch (PassInstance(instance, package))
             {
                 case TransformActionType.Copy:
                     Copy(instance, package, false);
@@ -178,6 +179,7 @@ public abstract class ModelTransformTemplate<T> : IModelTransform where T : Tran
 
             package.ProgressMonitor?.NotifyOnProgressChange(1, Name);
         }
+
         return TransformResult.Code.Finished;
     }
 
