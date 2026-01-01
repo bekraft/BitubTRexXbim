@@ -12,11 +12,11 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.1.847-netcore" />
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.3.873-netcore" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(IsWindows)' == 'true'">
-    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.1.847-netcore" />
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.3.873-netcore" />
   </ItemGroup>
   
 </Project>

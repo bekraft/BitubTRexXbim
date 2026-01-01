@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <BuildMajor>1</BuildMajor>
-    <BuildMinor>1</BuildMinor>
+    <BuildMinor>2</BuildMinor>
 
     <BuildRelease>$([System.DateTime]::Now.ToString("yy"))$([System.String]::Format("{0:000}",$([System.DateTime]::Now.DayOfYear)))</BuildRelease>
     <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
@@ -19,7 +19,7 @@
     <BuildConfiguration>$(Configuration)</BuildConfiguration>
     <LangVersion>12</LangVersion>
     <Platforms>x64</Platforms>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
