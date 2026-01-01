@@ -15,7 +15,7 @@
   
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 
-    <Configurations>Test;Dev;Release;Debug;XbimDev</Configurations>
+    <Configurations>Test;Dev;Release;Debug</Configurations>
     <BuildConfiguration>$(Configuration)</BuildConfiguration>
     <LangVersion>12</LangVersion>
     <Platforms>x64</Platforms>

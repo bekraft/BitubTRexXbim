@@ -5,6 +5,8 @@
     <AssemblyName>Bitub.Xbim.Ifc.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <Configurations>Test;Dev;Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

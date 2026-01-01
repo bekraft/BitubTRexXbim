@@ -4,10 +4,12 @@
     <Description>Ifc Common Adapter Library using Xbim</Description>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
     <IsPackable>true</IsPackable>
+    <Configurations>Test;Dev;Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   
   <ItemGroup> 
-    <PackageReference Include="Bitub.Dto" Version="1.1.24254.34336" />
+    <PackageReference Include="Bitub.Dto" Version="1.2.26001-Dev46f5b70e.31061" />
     <PackageReference Include="Xbim.Common" Version="6.0.563" />
     <PackageReference Include="Xbim.Ifc" Version="6.0.563" />
     <PackageReference Include="Xbim.Ifc2x3" Version="6.0.563" />

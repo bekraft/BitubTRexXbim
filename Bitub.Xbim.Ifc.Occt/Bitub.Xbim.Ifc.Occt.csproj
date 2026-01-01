@@ -5,6 +5,8 @@
     <Description>Ifc Occt Interop Adapter Library using Xbim</Description>
     <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
     <IsPackable>true</IsPackable>
+    <Configurations>Test;Dev;Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
   </PropertyGroup>
   
   <ItemGroup>
