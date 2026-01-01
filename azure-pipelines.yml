@@ -26,9 +26,6 @@ variables:
   ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
     buildConfiguration: 'Dev'
     buildQualifier: '-Dev'
-  ${{ elseif eq(variables['Build.SourceBranchName'], 'xbim-dev') }}:
-    buildConfiguration: 'XbimDev'
-    buildQualifier: '-XbimDev'
   ${{ else }}:
     buildConfiguration: 'Test'
     buildQualifier: '-Test'
@@ -76,7 +73,7 @@ steps:
     arguments: '-c $(buildConfiguration) -a $(buildPlatform)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
@@ -89,4 +86,4 @@ steps:
   workingDirectory: $(Build.SourcesDirectory)
   displayName: Git Commit and Tag from pipeline
   continueOnError: true
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))

@@ -30,8 +30,6 @@ Global
 		Release|x64 = Release|x64
 		Test|Any CPU = Test|Any CPU
 		Test|x64 = Test|x64
-		XbimDev|Any CPU = XbimDev|Any CPU
-		XbimDev|x64 = XbimDev|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{31C77FF4-650A-4527-A2DE-68C4814076D7}.Debug|x64.ActiveCfg = Debug|x64
@@ -42,8 +40,6 @@ Global
 		{31C77FF4-650A-4527-A2DE-68C4814076D7}.Release|x64.Build.0 = Release|x64
 		{31C77FF4-650A-4527-A2DE-68C4814076D7}.Test|x64.ActiveCfg = Test|x64
 		{31C77FF4-650A-4527-A2DE-68C4814076D7}.Test|x64.Build.0 = Test|x64
-		{31C77FF4-650A-4527-A2DE-68C4814076D7}.XbimDev|x64.ActiveCfg = XbimDev|x64
-		{31C77FF4-650A-4527-A2DE-68C4814076D7}.XbimDev|x64.Build.0 = XbimDev|x64
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Debug|x64.ActiveCfg = Debug|x64
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Debug|x64.Build.0 = Debug|x64
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Dev|x64.ActiveCfg = Dev|x64
@@ -52,8 +48,6 @@ Global
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Release|x64.Build.0 = Release|x64
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Test|x64.ActiveCfg = Test|x64
 		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.Test|x64.Build.0 = Test|x64
-		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.XbimDev|x64.ActiveCfg = XbimDev|x64
-		{132FECE7-926B-44D3-9977-7FA6D9C2C8A9}.XbimDev|x64.Build.0 = XbimDev|x64
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Debug|x64.ActiveCfg = Debug|x64
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Debug|x64.Build.0 = Debug|x64
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Dev|x64.ActiveCfg = Dev|x64
@@ -62,8 +56,6 @@ Global
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Release|x64.Build.0 = Release|x64
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Test|x64.ActiveCfg = Test|x64
 		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.Test|x64.Build.0 = Test|x64
-		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.XbimDev|x64.ActiveCfg = XbimDev|x64
-		{AD7B036D-EA16-4872-A0BD-43C117EA5930}.XbimDev|x64.Build.0 = XbimDev|x64
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Debug|x64.ActiveCfg = Debug|x64
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Debug|x64.Build.0 = Debug|x64
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Dev|x64.ActiveCfg = Dev|x64
@@ -72,8 +64,6 @@ Global
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Release|x64.Build.0 = Release|x64
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Test|x64.ActiveCfg = Test|x64
 		{C1A94EED-3F66-479A-80B7-C45303EEC426}.Test|x64.Build.0 = Test|x64
-		{C1A94EED-3F66-479A-80B7-C45303EEC426}.XbimDev|x64.ActiveCfg = XbimDev|x64
-		{C1A94EED-3F66-479A-80B7-C45303EEC426}.XbimDev|x64.Build.0 = XbimDev|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
