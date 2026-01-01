@@ -56,13 +56,6 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'XbimDev' ">
-    <IsPackable>true</IsPackable>
-    <BuildQualifier>-XbimDev</BuildQualifier>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <IncludeSymbols>true</IncludeSymbols>
-  </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Test' ">
     <IsPackable>false</IsPackable>
