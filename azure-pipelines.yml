@@ -3,47 +3,87 @@ trigger:
    include:
      - dev
      - master
+     - xbim-dev
      - feature/*
   paths:
     exclude:
       - .gitignore
       - README.md
+      - azure-pipelines.yml
 
 pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln' 
-  buildPlatform: 'Any CPU'
-  ${{ if eq(variables['Build.SourceBranchName'], 'master') }}: 
+  solution: '**/*.sln'
+  buildPlatform: 'x64'
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'master') }}: 
     buildConfiguration: 'Release'
-  ${{ if eq(variables['Build.SourceBranchName'], 'dev') }}: 
-    buildConfiguration: 'Beta'
-  ${{ if startsWith(variables['Build.SourceBranchName'], 'feature') }}: 
-    buildConfiguration: 'Debug'
+    buildQualifier: ''
+  ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
+    buildConfiguration: 'Dev'
+    buildQualifier: '-Dev'
+  ${{ else }}:
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
 
 steps:
+- checkout: self
+  persistCredentials: true
+  clean: true
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      Write-Host "Retrieving stable build number"
+      $date=Get-Date
+      [int] $buildSecond=[int][Math]::Floor((([int]$date.Hour) * 3600 + ([int]$date.Minute) * 60 + ([int]$date.Second))/2)
+      [string] $buildDate=-join($(Get-Date -format yy), ([string]$date.DayOfYear).PadLeft(3,'0'))
+      Write-Host "##vso[task.setvariable variable=buildSecond]$buildSecond"
+      Write-Host "##vso[task.setvariable variable=buildDate]$buildDate"
+      Write-Host "##vso[build.updatebuildnumber]$buildDate.$buildSecond"
+
 - task: NuGetToolInstaller@1
-
+  
+- task: NuGetAuthenticate@1
+    
 - task: NuGetCommand@2
   inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
+    command: 'restore'
     configuration: '$(buildConfiguration)'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'
 
-- task: VSTest@2
+- task: DotNetCoreCLI@2
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: 'pack'
+    projects: '**/*/*.csproj'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform) -p:Build=$(buildSecond) -p:BuildRelease=$(buildDate) -p:BuildQualifier=$(buildQualifier)'
+    
+- task: DotNetCoreCLI@2
+  condition: and(succeeded(), eq(variables.skipTests, 'false'))
+  inputs:
+    command: 'test'
+    projects: '**/*Tests/*.csproj'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables['buildConfiguration'], 'Release', 'Beta'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
     nuGetFeedType: 'external'
     publishFeedCredentials: 'nuget.org'
+    
+- script: |
+    git tag $(majorVersion).$(minorVersion).$(buildDate)$(buildQualifier).$(buildSecond)
+    git push origin $(majorVersion).$(minorVersion).$(buildDate)$(buildQualifier).$(buildSecond)
+  workingDirectory: $(Build.SourcesDirectory)
+  displayName: Git Commit and Tag from pipeline
+  continueOnError: true
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))

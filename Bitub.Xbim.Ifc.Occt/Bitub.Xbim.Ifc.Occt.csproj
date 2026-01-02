@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Title>Bitub.Xbim.Ifc.Occt</Title>
+    <Description>Ifc Occt Interop Adapter Library using Xbim</Description>
+    <RootNamespace>Bitub.Xbim.Ifc</RootNamespace>
+    <IsPackable>true</IsPackable>
+    <Configurations>Test;Dev;Release;Debug</Configurations>
+    <Platforms>x64</Platforms>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Bitub.Xbim.Ifc\Bitub.Xbim.Ifc.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Xbim.ModelGeometry.Scene" Version="6.3.873-netcore" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(IsWindows)' == 'true'">
+    <PackageReference Include="Xbim.Geometry.Engine.Interop" Version="6.3.873-netcore" />
+  </ItemGroup>
+  
+</Project>

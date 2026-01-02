@@ -1,4 +1,7 @@
-﻿using Xbim.Ifc;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
 using Xbim.Ifc4.UtilityResource;
 using Xbim.Ifc4.DateTimeResource;
 using Xbim.Ifc4.ActorResource;
@@ -11,17 +14,13 @@ using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.RepresentationResource;
 using Xbim.Ifc4.PresentationAppearanceResource;
 
-using System.Linq;
-
 using Xbim.Common;
-using System;
 using Xbim.Ifc4.TopologyResource;
-using System.Collections.Generic;
 using Xbim.Common.Geometry;
 using Xbim.Ifc4.PropertyResource;
+
 using Bitub.Xbim.Ifc.Transform;
-using Microsoft.Extensions.Logging;
-using Bitub.Xbim.Ifc.Export;
+using Bitub.Xbim.Ifc.Tesselate;
 
 namespace Bitub.Xbim.Ifc
 {
@@ -130,11 +129,11 @@ namespace Bitub.Xbim.Ifc
             return relation;
         }
 
-        public static IfcOwnerHistory NewIfc4OwnerHistoryEntry(this IModel s, string version,
-            IfcPersonAndOrganization owningUser, IfcApplication owningApplication,
-            IfcChangeActionEnum change = IfcChangeActionEnum.ADDED)
+        public static T NewIfcOwnerHistoryEntry<T>(this IModel s,
+            IIfcPersonAndOrganization owningUser, IIfcApplication owningApplication,
+            IfcChangeActionEnum change = IfcChangeActionEnum.ADDED) where T : IIfcOwnerHistory, IInstantiableEntity
         {
-            var newEntry = s.Instances.New<IfcOwnerHistory>();
+            var newEntry = s.Instances.New<T>();
 
             newEntry.ChangeAction = change;
             var dateTime = (IfcTimeStamp)DateTime.Now;
@@ -145,7 +144,7 @@ namespace Bitub.Xbim.Ifc
             return newEntry;
         }
 
-        public static T NewIfc4Product<T>(this IModel s, IfcObjectDefinition container = null, string name = null) where T : IInstantiableEntity, IIfcProduct
+        public static T NewIfc4Product<T>(this IModel s, IfcObjectDefinition container, string? name = null) where T : IInstantiableEntity, IIfcProduct
         {
             var product = s.Instances.New<T>(p => p.Name = name);
 
@@ -292,9 +291,7 @@ namespace Bitub.Xbim.Ifc
             var refAxis = placement.RelativePlacement as IfcAxis2Placement3D;
             if (null == refAxis)
             {
-                refAxis = s.Instances.New<IfcAxis2Placement3D>();
-                if (null != placement.RelativePlacement)
-                    s.Logger.LogWarning($"Leaving potentially orphan instance '{placement.RelativePlacement}'");
+                refAxis = s.Instances.New<IfcAxis2Placement3D>(); 
             }
 
             if (!newAxisInstances && refAxis.Axis is IfcDirection d1)

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 
 using System.Xml.Serialization;
 
-using Xbim.Ifc;
 using Xbim.Ifc4.Interfaces;
 
 using Xbim.Common.Geometry;
@@ -13,7 +11,7 @@ using Xbim.Common.Step21;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
-    [XmlRoot(ElementName = "Alignment", Namespace = "https://github.com/bekraft/BitubTRex/Bitub.Ifc.Transform")]
+    [XmlRoot(ElementName = "Alignment", Namespace = "https://github.com/bekraft/BitubTRexXbim/Bitub.Xbim.Ifc.Transform")]
     public class IfcAxisAlignment
     {
         internal readonly static XmlSerializer serializer = new XmlSerializer(typeof(IfcAxisAlignment));
@@ -106,8 +104,16 @@ namespace Bitub.Xbim.Ifc.Transform
         {
             using(var reader = new FileStream(fileName, FileMode.Open))
             {
-                return serializer.Deserialize(reader) as IfcAxisAlignment;                
+                return serializer.Deserialize(reader) as IfcAxisAlignment;
             }            
+        }
+
+        ///<summary>
+        /// Reads an axis alignment from stream.
+        ///</summary>
+        public static IfcAxisAlignment Load(Stream inStream)
+        {
+            return serializer.Deserialize(inStream) as IfcAxisAlignment;
         }
 
         /// <summary>

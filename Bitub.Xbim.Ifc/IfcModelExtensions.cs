@@ -179,7 +179,8 @@ namespace Bitub.Xbim.Ifc
             }
         }
 
-        public static IIfcPropertySet NewIfcPropertySet(this IModel s, string setName, string description = null)
+        public static IIfcPropertySet NewIfcPropertySet(this IModel s, string setName, 
+            string? description = null)
         {
             switch(s.SchemaVersion)
             {

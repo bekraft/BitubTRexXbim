@@ -1,26 +1,41 @@
 # Bitub TRex Xbim
 
-Dev Build ![Dev status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev) | Release Build ![Dev status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=master)
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=master&label=MASTER)
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev&label=DEV)
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=xbim-dev&label=XBIM-DEV)
+![Nuget](https://img.shields.io/nuget/v/Bitub.Xbim.Ifc.svg)
 
-## Goal
+## Goals & use cases
 
 BitubTRexXbim uses the [Xbim libraries](https://github.com/xBimTeam) and adds some domain driven functionalities.
+- IFC model builder pattern with uniform version handling
+- IFC model-2-model geometrical transformation (i.e. typical geometrical alignment tasks for model fragments)
+- IFC model-2-model property clean-up and transformation (i.e. removing property sets or single properties, mapping properties)
+- IFC model export and further evaluation in model usage pipes (JSON export and via [Dynamo TRex](https://github.com/bekraft/BitubTRexDynamo) and [Assimp](https://github.com/assimp/assimp) to a number of visualization formats.
 
-Mainly adds
-- transforming pipes to filter, enhance and modify IFC models (2x3, 4.0 & 4.1).
-- export into JSON or Protobuf format
-- internal functionalities of [BitubTRexDynamo](https://github.com/bekraft/BitubTRexDynamo)
+See the [Wiki](https://github.com/bekraft/BitubTRexXbim/wiki) for the use cases.
 
 Provided assemblies:
 - ```Bitub.Xbim.Ifc``` wraps all extensions, workflows and additions concerning Xbim IFC model handling 
 
-## Use cases
+## Building
 
-See the [Wiki](https://github.com/bekraft/BitubTRexXbim/wiki) for the use cases.
+Building library
+```
+dotnet build -c (Release|Dev|XbimDev)
+```
 
-- Building IFCs programmatically.
-- Transforming IFCs by async transformation requests.
-- Exporting IFCs to other formats.
+and running tests
+```
+dotnet test -c (Release|Dev|XbimDev) -a x64
+```
+
+Deployment configurations and dependencies
+| Configuration | Xbim dependency | Frameworks |
+|---------------|-----------------|------------|
+| Release | Xbim master nugets | net472, net48, net481, net6.0 |
+| Dev | Xbim master nugets |  net472, net48, net481, net6.0 |
+| XbimDev | Xbim develop nugets | net472, net48, net481, net6.0 |
 
 Its part of the Dynamo plugin  [BitubTRexDynamo](https://github.com/bekraft/BitubTRexDynamo).
 

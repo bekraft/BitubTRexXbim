@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Bitub.Dto;
 using Bitub.Dto.Concept;
 
 namespace Bitub.Xbim.Ifc.TRex
@@ -9,18 +10,20 @@ namespace Bitub.Xbim.Ifc.TRex
     /// </summary>
     public class FeatureStage : IEquatable<FeatureStage>, IComparable<FeatureStage>
     {
-        public readonly ELFeature feature;
-        public readonly int stage;
+        public readonly Feature _feature;
+        public readonly int _stage;
 
-        public FeatureStage(int s, ELFeature f)
+        public FeatureStage(int s, Feature f)
         {
-            feature = f;
-            stage = s;
+            _feature = f;
+            _stage = s;
         }
+
+        public Qualifier FeatureName => _feature.Name;
 
         public int CompareTo(FeatureStage other)
         {
-            return Math.Sign(stage - other.stage);
+            return Math.Sign(_stage - other._stage);
         }
 
         public override bool Equals(object obj)
@@ -33,14 +36,14 @@ namespace Bitub.Xbim.Ifc.TRex
 
         public bool Equals(FeatureStage other)
         {
-            return feature.Name.Equals(other?.feature?.Name);
+            return _feature.Name.Equals(other?._feature?.Name);
         }
 
         public override int GetHashCode()
         {
             int hashCode = -1497673742;
-            hashCode = hashCode * -1521134295 + EqualityComparer<ELFeature>.Default.GetHashCode(feature);
-            hashCode = hashCode * -1521134295 + stage.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<Feature>.Default.GetHashCode(_feature);
+            hashCode = hashCode * -1521134295 + _stage.GetHashCode();
             return hashCode;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 using Microsoft.Extensions.Logging;
 
@@ -16,9 +17,8 @@ using Bitub.Dto.Scene;
 using Component = Bitub.Dto.Scene.Component;
 using System.Threading.Tasks;
 
+using Bitub.Xbim.Ifc.Tesselate;
 using Bitub.Xbim.Ifc.Concept;
-using Bitub.Dto.Concept;
-using Google.Protobuf.WellKnownTypes;
 
 namespace Bitub.Xbim.Ifc.Export
 {
@@ -29,35 +29,36 @@ namespace Bitub.Xbim.Ifc.Export
     /// var result = await exporter.Run(myModel);
     /// </code>
     /// </summary>
-    public class ComponentModelExporter : IExporter<ComponentScene>
+    public class ComponentModelExporter : IModelExporter<ComponentScene>
     {
         #region Internals
-        private readonly ILoggerFactory loggerFactory;
-        private readonly ILogger logger;
-        private readonly ITesselationContext<ExportPreferences> tesselatorInstance;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly ILogger _logger;
+        private readonly ITesselationContext<ScenePreferences> _tesselatorInstance;
         #endregion
+
+        /// <summary>
+        /// Creates a new instance of a scene exporter.
+        /// </summary>
+        /// <param name="loggerFactory"></param>
+        public ComponentModelExporter(ITesselationContext<ScenePreferences> tesselatorInstance, ILoggerFactory loggerFactory = null)
+        {
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory?.CreateLogger<ComponentModelExporter>();
+            _tesselatorInstance = tesselatorInstance;
+        }
 
         /// <summary>
         /// Initial experter settings.
         /// </summary>
-        public ExportPreferences Preferences { get; set; } = new ExportPreferences();
+        public ScenePreferences Preferences { get; set; } = new ScenePreferences();
 
         /// <summary>
         /// Default color settings.
         /// </summary>
         public XbimColourMap DefaultProductColorMap { get; set; } = new XbimColourMap(StandardColourMaps.IfcProductTypeMap);
 
-        /// <summary>
-        /// Creates a new instance of a scene exporter.
-        /// </summary>
-        /// <param name="loggerFactory"></param>
-        public ComponentModelExporter(ITesselationContext<ExportPreferences> tesselatorInstance, ILoggerFactory loggerFactory = null)
-        {
-            this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<ComponentModelExporter>();
-            this.tesselatorInstance = tesselatorInstance;            
-        }
-
+        
         /// <summary>
         /// Runs the model transformation.
         /// </summary>
@@ -69,7 +70,7 @@ namespace Bitub.Xbim.Ifc.Export
             {
                 try
                 {
-                    var applied = new ExportPreferences(Preferences);
+                    var applied = new ScenePreferences(Preferences);
                     if (Preferences.BodyExportType == 0)
                         applied.BodyExportType = SceneBodyExportType.MeshBody;
 
@@ -78,16 +79,16 @@ namespace Bitub.Xbim.Ifc.Export
                 catch (Exception e)
                 {
                     monitor?.State.MarkBroken();
-                    logger.LogError("{0}: {1} [{2}]", e.GetType().Name, e.Message, e.StackTrace);
-                    throw e;
+                    _logger.LogError("{0}: {1} [{2}]", e.GetType().Name, e.Message, e.StackTrace);
+                    throw new ThreadInterruptedException($"Export broke due to {e.Message}", e);
                 }
             });
         }
 
         // Runs the scene model export
-        private ComponentScene BuildScene(IModel model,ExportPreferences exportSettings, CancelableProgressing progressing)
+        private ComponentScene BuildScene(IModel model, ScenePreferences exportSettings, CancelableProgressing progressing)
         {
-            var exportContext = new ExportContext<ExportPreferences>(loggerFactory);
+            var exportContext = new SceneContext<ScenePreferences>(_loggerFactory);
             exportContext.InitContextsAndScaleFromModel(model, exportSettings);
 
             // Transfer materials
@@ -95,12 +96,12 @@ namespace Bitub.Xbim.Ifc.Export
             var materials = model.ToMaterialBySurfaceStyles().ToDictionary(m => m.Id.Nid);
             componentScene.Materials.AddRange(materials.Values);
             
-            logger?.LogInformation("Starting model tesselation of {0}", model.Header.Name);
+            _logger?.LogInformation("Starting model tesselation of {0}", model.Header.Name);
             // Retrieve enumeration of components having a geomety within given contexts            
-            var messages = tesselatorInstance.Tesselate(model, exportContext, progressing);
+            var messages = _tesselatorInstance.Tesselate(model, exportContext, progressing);
             var ifcClassifierMap = model.SchemaVersion.ToImplementingClassification<IIfcProduct>();
 
-            logger?.LogInformation("Starting model export of {0}", model.Header.Name);
+            _logger?.LogInformation("Starting model export of {0}", model.Header.Name);
 
             // Run transfer and log parents
             var parents = new HashSet<int>();
@@ -109,7 +110,7 @@ namespace Bitub.Xbim.Ifc.Export
             {
                 if (progressing?.State.IsAboutCancelling ?? false)
                 {
-                    logger?.LogInformation("Canceled model export of '{0}'", model.Header.FileName);
+                    _logger?.LogInformation("Canceled model export of '{0}'", model.Header.FileName);
                     progressing.State.MarkCanceled();
                     break;
                 }
@@ -124,11 +125,10 @@ namespace Bitub.Xbim.Ifc.Export
                         break;
                     case TesselationMessageType.Shape:
                         var product = model.Instances[msg.ProductShape.productLabel] as IIfcProduct;
-                        Component c;
-                        if (!componentCache.TryGetValue(product.EntityLabel, out c))
+                        
+                        if (!componentCache.TryGetValue(product.EntityLabel, out Component c))
                         {
-                            int? optParent;
-                            c = product.ToComponent(out optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
+                            c = product.ToComponent(out int? optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
 
                             componentCache.Add(product.EntityLabel, c);
                             componentScene.Components.Add(c);
@@ -138,7 +138,9 @@ namespace Bitub.Xbim.Ifc.Export
                         }
 
                         c.Shapes.AddRange(msg.ProductShape.shapes);
-                        c.BoundingBox = msg.ProductShape.shapes.Select(shape => shape.BoundingBox).Aggregate((a, b) => a.UnionWith(b));
+                        c.BoundingBox = msg.ProductShape.shapes
+                            .Select(shape => shape.BoundingBox)
+                            .Aggregate(new BoundingBox { ABox = ABox.Empty }, (a, b) => a.UnionWith(b));
                         break;
                 }
             }
@@ -152,7 +154,7 @@ namespace Bitub.Xbim.Ifc.Export
                 {
                     if (!progressing.State.IsCanceled)
                     {
-                        logger?.LogInformation("Canceled model export of '{0}'", model.Header.FileName);
+                        _logger?.LogInformation("Canceled model export of '{0}'", model.Header.FileName);
                         progressing.State.MarkCanceled();
                     }
                     break;
@@ -160,13 +162,11 @@ namespace Bitub.Xbim.Ifc.Export
 
                 if (model.Instances[missingInstance.Dequeue()] is IIfcProduct product)
                 {
-                    Component c;
-                    if (!componentCache.TryGetValue(product.EntityLabel, out c))
+                    if (!componentCache.TryGetValue(product.EntityLabel, out Component c))
                     {
-                        int? optParent;
-                        c = product.ToComponent(out optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
+                        c = product.ToComponent(out int? optParent, ifcClassifierMap, exportSettings.ComponentIdentificationStrategy);
 
-                        componentCache.Add(product.EntityLabel, c);                       
+                        componentCache.Add(product.EntityLabel, c);
 
                         if (optParent.HasValue && !componentCache.ContainsKey(optParent.Value))
                             // Enqueue missing parents
