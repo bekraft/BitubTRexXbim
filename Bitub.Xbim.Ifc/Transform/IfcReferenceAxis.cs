@@ -4,21 +4,22 @@ using System.Xml.Serialization;
 using Xbim.Common.Geometry;
 
 using Bitub.Dto.Spatial;
-using Bitub.Xbim.Ifc.Export;
 using Bitub.Dto.Scene;
+
+using Bitub.Xbim.Ifc.Tesselate;
 
 namespace Bitub.Xbim.Ifc.Transform
 {
     /// <summary>
-    /// IFC alignment reference axis. Embeds a reference coordinate transformation by a start and target point of an
+    /// IFC alignment reference axis. Embeds a reference coordinate transformation by a start and _target point of an
     /// alignment ray pointing to positive X axis. The Y and Z axis are computed respectively using a right-hand (CCW oriented) CRS starting from
     /// a default reference axis given by (<see cref="DefaultReferenceAxis"/>).
     /// </summary>
     public class IfcAlignReferenceAxis
     {
         #region Internals
-        private XYZ offset = new XYZ { X = 0, Y = 0, Z = 0 };
-        private XYZ target = new XYZ { X = 1, Y = 0, Z = 0 };
+        private XYZ _offset = new XYZ { X = 0, Y = 0, Z = 0 };
+        private XYZ _target = new XYZ { X = 1, Y = 0, Z = 0 };
         #endregion
 
         /// <summary>
@@ -34,25 +35,25 @@ namespace Bitub.Xbim.Ifc.Transform
         public XYZ Offset
         {
             get {
-                return offset;
+                return _offset;
             }
             set {
-                offset = value;
+                _offset = value;
                 InternallyUpdateAxis();
             }
         }
 
         /// <summary>
-        /// The derived target point of ray respectively to the offset and aligning ray. Given in Meter-scale.
+        /// The derived _target point of ray respectively to the offset and aligning ray. Given in Meter-scale.
         /// </summary>
         [XmlElement("End")]
         public XYZ Target
         {
             get {
-                return target;
+                return _target;
             }
             set {
-                target = value;
+                _target = value;
                 InternallyUpdateAxis();
             }
         }
@@ -63,7 +64,7 @@ namespace Bitub.Xbim.Ifc.Transform
         [XmlIgnore]
         public XbimVector3D AlignToRay
         {
-            get => target.ToXbimPoint3D() - offset.ToXbimPoint3D();
+            get => _target.ToXbimPoint3D() - _offset.ToXbimPoint3D();
         }
 
         /// <summary>
@@ -104,8 +105,8 @@ namespace Bitub.Xbim.Ifc.Transform
             if (null == alignReferenceAxis)
                 throw new ArgumentNullException(nameof(alignReferenceAxis));
 
-            offset = alignReferenceAxis.Offset;
-            target = alignReferenceAxis.Target;
+            _offset = alignReferenceAxis._offset;
+            _target = alignReferenceAxis._target;
             ReferenceAxis = alignReferenceAxis.ReferenceAxis;
             TangentAxis = alignReferenceAxis.TangentAxis;
         }
@@ -114,11 +115,11 @@ namespace Bitub.Xbim.Ifc.Transform
         /// A new align-reference axis given a start and end coordinate.
         /// </summary>
         /// <param name="offset">The offset (start)</param>
-        /// <param name="target">The alignment target (end)</param>
+        /// <param name="target">The alignment _target (end)</param>
         public IfcAlignReferenceAxis(XYZ offset, XYZ target)
         {
-            Offset = offset;
-            Target = target;
+            _offset = offset;
+            _target = target;
             InternallyUpdateAxis();
         }
 
@@ -129,13 +130,13 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <param name="unitsPerMeter">The scale of 1 meter (i.e. 1000 for "mm")</param>
         public IfcAlignReferenceAxis(XbimMatrix3D m, double unitsPerMeter = 1.0f)
         {
-            // Set offset and target by translation and EX            
-            offset = m.Translation.ToXYZ(XbimExtensions.ToXbimVector3D(1.0 / unitsPerMeter));
-            target = new XYZ
+            // Set _offset and _target by translation and EX            
+            _offset = m.Translation.ToXYZ(XbimExtensions.ToXbimVector3D(1.0 / unitsPerMeter));
+            _target = new XYZ
             {
-                X = (float)m.M11 + offset.X,
-                Y = (float)m.M12 + offset.Y,
-                Z = (float)m.M13 + offset.Z
+                X = (float)m.M11 + _offset.X,
+                Y = (float)m.M12 + _offset.Y,
+                Z = (float)m.M13 + _offset.Z
             };
 
             // Set Y & Z from transformation directly
@@ -151,15 +152,15 @@ namespace Bitub.Xbim.Ifc.Transform
         }
 
         /// <summary>
-        /// Translates the references axis offset by given delta offset
+        /// Translates the references axis offset by given delta _offset
         /// </summary>
         /// <param name="deltaOffset">The shift</param>
         /// <param name="unitsPerMeter">The units per meter scale</param>
         public void Translate(XbimVector3D deltaOffset, float unitsPerMeter = 1.0f)
         {
             var shift = deltaOffset.ToXYZ(XbimExtensions.ToXbimVector3D(1.0 / unitsPerMeter));
-            offset = offset.Add(shift);
-            target = target.Add(shift);
+            _offset = _offset.Add(shift);
+            _target = _target.Add(shift);
         }
 
         /// <summary>
@@ -168,26 +169,26 @@ namespace Bitub.Xbim.Ifc.Transform
         /// <param name="shift">The shift in meter</param>        
         public void Translate(XYZ shift)
         {
-            offset = offset.Add(shift);
-            target = target.Add(shift);
+            _offset = _offset.Add(shift);
+            _target = _target.Add(shift);
         }
 
         /// <summary>
         /// Computes an alignment axis to compensate the deviation between this axis and
         /// the given reference axis.
         /// </summary>
-        /// <param name="targetAxis">Another reference axis</param>
+        /// <param name="_targetAxis">Another reference axis</param>
         /// <returns>A new reference which reflects the given alignment axis when applied to transformation chain</returns>
-        public IfcAlignReferenceAxis TransformAxisTo(IfcAlignReferenceAxis targetAxis)
+        public IfcAlignReferenceAxis TransformAxisTo(IfcAlignReferenceAxis _targetAxis)
         {
             var alignDirection = AlignToAxis;
-            var x0 = alignDirection.DotProduct(targetAxis.AlignToAxis);
-            var y0 = alignDirection.DotProduct(targetAxis.TangentAxis);
-            var z0 = alignDirection.DotProduct(targetAxis.ReferenceAxis);
+            var x0 = alignDirection.DotProduct(_targetAxis.AlignToAxis);
+            var y0 = alignDirection.DotProduct(_targetAxis.TangentAxis);
+            var z0 = alignDirection.DotProduct(_targetAxis.ReferenceAxis);
 
             // New reference placed at P2-P1 and X1 + d*(-z12) by mirroring at x2
             var deltaAxis = new IfcAlignReferenceAxis(new XYZ { }, new XbimVector3D(x0, -y0, -z0).Normalized().ToXYZ());            
-            deltaAxis.Translate( targetAxis.offset.ToXbimPoint3D() - (offset.ToXbimPoint3D() * deltaAxis.ToTransform3D()) );
+            deltaAxis.Translate( _targetAxis._offset.ToXbimPoint3D() - (_offset.ToXbimPoint3D() * deltaAxis.ToTransform3D()) );
             return deltaAxis;
         }
 
@@ -203,7 +204,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 ex.X, ex.Y, ex.Z, 0,
                 TangentAxis.X, TangentAxis.Y, TangentAxis.Z, 0,
                 ReferenceAxis.X, ReferenceAxis.Y, ReferenceAxis.Z, 0,
-                offset.X * scale.X, offset.Y * scale.Y, offset.Z * scale.Z, 1
+                _offset.X * scale.X, _offset.Y * scale.Y, _offset.Z * scale.Z, 1
             );
         }
 
@@ -218,7 +219,7 @@ namespace Bitub.Xbim.Ifc.Transform
                 ex.X, ex.Y, ex.Z, 0,
                 TangentAxis.X, TangentAxis.Y, TangentAxis.Z, 0,
                 ReferenceAxis.X, ReferenceAxis.Y, ReferenceAxis.Z, 0,
-                offset.X, offset.Y, offset.Z, 1
+                _offset.X, _offset.Y, _offset.Z, 1
             );
         }
 

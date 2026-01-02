@@ -118,7 +118,7 @@ namespace Bitub.Xbim.Ifc.Concept
             var typeIds = markerTypes?.Select(t => t.TypeId).ToArray();
             Array.Sort(typeIds);
 
-            return IfcAssemblyScope.SchemaAssemblyScope[schemaVersion].metadata
+            return IfcAssemblyScope.SchemaAssemblyScope[schemaVersion].Metadata
                 .Types()
                 .Where(t => typeof(T).IsAssignableFrom(t.Type))
                 .Select(t => ToInternalClassifier(schemaVersion, t, typeIds));
@@ -132,7 +132,7 @@ namespace Bitub.Xbim.Ifc.Concept
         /// <returns>A map of classifiers.</returns>
         public static IDictionary<Type, Classifier> ToImplementingClassification<T>(this XbimSchemaVersion schemaVersion) where T : IPersistEntity
         {
-            return IfcAssemblyScope.SchemaAssemblyScope[schemaVersion].metadata
+            return IfcAssemblyScope.SchemaAssemblyScope[schemaVersion].Metadata
                 .Types()
                 .Where(t => typeof(T).IsAssignableFrom(t.Type))
                 .ToDictionary(t => t.Type, t => ToInternalClassifier(schemaVersion, t, null));

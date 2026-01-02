@@ -2,6 +2,7 @@
 
 ![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=master&label=MASTER)
 ![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=dev&label=DEV)
+![Build status](https://dev.azure.com/bitub/BitubTRexXbim/_apis/build/status/bekraft.BitubTRexXbim?branchName=xbim-dev&label=XBIM-DEV)
 ![Nuget](https://img.shields.io/nuget/v/Bitub.Xbim.Ifc.svg)
 
 ## Goals & use cases

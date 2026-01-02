@@ -26,12 +26,9 @@ variables:
   ${{ elseif eq(variables['Build.SourceBranchName'], 'dev') }}: 
     buildConfiguration: 'Dev'
     buildQualifier: '-Dev'
-  ${{ elseif eq(variables['Build.SourceBranchName'], 'xbim-dev') }}:
-    buildConfiguration: 'XbimDev'
-    buildQualifier: '-XbimDev'
   ${{ else }}:
-    buildConfiguration: 'Debug'
-    buildQualifier: '-Debug'
+    buildConfiguration: 'Test'
+    buildQualifier: '-Test'
 
 steps:
 - checkout: self
@@ -51,30 +48,32 @@ steps:
       Write-Host "##vso[build.updatebuildnumber]$buildDate.$buildSecond"
 
 - task: NuGetToolInstaller@1
-
+  
+- task: NuGetAuthenticate@1
+    
 - task: NuGetCommand@2
   inputs:
     command: 'restore'
+    configuration: '$(buildConfiguration)'
     restoreSolution: '**/*.sln'
     feedsToUse: 'config'
     nugetConfigPath: 'nuget.config'
 
-- task: VSBuild@1
+- task: DotNetCoreCLI@2
   inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-    msbuildArgs: '-p:BuildRelease=$(buildDate) -p:Build=$(buildSecond) -p:BuildQualifier=$(buildQualifier)'
+    command: 'pack'
+    projects: '**/*/*.csproj'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform) -p:Build=$(buildSecond) -p:BuildRelease=$(buildDate) -p:BuildQualifier=$(buildQualifier)'
     
 - task: DotNetCoreCLI@2
   condition: and(succeeded(), eq(variables.skipTests, 'false'))
   inputs:
     command: 'test'
     projects: '**/*Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration) --arch $(buildPlatform)'
+    arguments: '-c $(buildConfiguration) -a $(buildPlatform)'
 
 - task: NuGetCommand@2
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))
   inputs:
     command: push
     packagesToPush: '$(Agent.BuildDirectory)/**/*.nupkg'
@@ -87,4 +86,4 @@ steps:
   workingDirectory: $(Build.SourcesDirectory)
   displayName: Git Commit and Tag from pipeline
   continueOnError: true
-  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev', 'XbimDev'), eq(variables.skipPush, 'false'))
+  condition: and(succeeded(), in(variables.buildConfiguration, 'Release', 'Dev'), eq(variables.skipPush, 'false'))

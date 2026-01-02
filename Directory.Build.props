@@ -1,10 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
-    <IsPackable>true</IsPackable>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
     <BuildMajor>1</BuildMajor>
-    <BuildMinor>0</BuildMinor>
+    <BuildMinor>2</BuildMinor>
 
     <BuildRelease>$([System.DateTime]::Now.ToString("yy"))$([System.String]::Format("{0:000}",$([System.DateTime]::Now.DayOfYear)))</BuildRelease>
     <SecondsByMinute>$([MSBuild]::Multiply($([System.DateTime]::Now.Minute), 60))</SecondsByMinute>
@@ -17,6 +14,13 @@
     <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
   
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <Configurations>Test;Dev;Release;Debug</Configurations>
+    <BuildConfiguration>$(Configuration)</BuildConfiguration>
+    <LangVersion>12</LangVersion>
+    <Platforms>x64</Platforms>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsWindows)' == 'true'">
@@ -33,17 +37,9 @@
     <DefineConstants>$(DefineConstants);Is_x64</DefineConstants>
   </PropertyGroup>
   
-  <PropertyGroup Condition=" '$(Configuration)' == '' ">
-    <Configuration>Debug</Configuration>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)' == 'XbimDev'">
-    <DefineConstants>$(DefineConstants);Is_XbimDev</DefineConstants>
-  </PropertyGroup>
-  
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <IsPackable>true</IsPackable>
-    <BuildQualifier></BuildQualifier>
+    <BuildQualifier/>
     <IncludeSymbols>false</IncludeSymbols>
   </PropertyGroup>
 
@@ -57,13 +53,6 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Dev' ">
     <IsPackable>true</IsPackable>
     <BuildQualifier>-Dev</BuildQualifier>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <IncludeSymbols>true</IncludeSymbols>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'XbimDev' ">
-    <IsPackable>true</IsPackable>
-    <BuildQualifier>-XbimDev</BuildQualifier>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
@@ -92,10 +81,12 @@
     <PackageProjectUrl>https://www.github.com/bekraft/BitubTRexXbim</PackageProjectUrl>
   </PropertyGroup>
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-  </ItemGroup>
+  <Target Name="VersionReport" BeforeTargets="BeforeBuild">
+    <Message Text="$(TargetFramework) ==&gt; Building version  : $(BuildVersion)" Importance="High" />
+    <Message Text="$(TargetFramework) ==&gt; Building platform : Windows" Importance="High" Condition="'$(IsWindows)' == 'true'" />
+    <Message Text="$(TargetFramework) ==&gt; Building platform : OSX or Linux" Importance="High" Condition="'$(IsLinux)' == 'true' Or '$(IsOSX)' == 'true'" />
+    <Message Text="$(TargetFramework) ==&gt; Building config   : $(BuildConfiguration)" Importance="High" />
+    <Message Text="$(TargetFramework) ==&gt; Declared config   : $(Configuration)" Importance="High" />
+  </Target>
 
 </Project>
